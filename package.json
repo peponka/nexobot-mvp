@@ -1,0 +1,31 @@
+{
+  "name": "nexobot-mvp",
+  "version": "0.1.0",
+  "description": "NexoFinanzas — WhatsApp bot for informal commerce in LATAM",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "echo \"No tests yet\" && exit 0"
+  },
+  "keywords": [
+    "fintech",
+    "whatsapp",
+    "latam",
+    "nlp",
+    "paraguay"
+  ],
+  "author": "NexoFinanzas",
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.95.3",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^4.22.1",
+    "express-rate-limit": "^8.2.1",
+    "helmet": "^8.1.0",
+    "morgan": "^1.10.1",
+    "openai": "^6.22.0"
+  }
+}
