@@ -14,6 +14,7 @@ import { fileURLToPath } from 'url';
 import webhookRouter from './routes/webhook.js';
 import dashboardRouter from './routes/dashboard.js';
 import { startReminderCron } from './services/reminders.js';
+import { startSummaryCron } from './services/dailySummary.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -201,11 +202,13 @@ app.listen(PORT, () => {
 ║  NLP:  ${process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY !== 'sk-your-openai-key' ? '✅ OpenAI GPT-4o-mini' : '⚠️  Fallback parser (no OpenAI)'}    ║
 ║  WA:   ${process.env.WHATSAPP_TOKEN && process.env.WHATSAPP_TOKEN !== 'your-whatsapp-token' ? '✅ WhatsApp connected' : '⚠️  Simulated (no WhatsApp)'}     ║
 ║  🔔:  Reminders cron active              ║
+║  📊:  Daily summary cron active          ║
 ╚═══════════════════════════════════════════╝
     `);
 
-    // Start daily reminder cron (9am Paraguay time)
-    startReminderCron();
+    // Start daily cron jobs
+    startReminderCron();   // 9am PY - debt reminders
+    startSummaryCron();    // 8pm PY - daily summary
 });
 
 export default app;
