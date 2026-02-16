@@ -1,0 +1,10 @@
+﻿[main d4379f0] feat: dashboard web + Supabase connection + Render deploy config
+ 13 files changed, 1713 insertions(+), 3 deletions(-)
+ create mode 100644 git-info.txt
+ create mode 100644 git-status.txt
+ create mode 100644 ngrok-output.txt
+ create mode 100644 public/dashboard.html
+ create mode 100644 render.yaml
+ create mode 100644 src/routes/dashboard.js
+ create mode 100644 supabase/schema-clean.sql
+ create mode 100644 test-send-result.txt

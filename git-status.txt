@@ -22,3 +22,52 @@ Untracked files:
 	test-send-result.txt
 
 no changes added to commit (use "git add" and/or "git commit -a")
+git : warning: in the 
+working copy of 
+'package-lock.json', LF 
+will be replaced by CRLF 
+the next time Git touches it
+En línea: 1 Carácter: 59
++ ... >&1 | Out-File 
+-Encoding utf8 
+git-status.txt; git add -A 
+2>&1 | Out-F ...
++                           
+                        
+~~~~~~~~~~~~~~~
+    + CategoryInfo          
+    : NotSpecified: (warni  
+  ng: in the... Git touch   
+ es it:String) [], Remot    
+eException
+    + FullyQualifiedErrorId 
+    : NativeCommandError
+ 
+warning: in the working 
+copy of 'package.json', LF 
+will be replaced by CRLF 
+the next time Git touches it
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+	modified:   .gitignore
+	new file:   git-info.txt
+	new file:   git-status.txt
+	new file:   ngrok-output.txt
+	modified:   package-lock.json
+	modified:   package.json
+	new file:   public/dashboard.html
+	new file:   render.yaml
+	new file:   src/routes/dashboard.js
+	modified:   src/routes/webhook.js
+	modified:   src/server.js
+	new file:   supabase/schema-clean.sql
+	new file:   test-send-result.txt
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   git-status.txt
+

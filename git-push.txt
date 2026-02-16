@@ -1,0 +1,17 @@
+﻿git : To https://github.com/
+peponka/nexobot-mvp.git
+En línea: 1 Carácter: 1
++ git push origin main 2>&1 
+| Out-File -Encoding utf8 
+git-push.txt
++ ~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          
+    : NotSpecified: (To ht  
+  tps://gith...nexobot-mv   
+ p.git:String) [], Remot    
+eException
+    + FullyQualifiedErrorId 
+    : NativeCommandError
+ 
+   d335769..d4379f0  main 
+-> main

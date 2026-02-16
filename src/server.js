@@ -76,6 +76,29 @@ app.use('/webhook', webhookRouter);
 // Dashboard API
 app.use('/api/dashboard', dashboardRouter);
 
+// Privacy Policy (required by Meta)
+app.get('/privacy', (req, res) => {
+    res.send(`<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Política de Privacidad - NexoFinanzas</title>
+<style>body{font-family:system-ui,sans-serif;max-width:700px;margin:40px auto;padding:20px;color:#333;line-height:1.6}
+h1{color:#1a56db}h2{color:#374151;margin-top:24px}</style></head>
+<body>
+<h1>Política de Privacidad — NexoFinanzas</h1>
+<p><strong>Última actualización:</strong> Febrero 2026</p>
+<h2>1. Datos que recopilamos</h2>
+<p>NexoFinanzas recopila datos transaccionales enviados voluntariamente por el usuario a través de WhatsApp, incluyendo: nombre del comerciante, montos de ventas, nombres de clientes y datos de cobros.</p>
+<h2>2. Uso de los datos</h2>
+<p>Los datos se utilizan exclusivamente para brindar servicios de gestión financiera al usuario, incluyendo registro de ventas, seguimiento de deudas y generación de reportes.</p>
+<h2>3. Almacenamiento</h2>
+<p>Los datos se almacenan de forma segura en servidores protegidos con encriptación. No compartimos datos con terceros.</p>
+<h2>4. Eliminación de datos</h2>
+<p>Podés solicitar la eliminación de todos tus datos enviando "borrar mis datos" al bot de WhatsApp o contactándonos directamente.</p>
+<h2>5. Contacto</h2>
+<p>Para consultas sobre privacidad, contactanos a través del bot de WhatsApp.</p>
+</body></html>`);
+});
+
 // =============================================
 // TEST / SIMULATE ENDPOINT (for development)
 // =============================================
