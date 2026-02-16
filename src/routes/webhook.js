@@ -36,6 +36,8 @@ router.post('/', async (req, res) => {
     // Always respond 200 quickly (Meta requires < 5s)
     res.sendStatus(200);
 
+    console.log('\n🔔 WEBHOOK RECEIVED:', JSON.stringify(req.body, null, 2));
+
     try {
         const messageData = extractMessageFromWebhook(req.body);
 

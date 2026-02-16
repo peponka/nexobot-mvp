@@ -1,0 +1,17 @@
+﻿Phone ID: 954191641118354
+Token (first 20): EAAZB1mYJOFQoBQiZAAa...
+Response status: 200
+Response: {
+  "messaging_product": "whatsapp",
+  "contacts": [
+    {
+      "input": "595994207248",
+      "wa_id": "595994207248"
+    }
+  ],
+  "messages": [
+    {
+      "id": "wamid.HBgMNTk1OTk0MjA3MjQ4FQIAERgSQTM2QjQ2REUyQUQ5MjMzRkQzAA=="
+    }
+  ]
+}

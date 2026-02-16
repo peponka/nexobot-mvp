@@ -1,7 +1,10 @@
 node_modules/
 .env
 *.log
-*.txt
 debug-*
-test-*
+test-*.mjs
 check.*
+seed-demo.mjs
+seed-result.txt
+server-log.txt
+test-supabase-result.txt

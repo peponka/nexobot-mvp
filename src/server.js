@@ -8,8 +8,14 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 import webhookRouter from './routes/webhook.js';
+import dashboardRouter from './routes/dashboard.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 import { processMessage } from './services/nlp.js';
 import { handleMessage } from './services/bot.js';
 
@@ -21,7 +27,9 @@ const PORT = process.env.PORT || 3000;
 // =============================================
 
 // Security
-app.use(helmet());
+app.use(helmet({
+    contentSecurityPolicy: false
+}));
 app.use(cors());
 
 // Logging
@@ -59,8 +67,14 @@ app.get('/', (req, res) => {
     });
 });
 
+// Static files (dashboard)
+app.use(express.static(path.join(__dirname, '..', 'public')));
+
 // WhatsApp webhook
 app.use('/webhook', webhookRouter);
+
+// Dashboard API
+app.use('/api/dashboard', dashboardRouter);
 
 // =============================================
 // TEST / SIMULATE ENDPOINT (for development)

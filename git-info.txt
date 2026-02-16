@@ -1,0 +1,9 @@
+﻿d335769 NexoBot MVP - WhatsApp financial bot for LATAM
+---
+origin	https://github.com/peponka/nexobot-mvp.git (fetch)
+origin	https://github.com/peponka/nexobot-mvp.git (push)
+---
+On branch main
+Your branch is up to date with 'origin/main'.
+
+nothing to commit, working tree clean
