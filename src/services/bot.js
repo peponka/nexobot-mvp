@@ -8,6 +8,7 @@ import * as Merchant from '../models/merchant.js';
 import * as Customer from '../models/customer.js';
 import * as Transaction from '../models/transaction.js';
 import { sendManualReminder } from './reminders.js';
+import { needsOnboarding, handleOnboarding } from './onboarding.js';
 
 /**
  * Format currency (Guaraníes)
@@ -42,6 +43,12 @@ export async function handleMessage(phone, contactName, rawMessage, parsed) {
 
     if (!merchant) {
         return '❌ Error interno. Intentá de nuevo en un momento.';
+    }
+
+    // Check if merchant needs onboarding (new user)
+    if (needsOnboarding(merchant)) {
+        const onboardingResponse = await handleOnboarding(merchant, rawMessage);
+        if (onboardingResponse) return onboardingResponse;
     }
 
     const { intent, entities } = parsed;
