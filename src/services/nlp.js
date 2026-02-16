@@ -79,7 +79,15 @@ function fastParser(message) {
         return result;
     }
 
-    // 3. DEBT QUERY (before sales to avoid conflicts)
+    // 3. REMINDER REQUEST (merchant asks to remind a customer)
+    if (/record[aá]le|mand[aá]le\s*(un\s*)?(mensaje|recordatorio|aviso)|avis[aá]le|cobr[aá]le|decile\s*que\s*(pague|me\s*debe)|envi[aá]le\s*(un\s*)?recordatorio/i.test(lower)) {
+        result.intent = 'REMINDER';
+        result.confidence = 0.9;
+        extractEntities(lower, original, result);
+        return result;
+    }
+
+    // 4. DEBT QUERY (before sales to avoid conflicts)
     if (/cu[áa]nto\s*me\s*deben|qui[eé]n(es)?\s*me\s*debe|deudas?|pendientes?|saldos?|deudores?|morosos?|qui[eé]n\s*me\s*debe\s*m[aá]s|lista\s*de\s*deud|me\s*deben|los\s*que\s*me\s*deben|gente\s*que\s*me\s*debe|cu[aá]nto\s*deben|clientes?\s*que\s*deben|cobrar|por\s*cobrar|cuentas?\s*pendientes?|fiados?\s*pendientes?|mo[oõ]pa\s*oje[''´]?debe/i.test(lower)) {
         result.intent = 'DEBT_QUERY';
         result.confidence = 0.9;

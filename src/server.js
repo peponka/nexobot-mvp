@@ -13,6 +13,7 @@ import { fileURLToPath } from 'url';
 
 import webhookRouter from './routes/webhook.js';
 import dashboardRouter from './routes/dashboard.js';
+import { startReminderCron } from './services/reminders.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -190,7 +191,7 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
     console.log(`
 ╔═══════════════════════════════════════════╗
-║          🤖 NexoBot MVP v0.1.0           ║
+║          🤖 NexoBot MVP v0.2.0           ║
 ║═══════════════════════════════════════════║
 ║  Server:    http://localhost:${PORT}         ║
 ║  Webhook:   http://localhost:${PORT}/webhook  ║
@@ -199,8 +200,12 @@ app.listen(PORT, () => {
 ║  DB:   ${process.env.SUPABASE_URL ? '✅ Supabase connected' : '⚠️  Memory mode (no Supabase)'}      ║
 ║  NLP:  ${process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY !== 'sk-your-openai-key' ? '✅ OpenAI GPT-4o-mini' : '⚠️  Fallback parser (no OpenAI)'}    ║
 ║  WA:   ${process.env.WHATSAPP_TOKEN && process.env.WHATSAPP_TOKEN !== 'your-whatsapp-token' ? '✅ WhatsApp connected' : '⚠️  Simulated (no WhatsApp)'}     ║
+║  🔔:  Reminders cron active              ║
 ╚═══════════════════════════════════════════╝
     `);
+
+    // Start daily reminder cron (9am Paraguay time)
+    startReminderCron();
 });
 
 export default app;

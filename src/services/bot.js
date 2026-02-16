@@ -7,6 +7,7 @@
 import * as Merchant from '../models/merchant.js';
 import * as Customer from '../models/customer.js';
 import * as Transaction from '../models/transaction.js';
+import { sendManualReminder } from './reminders.js';
 
 /**
  * Format currency (Guaraníes)
@@ -64,6 +65,9 @@ export async function handleMessage(phone, contactName, rawMessage, parsed) {
 
             case 'INVENTORY_IN':
                 return await handleInventoryIn(merchant, entities, rawMessage);
+
+            case 'REMINDER':
+                return await handleReminder(merchant, entities);
 
             case 'GREETING':
                 return handleGreeting(merchant);
@@ -290,6 +294,24 @@ async function handleInventoryIn(merchant, entities, rawMessage) {
     if (amount) response += `💰 Costo: ${formatPYG(amount)}\n`;
 
     return response;
+}
+
+async function handleReminder(merchant, entities) {
+    const { customer_name } = entities;
+
+    if (!customer_name) {
+        return '🤔 ¿A quién le mando el recordatorio? Ej: _"Recordale a Carlos"_';
+    }
+
+    const result = await sendManualReminder(merchant.id, customer_name);
+
+    if (result && result.success) {
+        return result.message;
+    } else if (result) {
+        return result.message;
+    }
+
+    return '❌ No pude enviar el recordatorio. Intentá más tarde.';
 }
 
 function handleGreeting(merchant) {
