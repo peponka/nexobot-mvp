@@ -294,41 +294,55 @@ async function handleInventoryIn(merchant, entities, rawMessage) {
 
 function handleGreeting(merchant) {
     const name = merchant.name || 'amigo';
-    return `¡Hola ${name}! 👋\n\nSoy *NexoBot*, tu asistente comercial.\n\n` +
+    const hour = new Date().getUTCHours() - 3; // Paraguay is UTC-3
+    const saludo = hour < 12 ? 'Buen día' : hour < 18 ? 'Buenas tardes' : 'Buenas noches';
+    return `${saludo} ${name}! 👋\n\nSoy *NexoBot* 🤖, tu asistente comercial.\n\n` +
         `Puedo ayudarte a:\n` +
-        `📝 Registrar ventas y cobros\n` +
-        `📊 Ver cuánto te deben\n` +
-        `💰 Resumen de ventas\n` +
-        `📦 Actualizar inventario\n\n` +
-        `Escribime como si fuera un amigo. Ej:\n` +
-        `_"Vendí 500 mil a Don Carlos, fiado"_`;
+        `📝 Registrar ventas (fiado y contado)\n` +
+        `💰 Registrar cobros\n` +
+        `📊 Ver quién te debe\n` +
+        `📈 Resumen de ventas\n` +
+        `📦 Controlar inventario\n\n` +
+        `Hablame tranquilo, como si fuera tu socio. Ej:\n` +
+        `_"Vendí 500 mil a Don Carlos, fiado"_\n` +
+        `_"Cobré 200 mil de María"_\n` +
+        `_"¿Cuánto me deben?"_`;
 }
 
 function handleHelp() {
-    return `📖 *Comandos de NexoBot*\n` +
+    return `📖 *Guía de NexoBot* 🇵🇾\n` +
         `━━━━━━━━━━━━━━━━━━\n\n` +
-        `📝 *Registrar venta fiado:*\n` +
-        `_"Vendí 500 mil a Carlos, fiado"_\n\n` +
-        `💵 *Registrar venta contado:*\n` +
-        `_"Vendí 300 mil al contado"_\n\n` +
+        `📝 *Venta fiado:*\n` +
+        `_"Vendí 500 mil a Carlos, fiado"_\n` +
+        `_"Le fié 200 mil a María"_\n` +
+        `_"Le dejé mercadería a Don Pedro, a cuenta"_\n\n` +
+        `💵 *Venta contado:*\n` +
+        `_"Vendí 300 mil al contado"_\n` +
+        `_"Venta de 1 palo en efectivo"_\n\n` +
         `💰 *Registrar cobro:*\n` +
-        `_"Cobré 200 mil de María"_\n\n` +
+        `_"Cobré 200 mil de María"_\n` +
+        `_"Carlos me pagó 500 mil"_\n` +
+        `_"Me trajo 100 mil la Doña Rosa"_\n\n` +
         `📋 *Consultar deudas:*\n` +
-        `_"¿Cuánto me deben?"_\n\n` +
-        `📊 *Resumen de ventas:*\n` +
-        `_"¿Cuánto vendí esta semana?"_\n\n` +
+        `_"¿Cuánto me deben?"_\n` +
+        `_"¿Quién me debe más?"_\n` +
+        `_"Deudores"_\n\n` +
+        `📊 *Resumen:*\n` +
+        `_"¿Cuánto vendí esta semana?"_\n` +
+        `_"¿Cómo me fue hoy?"_\n\n` +
         `📦 *Inventario:*\n` +
         `_"Me llegaron 30 cajas de cerveza"_\n\n` +
-        `¡Hablame con confianza, entiendo español y guaraní! 🇵🇾`;
+        `💡 Podés escribir como quieras, ¡entiendo todo! 🇵🇾`;
 }
 
 function handleUnknown() {
-    return `🤔 No entendí bien tu mensaje.\n\n` +
-        `Probá con algo como:\n` +
+    return `🤔 No te entendí bien, disculpá.\n\n` +
+        `Probá con algo así:\n` +
         `📝 _"Vendí 500 mil a Carlos, fiado"_\n` +
         `💰 _"Cobré 200 mil de María"_\n` +
-        `📋 _"¿Cuánto me deben?"_\n\n` +
-        `Escribí *ayuda* para ver todos los comandos.`;
+        `📋 _"¿Cuánto me deben?"_\n` +
+        `📊 _"¿Cómo me fue esta semana?"_\n\n` +
+        `Escribí *ayuda* para ver todo lo que puedo hacer 💪`;
 }
 
 export default { handleMessage };
