@@ -83,6 +83,55 @@ export async function getRecent(merchantId, limit = 10) {
     return data || [];
 }
 
+/**
+ * Get daily summary for a merchant (today's activity)
+ */
+export async function getDailySummary(merchantId) {
+    if (!supabase) {
+        return getDailySummaryMemory(merchantId);
+    }
+
+    // Today in Paraguay time (UTC-3)
+    const now = new Date();
+    const todayStart = new Date(now);
+    todayStart.setUTCHours(3, 0, 0, 0); // Midnight PY = 3am UTC
+    if (now.getUTCHours() < 3) {
+        todayStart.setDate(todayStart.getDate() - 1);
+    }
+
+    const { data, error } = await supabase
+        .from('transactions')
+        .select('amount, type, currency')
+        .eq('merchant_id', merchantId)
+        .gte('created_at', todayStart.toISOString());
+
+    if (error) {
+        console.error('DB Error getting daily summary:', error);
+        return { totalSales: 0, salesCash: 0, salesCredit: 0, totalCollected: 0, countSales: 0, countPayments: 0, totalOps: 0 };
+    }
+
+    const txs = data || [];
+    const salesCashList = txs.filter(t => t.type === 'SALE_CASH');
+    const salesCreditList = txs.filter(t => t.type === 'SALE_CREDIT');
+    const paymentsList = txs.filter(t => t.type === 'PAYMENT');
+
+    const salesCash = salesCashList.reduce((sum, t) => sum + t.amount, 0);
+    const salesCredit = salesCreditList.reduce((sum, t) => sum + t.amount, 0);
+    const totalCollected = paymentsList.reduce((sum, t) => sum + t.amount, 0);
+
+    return {
+        totalSales: salesCash + salesCredit,
+        salesCash,
+        salesCredit,
+        totalCollected,
+        countSalesCash: salesCashList.length,
+        countSalesCredit: salesCreditList.length,
+        countSales: salesCashList.length + salesCreditList.length,
+        countPayments: paymentsList.length,
+        totalOps: txs.length
+    };
+}
+
 // =============================================
 // IN-MEMORY FALLBACK
 // =============================================
@@ -122,4 +171,34 @@ function getRecentMemory(merchantId, limit) {
         .slice(0, limit);
 }
 
-export default { create, getWeeklySummary, getRecent };
+function getDailySummaryMemory(merchantId) {
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    const txs = memoryStore.filter(tx =>
+        tx.merchant_id === merchantId &&
+        new Date(tx.created_at) >= todayStart
+    );
+
+    const salesCashList = txs.filter(t => t.type === 'SALE_CASH');
+    const salesCreditList = txs.filter(t => t.type === 'SALE_CREDIT');
+    const paymentsList = txs.filter(t => t.type === 'PAYMENT');
+
+    const salesCash = salesCashList.reduce((sum, t) => sum + t.amount, 0);
+    const salesCredit = salesCreditList.reduce((sum, t) => sum + t.amount, 0);
+    const totalCollected = paymentsList.reduce((sum, t) => sum + t.amount, 0);
+
+    return {
+        totalSales: salesCash + salesCredit,
+        salesCash,
+        salesCredit,
+        totalCollected,
+        countSalesCash: salesCashList.length,
+        countSalesCredit: salesCreditList.length,
+        countSales: salesCashList.length + salesCreditList.length,
+        countPayments: paymentsList.length,
+        totalOps: txs.length
+    };
+}
+
+export default { create, getWeeklySummary, getDailySummary, getRecent };

@@ -262,18 +262,44 @@ async function handleDebtQuery(merchant) {
 }
 
 async function handleSalesQuery(merchant) {
-    const summary = await Transaction.getWeeklySummary(merchant.id);
+    const weekly = await Transaction.getWeeklySummary(merchant.id);
+    const daily = await Transaction.getDailySummary(merchant.id);
 
-    if (summary.count === 0) {
-        return '📊 No tenés ventas registradas esta semana todavía. ¡Registrá tu primera venta!';
+    if (weekly.count === 0 && daily.totalOps === 0) {
+        return '📊 No tenés ventas registradas todavía. ¡Registrá tu primera venta!';
     }
 
-    let response = `📊 *Resumen semanal*\n` +
-        `━━━━━━━━━━━━━━━━━━\n\n`;
+    let response = '';
 
-    response += `💰 Total vendido: *${formatPYG(summary.total)}*\n`;
-    response += `🧾 Operaciones: ${summary.count}\n`;
-    response += `📈 Ticket promedio: ${formatPYG(summary.avgTicket)}\n`;
+    // Daily summary (today)
+    if (daily.totalOps > 0) {
+        response += `📊 *Resumen de hoy*\n`;
+        response += `━━━━━━━━━━━━━━━━━━\n\n`;
+        response += `💰 *Ventas totales: ${formatPYG(daily.totalSales)}*\n`;
+        if (daily.countSalesCash > 0) {
+            response += `   💵 Contado: ${formatPYG(daily.salesCash)} (${daily.countSalesCash})\n`;
+        }
+        if (daily.countSalesCredit > 0) {
+            response += `   📝 Fiado: ${formatPYG(daily.salesCredit)} (${daily.countSalesCredit})\n`;
+        }
+        if (daily.countPayments > 0) {
+            response += `\n💵 *Cobros: ${formatPYG(daily.totalCollected)}* (${daily.countPayments})\n`;
+        }
+        response += `\n🧾 Operaciones del día: ${daily.totalOps}\n`;
+    } else {
+        response += `📊 *Hoy* — Sin actividad todavía.\n`;
+    }
+
+    // Weekly summary
+    if (weekly.count > 0) {
+        response += `\n━━━━━━━━━━━━━━━━━━\n`;
+        response += `📈 *Semana:* ${formatPYG(weekly.total)} (${weekly.count} ops)\n`;
+        response += `📊 Ticket promedio: ${formatPYG(weekly.avgTicket)}\n`;
+    }
+
+    // Motivational
+    const emoji = daily.totalSales >= 1000000 ? '🔥' : daily.totalSales >= 500000 ? '💪' : '👍';
+    response += `\n${emoji} ¡Seguí así!`;
 
     return response;
 }

@@ -28,13 +28,11 @@ export async function findOrCreate(phone, contactName) {
 
     if (merchant) return merchant;
 
-    // Create new merchant
+    // Create new merchant (without name — onboarding will collect verified data)
     const { data: newMerchant, error: createError } = await supabase
         .from('merchants')
         .insert({
-            phone,
-            name: contactName || null,
-            onboarded_at: new Date().toISOString()
+            phone
         })
         .select()
         .single();
@@ -44,7 +42,7 @@ export async function findOrCreate(phone, contactName) {
         return null;
     }
 
-    console.log(`👤 New merchant: ${contactName} (${phone})`);
+    console.log(`👤 New merchant registered: ${phone} (WhatsApp: ${contactName})`);
     return newMerchant;
 }
 
@@ -95,18 +93,25 @@ function findOrCreateMemory(phone, contactName) {
     const merchant = {
         id: `mem_${Date.now()}`,
         phone,
-        name: contactName,
+        name: null,
+        contact_name: contactName,
+        cedula: null,
+        address: null,
+        city: null,
         business_name: null,
+        business_type: null,
+        monthly_volume: null,
         nexo_score: 0,
         total_sales: 0,
         total_credit_given: 0,
         total_collected: 0,
         status: 'active',
+        onboarded_at: null,
         created_at: new Date().toISOString()
     };
 
     memoryStore.set(phone, merchant);
-    console.log(`👤 New merchant (memory): ${contactName} (${phone})`);
+    console.log(`👤 New merchant (memory): ${phone} (WhatsApp: ${contactName})`);
     return merchant;
 }
 

@@ -1,10 +1,11 @@
 // =============================================
-// NexoBot MVP — Onboarding Service
+// NexoBot MVP — Onboarding Service v2
 // =============================================
 // Guides new merchants through a setup flow
-// when they first interact with the bot.
+// collecting identity data for the NexoFinanzas database.
 // 
-// Flow: Name → Business Type → City → Volume
+// Flow: Welcome → Nombre completo → Cédula → Dirección → 
+//       Ciudad → Tipo de negocio → Nombre del negocio → Volumen
 // After completing → normal bot mode
 
 import supabase from '../config/supabase.js';
@@ -14,16 +15,19 @@ import supabase from '../config/supabase.js';
 const onboardingState = new Map();
 
 // =============================================
-// ONBOARDING STEPS
+// ONBOARDING STEPS (expanded with personal data)
 // =============================================
 
 const STEPS = {
     WELCOME: 0,
-    BUSINESS_NAME: 1,
-    BUSINESS_TYPE: 2,
-    CITY: 3,
-    VOLUME: 4,
-    COMPLETE: 5
+    FULL_NAME: 1,
+    CEDULA: 2,
+    ADDRESS: 3,
+    CITY: 4,
+    BUSINESS_TYPE: 5,
+    BUSINESS_NAME: 6,
+    VOLUME: 7,
+    COMPLETE: 8
 };
 
 const BUSINESS_TYPES = {
@@ -34,7 +38,8 @@ const BUSINESS_TYPES = {
     '5': 'ferretería',
     '6': 'farmacia',
     '7': 'restaurante',
-    '8': 'otro'
+    '8': 'taller / servicio',
+    '9': 'otro'
 };
 
 // =============================================
@@ -51,8 +56,8 @@ export function needsOnboarding(merchant) {
         return true;
     }
 
-    // If merchant has no business_name → new user, start onboarding
-    if (!merchant.business_name && !merchant.city) {
+    // If merchant has no name or cedula → new user, start onboarding
+    if (!merchant.name && !merchant.business_name) {
         return true;
     }
 
@@ -86,20 +91,61 @@ export async function handleOnboarding(merchant, message) {
 
     switch (state.step) {
         case STEPS.WELCOME:
-            state.step = STEPS.BUSINESS_NAME;
+            state.step = STEPS.FULL_NAME;
             return `🦄 *¡Bienvenido a NexoFinanzas!* 🇵🇾\n\n` +
                 `Soy *NexoBot*, tu asistente comercial por WhatsApp.\n\n` +
-                `Voy a hacerte unas preguntas rápidas para configurar tu cuenta (30 segundos).\n\n` +
-                `📝 *¿Cómo se llama tu negocio?*\n` +
-                `_(Ej: "Despensa Don Carlos", "Distribuidora López")_\n\n` +
+                `Vamos a crear tu cuenta en 1 minuto. Necesito algunos datos para que tu perfil quede completo y seguro.\n\n` +
+                `👤 *¿Cuál es tu nombre completo?*\n` +
+                `_(Ej: "Juan Carlos Pérez González")_\n\n` +
                 `_Escribí "saltar" si querés configurar después_`;
 
-        case STEPS.BUSINESS_NAME:
-            // Save business name
-            state.data.business_name = message.trim();
+        case STEPS.FULL_NAME:
+            // Validate: at least 2 words
+            const nameParts = message.trim().split(/\s+/);
+            if (nameParts.length < 2) {
+                return `⚠️ Necesito tu *nombre completo* (nombre y apellido).\n\n` +
+                    `👤 *¿Cuál es tu nombre y apellido?*\n` +
+                    `_(Ej: "Juan Carlos Pérez")_`;
+            }
+            state.data.full_name = capitalize(message.trim());
+            state.step = STEPS.CEDULA;
+            return `👍 *${state.data.full_name}* — ¡un gusto!\n\n` +
+                `🪪 *¿Cuál es tu número de cédula?*\n` +
+                `_(Solo los números, sin puntos. Ej: 4523871)_`;
+
+        case STEPS.CEDULA:
+            // Extract only digits
+            const cedulaDigits = message.replace(/[^0-9]/g, '');
+            if (cedulaDigits.length < 5 || cedulaDigits.length > 10) {
+                return `⚠️ Ese número no parece una cédula válida.\n\n` +
+                    `🪪 *Escribí tu número de cédula* (solo los números).\n` +
+                    `_(Ej: 4523871)_`;
+            }
+            state.data.cedula = cedulaDigits;
+            // Format with dots for display
+            state.data.cedula_display = formatCedula(cedulaDigits);
+            state.step = STEPS.ADDRESS;
+            return `✅ Cédula: *${state.data.cedula_display}*\n\n` +
+                `🏠 *¿Cuál es tu dirección?*\n` +
+                `_(Calle, número, barrio. Ej: "Av. Mariscal López 1234, Barrio Jara")_`;
+
+        case STEPS.ADDRESS:
+            if (message.trim().length < 5) {
+                return `⚠️ Necesito una dirección más completa.\n\n` +
+                    `🏠 *Escribí tu dirección* (calle, número, barrio).\n` +
+                    `_(Ej: "Av. Mariscal López 1234, Barrio Jara")_`;
+            }
+            state.data.address = message.trim();
+            state.step = STEPS.CITY;
+            return `✅ Dirección registrada.\n\n` +
+                `📍 *¿En qué ciudad estás?*\n` +
+                `_(Ej: Asunción, Ciudad del Este, Encarnación, Luque...)_`;
+
+        case STEPS.CITY:
+            state.data.city = capitalize(message.trim());
             state.step = STEPS.BUSINESS_TYPE;
-            return `👍 *${state.data.business_name}* — ¡buenísimo!\n\n` +
-                `🏪 *¿Qué tipo de negocio es?*\n\n` +
+            return `📍 *${state.data.city}* — perfecto!\n\n` +
+                `🏪 *¿Qué tipo de negocio tenés?*\n\n` +
                 `Respondé con el número:\n` +
                 `1️⃣ Almacén / Supermercado\n` +
                 `2️⃣ Despensa / Minimarket\n` +
@@ -108,11 +154,12 @@ export async function handleOnboarding(merchant, message) {
                 `5️⃣ Ferretería\n` +
                 `6️⃣ Farmacia\n` +
                 `7️⃣ Restaurante / Bar\n` +
-                `8️⃣ Otro`;
+                `8️⃣ Taller / Servicio\n` +
+                `9️⃣ Otro`;
 
         case STEPS.BUSINESS_TYPE:
             // Parse business type
-            const typeKey = lower.replace(/[^1-8]/g, '').charAt(0);
+            const typeKey = lower.replace(/[^1-9]/g, '').charAt(0);
             if (BUSINESS_TYPES[typeKey]) {
                 state.data.business_type = BUSINESS_TYPES[typeKey];
             } else {
@@ -124,18 +171,19 @@ export async function handleOnboarding(merchant, message) {
                 else if (/ferret/i.test(lower)) state.data.business_type = 'ferretería';
                 else if (/farma/i.test(lower)) state.data.business_type = 'farmacia';
                 else if (/restau|bar|comida/i.test(lower)) state.data.business_type = 'restaurante';
+                else if (/taller|servicio|mec[aá]nic/i.test(lower)) state.data.business_type = 'taller / servicio';
                 else state.data.business_type = lower.substring(0, 50);
             }
 
-            state.step = STEPS.CITY;
+            state.step = STEPS.BUSINESS_NAME;
             return `✅ Tipo: *${capitalize(state.data.business_type)}*\n\n` +
-                `📍 *¿En qué ciudad estás?*\n` +
-                `_(Ej: Asunción, Ciudad del Este, Encarnación, Luque...)_`;
+                `🏷️ *¿Cómo se llama tu negocio?*\n` +
+                `_(Ej: "Despensa Don Carlos", "Distribuidora López")_`;
 
-        case STEPS.CITY:
-            state.data.city = capitalize(message.trim());
+        case STEPS.BUSINESS_NAME:
+            state.data.business_name = message.trim();
             state.step = STEPS.VOLUME;
-            return `📍 *${state.data.city}* — perfecto!\n\n` +
+            return `👍 *${state.data.business_name}* — ¡buenísimo!\n\n` +
                 `💰 *¿Cuánto vendés aproximadamente por mes?*\n\n` +
                 `Respondé con el número:\n` +
                 `1️⃣ Menos de 5 millones Gs.\n` +
@@ -161,11 +209,15 @@ export async function handleOnboarding(merchant, message) {
             onboardingState.delete(phone);
 
             return `🎉 *¡Registro completo!*\n\n` +
-                `📋 Tu perfil:\n` +
-                `🏪 ${state.data.business_name}\n` +
-                `📦 ${capitalize(state.data.business_type)}\n` +
-                `📍 ${state.data.city}\n\n` +
+                `📋 Tu perfil NexoFinanzas:\n` +
+                `━━━━━━━━━━━━━━━━━━\n` +
+                `👤 ${state.data.full_name}\n` +
+                `🪪 CI: ${state.data.cedula_display}\n` +
+                `🏠 ${state.data.address}\n` +
+                `📍 ${state.data.city}\n` +
+                `🏪 ${state.data.business_name} (${capitalize(state.data.business_type)})\n` +
                 `━━━━━━━━━━━━━━━━━━\n\n` +
+                `✅ Tu cuenta está verificada y segura.\n\n` +
                 `Ya podés empezar a usar NexoBot. Probá:\n\n` +
                 `📝 _"Vendí 500 mil a Carlos, fiado"_\n` +
                 `💰 _"Cobré 200 mil de María"_\n` +
@@ -187,12 +239,20 @@ export async function handleOnboarding(merchant, message) {
  * Save onboarding data to merchant profile in Supabase
  */
 async function saveOnboardingData(merchantId, data) {
-    if (!supabase) return;
+    if (!supabase) {
+        console.log('⚠️ No Supabase - onboarding data not saved:', data);
+        return;
+    }
 
     const updates = {
+        name: data.full_name,
+        cedula: data.cedula,
+        address: data.address,
+        city: data.city,
         business_name: data.business_name,
         business_type: data.business_type,
-        city: data.city
+        monthly_volume: data.volume,
+        onboarded_at: new Date().toISOString()
     };
 
     const { error } = await supabase
@@ -203,7 +263,7 @@ async function saveOnboardingData(merchantId, data) {
     if (error) {
         console.error('❌ Error saving onboarding data:', error);
     } else {
-        console.log(`✅ Onboarding complete for merchant ${merchantId}: ${data.business_name} (${data.city})`);
+        console.log(`✅ Onboarding complete: ${data.full_name} (CI: ${data.cedula}) — ${data.business_name}, ${data.city}`);
     }
 }
 
@@ -214,6 +274,13 @@ function capitalize(str) {
     return str.split(' ')
         .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
         .join(' ');
+}
+
+/**
+ * Format cédula with dots (e.g., 4.523.871)
+ */
+function formatCedula(digits) {
+    return digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 }
 
 /**

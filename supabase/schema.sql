@@ -13,11 +13,17 @@ CREATE TABLE IF NOT EXISTS merchants (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     phone VARCHAR(20) UNIQUE NOT NULL,
     name VARCHAR(100),
+    
+    -- Identity data (collected during onboarding)
+    cedula VARCHAR(15),             -- Cédula de identidad (ej: 4523871)
+    address TEXT,                   -- Dirección completa (calle, barrio)
+    
     business_name VARCHAR(200),
     business_type VARCHAR(50) DEFAULT 'general',
     city VARCHAR(100),
     country VARCHAR(3) DEFAULT 'PY',
     language VARCHAR(5) DEFAULT 'es',
+    monthly_volume VARCHAR(20),     -- Rango de facturación mensual
     nexo_score INT DEFAULT 0,
     total_sales BIGINT DEFAULT 0,
     total_credit_given BIGINT DEFAULT 0,
@@ -148,6 +154,7 @@ CREATE TABLE IF NOT EXISTS nexo_scores (
 -- =============================================
 CREATE INDEX IF NOT EXISTS idx_merchants_phone ON merchants(phone);
 CREATE INDEX IF NOT EXISTS idx_merchants_status ON merchants(status);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_merchants_cedula ON merchants(cedula) WHERE cedula IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_customers_merchant ON merchant_customers(merchant_id);
 CREATE INDEX IF NOT EXISTS idx_customers_name ON merchant_customers(merchant_id, name);
 CREATE INDEX IF NOT EXISTS idx_transactions_merchant ON transactions(merchant_id, created_at DESC);
@@ -170,6 +177,15 @@ ALTER TABLE message_log ENABLE ROW LEVEL SECURITY;
 ALTER TABLE nexo_scores ENABLE ROW LEVEL SECURITY;
 
 -- Service role policy (backend has full access)
+-- Drop existing policies first to make script re-runnable
+DROP POLICY IF EXISTS "Service role full access" ON merchants;
+DROP POLICY IF EXISTS "Service role full access" ON merchant_customers;
+DROP POLICY IF EXISTS "Service role full access" ON transactions;
+DROP POLICY IF EXISTS "Service role full access" ON inventory;
+DROP POLICY IF EXISTS "Service role full access" ON reminders;
+DROP POLICY IF EXISTS "Service role full access" ON message_log;
+DROP POLICY IF EXISTS "Service role full access" ON nexo_scores;
+
 CREATE POLICY "Service role full access" ON merchants FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Service role full access" ON merchant_customers FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Service role full access" ON transactions FOR ALL USING (true) WITH CHECK (true);
@@ -191,14 +207,17 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS merchants_updated_at ON merchants;
 CREATE TRIGGER merchants_updated_at
     BEFORE UPDATE ON merchants
     FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
+DROP TRIGGER IF EXISTS customers_updated_at ON merchant_customers;
 CREATE TRIGGER customers_updated_at
     BEFORE UPDATE ON merchant_customers
     FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
+DROP TRIGGER IF EXISTS inventory_updated_at ON inventory;
 CREATE TRIGGER inventory_updated_at
     BEFORE UPDATE ON inventory
     FOR EACH ROW EXECUTE FUNCTION update_updated_at();
@@ -208,14 +227,21 @@ CREATE TRIGGER inventory_updated_at
 -- =============================================
 
 -- Merchant dashboard summary
-CREATE OR REPLACE VIEW merchant_summary AS
+DROP VIEW IF EXISTS merchant_summary;
+CREATE VIEW merchant_summary AS
 SELECT 
     m.id,
     m.phone,
     m.name,
+    m.cedula,
+    m.address,
+    m.city,
     m.business_name,
+    m.business_type,
+    m.monthly_volume,
     m.nexo_score,
     m.total_sales,
+    m.onboarded_at,
     COALESCE(SUM(CASE WHEN mc.total_debt > 0 THEN mc.total_debt ELSE 0 END), 0) as total_pending_debt,
     COUNT(DISTINCT CASE WHEN mc.total_debt > 0 THEN mc.id END) as debtors_count,
     COUNT(DISTINCT mc.id) as total_customers,
@@ -223,4 +249,6 @@ SELECT
      AND t.created_at >= now() - interval '7 days') as weekly_transactions
 FROM merchants m
 LEFT JOIN merchant_customers mc ON mc.merchant_id = m.id
-GROUP BY m.id, m.phone, m.name, m.business_name, m.nexo_score, m.total_sales;
+GROUP BY m.id, m.phone, m.name, m.cedula, m.address, m.city,
+         m.business_name, m.business_type, m.monthly_volume,
+         m.nexo_score, m.total_sales, m.onboarded_at;

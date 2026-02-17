@@ -3,8 +3,12 @@ node_modules/
 *.log
 debug-*
 test-*.mjs
+test-*.txt
 check.*
 seed-demo.mjs
 seed-result.txt
 server-log.txt
+server-err.txt
 test-supabase-result.txt
+git-*.txt
+ngrok-output.txt

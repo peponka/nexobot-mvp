@@ -4,11 +4,14 @@ CREATE TABLE IF NOT EXISTS merchants (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     phone VARCHAR(20) UNIQUE NOT NULL,
     name VARCHAR(100),
+    cedula VARCHAR(15),
+    address TEXT,
     business_name VARCHAR(200),
     business_type VARCHAR(50) DEFAULT 'general',
     city VARCHAR(100),
     country VARCHAR(3) DEFAULT 'PY',
     language VARCHAR(5) DEFAULT 'es',
+    monthly_volume VARCHAR(30),
     nexo_score INT DEFAULT 0,
     total_sales BIGINT DEFAULT 0,
     total_credit_given BIGINT DEFAULT 0,
@@ -102,6 +105,7 @@ CREATE TABLE IF NOT EXISTS nexo_scores (
 
 CREATE INDEX IF NOT EXISTS idx_merchants_phone ON merchants(phone);
 CREATE INDEX IF NOT EXISTS idx_merchants_status ON merchants(status);
+CREATE INDEX IF NOT EXISTS idx_merchants_cedula ON merchants(cedula);
 CREATE INDEX IF NOT EXISTS idx_customers_merchant ON merchant_customers(merchant_id);
 CREATE INDEX IF NOT EXISTS idx_customers_name ON merchant_customers(merchant_id, name);
 CREATE INDEX IF NOT EXISTS idx_transactions_merchant ON transactions(merchant_id, created_at DESC);
