@@ -4,473 +4,364 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NexoBot Demo — Probá la API en vivo</title>
-    <meta name="description"
-        content="Probá la API de NexoBot con datos de ejemplo. Consultá NexoScore, GreenLight y Market Intelligence.">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap"
+    <title>NexoBot — Así evaluamos un comerciante</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
         rel="stylesheet">
     <style>
-        *,
-        *::before,
-        *::after {
+        * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        :root {
-            --bg: #0A0E17;
-            --bg-card: #111722;
-            --bg-card2: #1A202E;
-            --border: rgba(255, 255, 255, 0.06);
-            --text: #F1F3F5;
-            --text-sec: #9DA5B1;
-            --text-muted: #5E6773;
-            --green: #00B894;
-            --green-bg: rgba(0, 184, 148, 0.1);
-            --blue: #0984E3;
-            --blue-bg: rgba(9, 132, 227, 0.1);
-            --red: #E74C3C;
-            --red-bg: rgba(231, 76, 60, 0.1);
-            --yellow: #FDCB6E;
-            --yellow-bg: rgba(253, 203, 110, 0.1);
-            --accent: #6C5CE7;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
         body {
             font-family: 'Inter', sans-serif;
-            color: var(--text);
-            background: var(--bg);
-            min-height: 100vh;
+            background: #F5F6F8;
+            color: #1a1d21;
         }
 
-        a {
-            color: var(--green);
-            text-decoration: none;
-        }
-
-        .container {
-            max-width: 1100px;
+        .page {
+            max-width: 700px;
             margin: 0 auto;
-            padding: 0 24px;
+            padding: 24px 20px 60px;
         }
 
-        /* HEADER */
-        .header {
-            padding: 20px 0;
+        /* NAV */
+        .topbar {
+            background: #fff;
+            padding: 14px 24px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .topbar .brand {
+            font-weight: 800;
+            font-size: 15px;
+        }
+
+        .topbar .brand span {
+            color: #6C5CE7;
+        }
+
+        .topbar a {
+            font-size: 13px;
+            color: #6C5CE7;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* INTRO */
+        .intro {
+            text-align: center;
+            padding: 40px 0 24px;
+        }
+
+        .intro h1 {
+            font-size: 24px;
+            font-weight: 900;
+            margin-bottom: 8px;
+        }
+
+        .intro p {
+            font-size: 15px;
+            color: #666;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        /* STEP LABEL */
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 32px 0 16px;
+        }
+
+        .step-num {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #6C5CE7;
+            color: white;
+            font-size: 14px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .step-text {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        /* CHAT */
+        .chat-box {
+            background: #E5DDD5;
+            border-radius: 14px;
+            padding: 20px;
+            max-width: 400px;
+        }
+
+        .msg {
+            max-width: 85%;
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .msg-user {
+            background: #DCF8C6;
+            margin-left: auto;
+            border-bottom-right-radius: 2px;
+        }
+
+        .msg-bot {
+            background: #fff;
+            border-bottom-left-radius: 2px;
+        }
+
+        .msg-time {
+            font-size: 10px;
+            color: #999;
+            text-align: right;
+            margin-top: 2px;
+        }
+
+        .chat-label {
+            font-size: 11px;
+            color: #888;
+            text-align: center;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        /* FICHA */
+        .ficha {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+        }
+
+        .ficha-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #f0f0f0;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            border-bottom: 1px solid var(--border);
         }
 
-        .header-left {
+        .ficha-header .left {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
         }
 
-        .logo {
+        .ficha-header .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #6C5CE7;
+            color: white;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ficha-header .name {
             font-size: 18px;
             font-weight: 800;
         }
 
-        .logo span {
-            color: var(--accent);
-        }
-
-        .demo-badge {
-            font-size: 11px;
-            font-weight: 700;
-            background: var(--green-bg);
-            color: var(--green);
-            padding: 3px 10px;
-            border-radius: 8px;
-        }
-
-        .header-links a {
+        .ficha-header .biz {
             font-size: 13px;
-            color: var(--text-sec);
-            margin-left: 20px;
+            color: #666;
         }
 
-        .header-links a:hover {
-            color: white;
+        .semaforo {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
         }
 
-        /* HERO */
-        .demo-hero {
-            padding: 48px 0 32px;
-            text-align: center;
+        .semaforo-verde {
+            background: #E6F9F1;
+            color: #00B894;
         }
 
-        .demo-hero h1 {
-            font-size: 32px;
-            font-weight: 900;
+        .semaforo-amarillo {
+            background: #FFF8E6;
+            color: #E67E22;
         }
 
-        .demo-hero p {
-            color: var(--text-sec);
-            font-size: 15px;
-            margin-top: 8px;
+        .semaforo-rojo {
+            background: #FDECEC;
+            color: #E74C3C;
         }
 
-        /* TABS */
-        .tabs {
-            display: flex;
-            gap: 8px;
-            justify-content: center;
-            margin: 32px 0;
-            flex-wrap: wrap;
-        }
-
-        .tab {
-            padding: 10px 24px;
-            border-radius: 10px;
-            border: 1px solid var(--border);
-            background: transparent;
-            color: var(--text-sec);
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .tab:hover {
-            border-color: rgba(255, 255, 255, 0.15);
-            color: white;
-        }
-
-        .tab.active {
-            background: var(--green-bg);
-            border-color: var(--green);
-            color: var(--green);
-        }
-
-        /* DEMO PANEL */
-        .demo-panel {
-            display: grid;
-            grid-template-columns: 380px 1fr;
-            gap: 24px;
-            margin-bottom: 48px;
-            min-height: 500px;
-        }
-
-        /* LEFT: INPUT */
-        .input-panel {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
+        .ficha-body {
             padding: 24px;
         }
 
-        .input-panel h3 {
-            font-size: 15px;
-            font-weight: 700;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .input-group {
-            margin-bottom: 16px;
-        }
-
-        .input-group label {
-            display: block;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-sec);
-            margin-bottom: 6px;
-        }
-
-        .input-group input,
-        .input-group select {
-            width: 100%;
-            padding: 10px 14px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            background: var(--bg-card2);
-            color: white;
-            font-family: 'Inter', sans-serif;
-            font-size: 14px;
-            outline: none;
-        }
-
-        .input-group input:focus {
-            border-color: var(--green);
-        }
-
-        .sample-merchants {
-            margin-top: 16px;
-        }
-
-        .sample-merchants h4 {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-muted);
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .sample-btn {
-            display: block;
-            width: 100%;
-            text-align: left;
-            padding: 10px 14px;
-            background: var(--bg-card2);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text);
-            font-size: 13px;
-            cursor: pointer;
-            margin-bottom: 6px;
-            transition: all 0.2s;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .sample-btn:hover {
-            border-color: var(--green);
-            background: rgba(0, 184, 148, 0.04);
-        }
-
-        .sample-btn .name {
-            font-weight: 600;
-        }
-
-        .sample-btn .meta {
-            color: var(--text-sec);
-            font-size: 11px;
-        }
-
-        .run-btn {
-            width: 100%;
-            padding: 12px;
-            border-radius: 10px;
-            border: none;
-            background: linear-gradient(135deg, var(--green), #00D2A0);
-            color: #000;
-            font-size: 14px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-family: 'Inter', sans-serif;
-            margin-top: 16px;
-        }
-
-        .run-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 16px rgba(0, 184, 148, 0.3);
-        }
-
-        /* RIGHT: OUTPUT */
-        .output-panel {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        /* REQUEST */
-        .request-block,
-        .response-block {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            overflow: hidden;
-        }
-
-        .block-header {
-            padding: 12px 20px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 13px;
-            font-weight: 600;
-        }
-
-        .block-header .method {
-            color: var(--green);
-            font-weight: 700;
-        }
-
-        .block-header .status {
-            font-size: 12px;
-            padding: 3px 10px;
-            border-radius: 6px;
-        }
-
-        .status-ok {
-            background: var(--green-bg);
-            color: var(--green);
-        }
-
-        .status-warn {
-            background: var(--yellow-bg);
-            color: var(--yellow);
-        }
-
-        .status-bad {
-            background: var(--red-bg);
-            color: var(--red);
-        }
-
-        .code-body {
-            padding: 20px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 13px;
-            line-height: 1.7;
-            overflow-x: auto;
-            white-space: pre;
-            color: #ABB2BF;
-            min-height: 120px;
-        }
-
-        .json-key {
-            color: #E06C75;
-        }
-
-        .json-str {
-            color: #98C379;
-        }
-
-        .json-num {
-            color: var(--yellow);
-        }
-
-        .json-bool {
-            color: #56B6C2;
-        }
-
-        /* VISUAL CARDS */
-        .visual-results {
+        .ficha-row {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
         }
 
-        .v-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 16px;
-            text-align: center;
-        }
+        .ficha-dato {}
 
-        .v-card .v-label {
+        .ficha-dato .label {
             font-size: 11px;
-            color: var(--text-muted);
+            color: #999;
+            font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.3px;
         }
 
-        .v-card .v-value {
-            font-size: 28px;
-            font-weight: 900;
+        .ficha-dato .valor {
+            font-size: 20px;
+            font-weight: 800;
             margin-top: 4px;
         }
 
-        .v-card .v-sub {
+        .ficha-dato .sub {
             font-size: 12px;
-            color: var(--text-sec);
+            color: #888;
             margin-top: 2px;
         }
 
-        /* SCORE GAUGE */
-        .score-gauge {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 24px;
-            text-align: center;
+        .barra-section {
+            margin-top: 8px;
         }
 
-        .gauge-circle {
-            width: 140px;
-            height: 140px;
-            border-radius: 50%;
-            margin: 0 auto 12px;
+        .barra-item {
+            margin-bottom: 12px;
+        }
+
+        .barra-label {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 48px;
-            font-weight: 900;
-            position: relative;
+            justify-content: space-between;
+            font-size: 13px;
+            margin-bottom: 4px;
         }
 
-        .gauge-circle::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 50%;
-            border: 6px solid var(--border);
+        .barra-label .name {
+            color: #555;
         }
 
-        .gauge-label {
-            font-size: 14px;
+        .barra-label .val {
             font-weight: 700;
         }
 
-        .gauge-sub {
-            font-size: 13px;
-            color: var(--text-sec);
-            margin-top: 4px;
+        .barra {
+            height: 8px;
+            background: #f0f0f0;
+            border-radius: 4px;
         }
 
-        /* FOOTER */
-        .demo-footer {
-            padding: 32px 0;
-            border-top: 1px solid var(--border);
+        .barra-fill {
+            height: 100%;
+            border-radius: 4px;
+        }
+
+        .veredicto {
+            margin-top: 20px;
+            padding: 16px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .veredicto-verde {
+            background: #E6F9F1;
+            border-left: 4px solid #00B894;
+        }
+
+        .veredicto-amarillo {
+            background: #FFF8E6;
+            border-left: 4px solid #E67E22;
+        }
+
+        .veredicto-rojo {
+            background: #FDECEC;
+            border-left: 4px solid #E74C3C;
+        }
+
+        .veredicto strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        /* ARROW */
+        .arrow {
             text-align: center;
-            font-size: 13px;
-            color: var(--text-muted);
+            font-size: 28px;
+            color: #ccc;
+            margin: 16px 0;
         }
 
-        /* LOADING ANIMATION */
-        .loading {
+        /* BOTTOM CTA */
+        .bottom-cta {
+            text-align: center;
+            margin-top: 40px;
+            padding: 32px;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .bottom-cta h3 {
+            font-size: 18px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .bottom-cta p {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .bottom-cta a {
             display: inline-block;
+            padding: 14px 32px;
+            background: #6C5CE7;
+            color: white;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 15px;
+            text-decoration: none;
+            transition: all 0.2s;
         }
 
-        .loading span {
-            animation: pulse 1.4s infinite;
-            display: inline-block;
+        .bottom-cta a:hover {
+            background: #5847D1;
+            transform: translateY(-2px);
         }
 
-        .loading span:nth-child(2) {
-            animation-delay: 0.2s;
+        .divider {
+            height: 1px;
+            background: #eee;
+            margin: 20px 0;
         }
 
-        .loading span:nth-child(3) {
-            animation-delay: 0.4s;
-        }
-
-        @keyframes pulse {
-
-            0%,
-            100% {
-                opacity: 0.3;
+        @media(max-width:600px) {
+            .ficha-row {
+                grid-template-columns: 1fr 1fr;
             }
 
-            50% {
-                opacity: 1;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .demo-panel {
-                grid-template-columns: 1fr;
-            }
-
-            .visual-results {
-                grid-template-columns: 1fr;
+            .chat-box {
+                max-width: 100%;
             }
         }
     </style>
@@ -478,489 +369,243 @@
 
 <body>
 
-    <div class="container">
-        <!-- HEADER -->
-        <div class="header">
-            <div class="header-left">
-                <div class="logo">🤖 Nexo<span>Bot</span></div>
-                <span class="demo-badge">DEMO INTERACTIVA</span>
-            </div>
-            <div class="header-links">
-                <a href="/empresas.html">← Volver</a>
-                <a href="/empresas.html#contacto">Contactar</a>
-            </div>
-        </div>
-
-        <!-- HERO -->
-        <div class="demo-hero">
-            <h1>Probá la API en vivo</h1>
-            <p>Seleccioná un comerciante de ejemplo y mirá qué data podés obtener</p>
-        </div>
-
-        <!-- TABS -->
-        <div class="tabs">
-            <button class="tab active" onclick="switchTab('greenlight')">🚦 GreenLight</button>
-            <button class="tab" onclick="switchTab('score')">📊 NexoScore</button>
-            <button class="tab" onclick="switchTab('intelligence')">🧠 Intelligence</button>
-        </div>
-
-        <!-- DEMO PANEL -->
-        <div class="demo-panel">
-            <!-- LEFT INPUT -->
-            <div class="input-panel">
-                <h3>⚙️ Parámetros</h3>
-                <div class="input-group">
-                    <label>Teléfono del comerciante</label>
-                    <input type="text" id="phoneInput" placeholder="0981 123 456" value="">
-                </div>
-                <div class="input-group" id="amountGroup" style="display:none">
-                    <label>Monto a prestar (Gs.)</label>
-                    <input type="text" id="amountInput" placeholder="10.000.000" value="10000000">
-                </div>
-
-                <div class="sample-merchants">
-                    <h4>Comerciantes de ejemplo</h4>
-                    <button class="sample-btn" onclick="selectMerchant('0981551234','Doña María - Almacén','almacen')">
-                        <div class="name">🏪 Doña María</div>
-                        <div class="meta">Almacén · San Lorenzo · 8 meses activa</div>
-                    </button>
-                    <button class="sample-btn"
-                        onclick="selectMerchant('0971882345','Don Carlos - Ferretería','ferreteria')">
-                        <div class="name">🔧 Don Carlos</div>
-                        <div class="meta">Ferretería · Luque · 14 meses activo</div>
-                    </button>
-                    <button class="sample-btn" onclick="selectMerchant('0982443456','Liz - Despensa','despensa')">
-                        <div class="name">🛒 Liz</div>
-                        <div class="meta">Despensa · Lambaré · 3 meses activa</div>
-                    </button>
-                    <button class="sample-btn" onclick="selectMerchant('0991774567','Roberto - Kiosco','kiosco')">
-                        <div class="name">🍬 Roberto</div>
-                        <div class="meta">Kiosco · Fernando de la Mora · 1 mes activo</div>
-                    </button>
-                </div>
-
-                <button class="run-btn" id="runBtn" onclick="runQuery()">
-                    ▶ Ejecutar consulta
-                </button>
-            </div>
-
-            <!-- RIGHT OUTPUT -->
-            <div class="output-panel" id="outputPanel">
-                <div class="request-block">
-                    <div class="block-header">
-                        <span><span class="method">GET</span> <span
-                                id="requestUrl">/api/greenlight?phone=...</span></span>
-                        <span>Request</span>
-                    </div>
-                    <div class="code-body" id="requestBody">
-                        <span style="color:var(--text-muted)">// Seleccioná un comerciante y hacé click en
-                            "Ejecutar"</span>
-                    </div>
-                </div>
-
-                <div class="response-block">
-                    <div class="block-header">
-                        <span>Response</span>
-                        <span class="status status-ok" id="statusBadge" style="display:none">200 OK</span>
-                    </div>
-                    <div class="code-body" id="responseBody">
-                        <span style="color:var(--text-muted)">// La respuesta de la API aparecerá acá</span>
-                    </div>
-                </div>
-
-                <div class="visual-results" id="visualResults" style="display:none"></div>
-            </div>
-        </div>
-
-        <!-- FOOTER -->
-        <div class="demo-footer">
-            <p>Esta demo usa datos simulados de comerciantes de ejemplo. Los datos reales están disponibles a través de
-                nuestra API.</p>
-            <p style="margin-top:8px"><a href="/empresas.html#contacto">Solicitá acceso a la API real →</a></p>
-        </div>
+    <div class="topbar">
+        <div class="brand">🤖 Nexo<span>Bot</span></div>
+        <a href="/empresas.html">← Volver</a>
     </div>
 
-    <script>
-        // =========================================
-        // SIMULATED MERCHANT DATA
-        // =========================================
-        const MERCHANTS = {
-            '0981551234': {
-                name: 'Doña María', business: 'Almacén El Sol', rubro: 'almacen',
-                city: 'San Lorenzo', days_active: 242, registered: '2025-06-21',
-                score: 78, grade: 'B+',
-                avg_daily_sales: 850000, monthly_volume: 25500000,
-                total_transactions: 1847, total_customers: 34,
-                collection_rate: 0.82, fiado_rate: 0.35,
-                growth_monthly: 12, consistency: 90,
-                payment_reliability: 'HIGH', risk_level: 'LOW',
-                suggested_max: 15000000
-            },
-            '0971882345': {
-                name: 'Don Carlos', business: 'Ferretería López', rubro: 'ferreteria',
-                city: 'Luque', days_active: 425, registered: '2024-12-20',
-                score: 85, grade: 'A-',
-                avg_daily_sales: 1200000, monthly_volume: 36000000,
-                total_transactions: 3210, total_customers: 67,
-                collection_rate: 0.91, fiado_rate: 0.28,
-                growth_monthly: 8, consistency: 95,
-                payment_reliability: 'VERY_HIGH', risk_level: 'LOW',
-                suggested_max: 25000000
-            },
-            '0982443456': {
-                name: 'Liz', business: 'Despensa Liz', rubro: 'despensa',
-                city: 'Lambaré', days_active: 89, registered: '2025-11-22',
-                score: 52, grade: 'C',
-                avg_daily_sales: 420000, monthly_volume: 12600000,
-                total_transactions: 312, total_customers: 18,
-                collection_rate: 0.65, fiado_rate: 0.45,
-                growth_monthly: 22, consistency: 60,
-                payment_reliability: 'MEDIUM', risk_level: 'MEDIUM',
-                suggested_max: 5000000
-            },
-            '0991774567': {
-                name: 'Roberto', business: 'Kiosco Don Rober', rubro: 'kiosco',
-                city: 'Fernando de la Mora', days_active: 28, registered: '2026-01-22',
-                score: 31, grade: 'D',
-                avg_daily_sales: 180000, monthly_volume: 5400000,
-                total_transactions: 87, total_customers: 12,
-                collection_rate: 0.45, fiado_rate: 0.55,
-                growth_monthly: 0, consistency: 35,
-                payment_reliability: 'LOW', risk_level: 'HIGH',
-                suggested_max: 1500000
-            }
-        };
+    <div class="page">
 
-        const MARKET_DATA = {
-            periodo: '2026-01',
-            comerciantes_activos: 2450,
-            volumen_mensual_gs: 12800000000,
-            volumen_mensual_display: 'Gs. 12.8 mil millones',
-            transacciones_mes: 89340,
-            ticket_promedio: 143000,
-            rubros_top: [
-                { rubro: 'Almacén/Despensa', pct: 38, volume: 'Gs. 4.86B', growth: '+8%' },
-                { rubro: 'Ferretería', pct: 18, volume: 'Gs. 2.30B', growth: '+12%' },
-                { rubro: 'Kiosco', pct: 15, volume: 'Gs. 1.92B', growth: '+3%' },
-                { rubro: 'Venta de ropa', pct: 12, volume: 'Gs. 1.54B', growth: '-2%' },
-                { rubro: 'Otros', pct: 17, volume: 'Gs. 2.18B', growth: '+5%' }
-            ],
-            zonas_top: [
-                { zona: 'San Lorenzo', comerciantes: 420, volumen: 'Gs. 2.1B' },
-                { zona: 'Luque', comerciantes: 380, volumen: 'Gs. 1.9B' },
-                { zona: 'Lambaré', comerciantes: 310, volumen: 'Gs. 1.5B' },
-                { zona: 'Fernando de la Mora', comerciantes: 290, volumen: 'Gs. 1.4B' }
-            ],
-            morosidad: {
-                tasa_general: '18%',
-                por_rubro: { 'Almacén': '15%', 'Ferretería': '12%', 'Kiosco': '25%', 'Ropa': '22%' }
-            },
-            tendencia: { crecimiento_mensual: '+6%', comerciantes_nuevos_mes: 180 }
-        };
+        <div class="intro">
+            <h1>Así te ayudamos a decidir</h1>
+            <p>Un comerciante te pide un crédito. Hoy no tenés cómo verificar sus ventas. Con NexoBot, sí.</p>
+        </div>
 
-        let currentTab = 'greenlight';
-        let currentPhone = '';
+        <!-- STEP 1 -->
+        <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-text">El comerciante ya usa NexoBot todos los días</div>
+        </div>
 
-        function switchTab(tab) {
-            currentTab = tab;
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
-            document.getElementById('amountGroup').style.display = tab === 'greenlight' ? 'block' : 'none';
-
-            const url = document.getElementById('requestUrl');
-            if (tab === 'greenlight') url.textContent = '/api/greenlight?phone=...';
-            else if (tab === 'score') url.textContent = '/api/score?phone=...';
-            else url.textContent = '/api/intelligence?period=2026-01';
-
-            // Reset output
-            document.getElementById('responseBody').innerHTML = '<span style="color:var(--text-muted)">// Ejecutá la consulta para ver el resultado</span>';
-            document.getElementById('statusBadge').style.display = 'none';
-            document.getElementById('visualResults').style.display = 'none';
-        }
-
-        function selectMerchant(phone, name, rubro) {
-            currentPhone = phone;
-            document.getElementById('phoneInput').value = phone;
-        }
-
-        function fmtGs(n) {
-            return 'Gs. ' + n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-        }
-
-        function colorForScore(score) {
-            if (score >= 70) return 'var(--green)';
-            if (score >= 50) return 'var(--yellow)';
-            return 'var(--red)';
-        }
-
-        function runQuery() {
-            const phone = document.getElementById('phoneInput').value.replace(/\s/g, '');
-            const btn = document.getElementById('runBtn');
-
-            if (currentTab !== 'intelligence' && !phone) {
-                alert('Seleccioná un comerciante primero');
-                return;
-            }
-
-            btn.textContent = '⏳ Consultando...';
-            btn.disabled = true;
-
-            // Show request
-            if (currentTab === 'greenlight') {
-                const amt = document.getElementById('amountInput').value || '10000000';
-                document.getElementById('requestUrl').textContent = `/api/greenlight?phone=${phone}&amount=${amt}`;
-                document.getElementById('requestBody').innerHTML = formatJSON({
-                    headers: { 'x-api-key': 'demo_key_xxxx', 'Content-Type': 'application/json' },
-                    params: { phone, amount: parseInt(amt) }
-                });
-            } else if (currentTab === 'score') {
-                document.getElementById('requestUrl').textContent = `/api/score?phone=${phone}`;
-                document.getElementById('requestBody').innerHTML = formatJSON({
-                    headers: { 'x-api-key': 'demo_key_xxxx' },
-                    params: { phone }
-                });
-            } else {
-                document.getElementById('requestUrl').textContent = '/api/intelligence?period=2026-01';
-                document.getElementById('requestBody').innerHTML = formatJSON({
-                    headers: { 'x-api-key': 'demo_key_xxxx' },
-                    params: { period: '2026-01', region: 'central' }
-                });
-            }
-
-            // Simulate API delay
-            setTimeout(() => {
-                btn.textContent = '▶ Ejecutar consulta';
-                btn.disabled = false;
-
-                if (currentTab === 'intelligence') {
-                    showIntelligence();
-                } else {
-                    const merchant = MERCHANTS[phone];
-                    if (!merchant) {
-                        document.getElementById('statusBadge').style.display = 'inline';
-                        document.getElementById('statusBadge').className = 'status status-bad';
-                        document.getElementById('statusBadge').textContent = '404 Not Found';
-                        document.getElementById('responseBody').innerHTML = formatJSON({
-                            error: 'MERCHANT_NOT_FOUND',
-                            message: 'No se encontró comerciante con ese teléfono en NexoBot'
-                        });
-                        return;
-                    }
-
-                    if (currentTab === 'greenlight') showGreenLight(merchant);
-                    else showScore(merchant);
-                }
-            }, 1200);
-        }
-
-        function showGreenLight(m) {
-            const amt = parseInt(document.getElementById('amountInput').value) || 10000000;
-            const approved = amt <= m.suggested_max;
-            const decision = approved ? 'APPROVED' : 'DENIED';
-
-            const response = {
-                decision,
-                nexo_score: m.score,
-                grade: m.grade,
-                merchant: { name: m.name, business: m.business, city: m.city, rubro: m.rubro },
-                financial: {
-                    avg_daily_sales: m.avg_daily_sales,
-                    monthly_volume: m.monthly_volume,
-                    collection_rate: (m.collection_rate * 100).toFixed(0) + '%',
-                    fiado_rate: (m.fiado_rate * 100).toFixed(0) + '%',
-                    days_active: m.days_active
-                },
-                risk: {
-                    level: m.risk_level,
-                    payment_reliability: m.payment_reliability,
-                    suggested_max_credit: m.suggested_max,
-                    requested_amount: amt,
-                    debt_capacity_ratio: (amt / m.suggested_max * 100).toFixed(0) + '%'
-                },
-                timestamp: new Date().toISOString()
-            };
-
-            document.getElementById('statusBadge').style.display = 'inline';
-            document.getElementById('statusBadge').className = `status ${approved ? 'status-ok' : 'status-bad'}`;
-            document.getElementById('statusBadge').textContent = `200 OK · ${approved ? '✅ APPROVED' : '❌ DENIED'}`;
-            document.getElementById('responseBody').innerHTML = formatJSON(response);
-
-            // Visual cards
-            const vis = document.getElementById('visualResults');
-            vis.style.display = 'grid';
-            vis.innerHTML = `
-        <div class="v-card">
-            <div class="v-label">Decisión</div>
-            <div class="v-value" style="color:${approved ? 'var(--green)' : 'var(--red)'}; font-size:20px">
-                ${approved ? '✅ APROBADO' : '❌ DENEGADO'}
+        <div class="chat-box">
+            <div class="chat-label">WhatsApp · Doña María · Almacén El Sol</div>
+            <div class="msg msg-user">vendí 450 mil a carlos fiado</div>
+            <div class="msg msg-bot">✅ Venta registrada: Gs. 450.000 a Carlos (fiado). Total hoy: Gs. 1.250.000</div>
+            <div class="msg msg-user">cobré 200 mil de jorge</div>
+            <div class="msg msg-bot">✅ Cobro registrado: Gs. 200.000 de Jorge. Le quedan Gs. 150.000 pendientes.</div>
+            <div class="msg msg-user">cuanto vendí esta semana</div>
+            <div class="msg msg-bot">📊 Esta semana vendiste Gs. 5.840.000 (23 ventas). Fiados pendientes: Gs. 1.2M
             </div>
-            <div class="v-sub">${approved ? 'Cumple criterios' : 'Supera capacidad'}</div>
+            <div class="msg-time">Doña María usa NexoBot hace 8 meses</div>
         </div>
-        <div class="v-card">
-            <div class="v-label">NexoScore</div>
-            <div class="v-value" style="color:${colorForScore(m.score)}">${m.score}</div>
-            <div class="v-sub">Grade: ${m.grade}</div>
-        </div>
-        <div class="v-card">
-            <div class="v-label">Crédito máximo sugerido</div>
-            <div class="v-value" style="font-size:18px">${fmtGs(m.suggested_max)}</div>
-            <div class="v-sub">Pedido: ${fmtGs(amt)}</div>
-        </div>
-        <div class="v-card">
-            <div class="v-label">Ventas diarias prom.</div>
-            <div class="v-value" style="font-size:18px">${fmtGs(m.avg_daily_sales)}</div>
-            <div class="v-sub">${m.days_active} días activo</div>
-        </div>
-        <div class="v-card">
-            <div class="v-label">Tasa de cobro</div>
-            <div class="v-value" style="color:${m.collection_rate >= 0.7 ? 'var(--green)' : 'var(--yellow)'}">${(m.collection_rate * 100).toFixed(0)}%</div>
-            <div class="v-sub">De fiados cobrados</div>
-        </div>
-        <div class="v-card">
-            <div class="v-label">Riesgo</div>
-            <div class="v-value" style="color:${m.risk_level === 'LOW' ? 'var(--green)' : m.risk_level === 'MEDIUM' ? 'var(--yellow)' : 'var(--red)'}; font-size:20px">
-                ${m.risk_level === 'LOW' ? '🟢 BAJO' : m.risk_level === 'MEDIUM' ? '🟡 MEDIO' : '🔴 ALTO'}
-            </div>
-            <div class="v-sub">Confiabilidad: ${m.payment_reliability}</div>
-        </div>
-    `;
-        }
 
-        function showScore(m) {
-            const response = {
-                phone: currentPhone,
-                merchant: { name: m.name, business: m.business, city: m.city },
-                score: m.score,
-                grade: m.grade,
-                factors: {
-                    sales_volume: Math.min(100, Math.round(m.avg_daily_sales / 12000)),
-                    collection_rate: Math.round(m.collection_rate * 100),
-                    consistency: m.consistency,
-                    growth: Math.min(100, 50 + m.growth_monthly * 2),
-                    tenure: Math.min(100, Math.round(m.days_active / 3.65))
-                },
-                stats: {
-                    days_active: m.days_active,
-                    total_transactions: m.total_transactions,
-                    total_customers: m.total_customers,
-                    monthly_volume: m.monthly_volume,
-                    avg_daily_sales: m.avg_daily_sales
-                },
-                recommendation: m.score >= 70 ? 'ELIGIBLE_FOR_CREDIT' : m.score >= 50 ? 'REVIEW_REQUIRED' : 'NOT_RECOMMENDED',
-                timestamp: new Date().toISOString()
-            };
+        <!-- ARROW -->
+        <div class="arrow">↓</div>
 
-            document.getElementById('statusBadge').style.display = 'inline';
-            document.getElementById('statusBadge').className = 'status status-ok';
-            document.getElementById('statusBadge').textContent = '200 OK';
-            document.getElementById('responseBody').innerHTML = formatJSON(response);
+        <!-- STEP 2 -->
+        <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-text">Doña María va a tu cooperativa y pide un crédito de Gs. 10 millones</div>
+        </div>
 
-            const vis = document.getElementById('visualResults');
-            vis.style.display = 'grid';
-            const f = response.factors;
-            vis.innerHTML = `
-        <div class="score-gauge" style="grid-column:1/-1">
-            <div class="gauge-circle" style="border: 6px solid ${colorForScore(m.score)}; color: ${colorForScore(m.score)}">
-                ${m.score}
-            </div>
-            <div class="gauge-label">NexoScore: ${m.grade}</div>
-            <div class="gauge-sub">${response.recommendation === 'ELIGIBLE_FOR_CREDIT' ? '✅ Elegible para crédito' : response.recommendation === 'REVIEW_REQUIRED' ? '⚠️ Requiere revisión' : '❌ No recomendado'}</div>
-        </div>
-        <div class="v-card">
-            <div class="v-label">Volumen ventas</div>
-            <div class="v-value" style="color:${colorForScore(f.sales_volume)}">${f.sales_volume}</div>
-            <div class="v-sub">de 100</div>
-        </div>
-        <div class="v-card">
-            <div class="v-label">Tasa de cobro</div>
-            <div class="v-value" style="color:${colorForScore(f.collection_rate)}">${f.collection_rate}</div>
-            <div class="v-sub">de 100</div>
-        </div>
-        <div class="v-card">
-            <div class="v-label">Consistencia</div>
-            <div class="v-value" style="color:${colorForScore(f.consistency)}">${f.consistency}</div>
-            <div class="v-sub">de 100</div>
-        </div>
-        <div class="v-card">
-            <div class="v-label">Crecimiento</div>
-            <div class="v-value" style="color:${colorForScore(f.growth)}">${f.growth}</div>
-            <div class="v-sub">de 100</div>
-        </div>
-        <div class="v-card">
-            <div class="v-label">Antigüedad</div>
-            <div class="v-value" style="color:${colorForScore(f.tenure)}">${f.tenure}</div>
-            <div class="v-sub">${m.days_active} días</div>
-        </div>
-        <div class="v-card">
-            <div class="v-label">Transacciones</div>
-            <div class="v-value" style="font-size:22px">${m.total_transactions.toLocaleString()}</div>
-            <div class="v-sub">${m.total_customers} clientes</div>
-        </div>
-    `;
-        }
+        <p style="font-size:14px;color:#666;margin-bottom:16px;">Vos consultás NexoBot y en 1 segundo recibís esta
+            ficha:</p>
 
-        function showIntelligence() {
-            const d = MARKET_DATA;
-            document.getElementById('statusBadge').style.display = 'inline';
-            document.getElementById('statusBadge').className = 'status status-ok';
-            document.getElementById('statusBadge').textContent = '200 OK';
-            document.getElementById('responseBody').innerHTML = formatJSON(d);
-
-            const vis = document.getElementById('visualResults');
-            vis.style.display = 'grid';
-            vis.innerHTML = `
-        <div class="v-card">
-            <div class="v-label">Comerciantes activos</div>
-            <div class="v-value" style="color:var(--green)">${d.comerciantes_activos.toLocaleString()}</div>
-            <div class="v-sub">+${d.tendencia.comerciantes_nuevos_mes}/mes nuevos</div>
-        </div>
-        <div class="v-card">
-            <div class="v-label">Volumen mensual</div>
-            <div class="v-value" style="font-size:18px;color:var(--blue)">${d.volumen_mensual_display}</div>
-            <div class="v-sub">${d.tendencia.crecimiento_mensual} vs mes ant.</div>
-        </div>
-        <div class="v-card">
-            <div class="v-label">Ticket promedio</div>
-            <div class="v-value" style="font-size:20px">${fmtGs(d.ticket_promedio)}</div>
-            <div class="v-sub">${d.transacciones_mes.toLocaleString()} txns/mes</div>
-        </div>
-        <div class="v-card" style="grid-column:1/-1">
-            <div class="v-label" style="margin-bottom:12px">Top rubros por volumen</div>
-            ${d.rubros_top.map(r => `
-                <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
-                    <div style="flex:1;text-align:left;font-size:13px;font-weight:600">${r.rubro}</div>
-                    <div style="flex:2;background:var(--bg-card2);border-radius:6px;height:24px;overflow:hidden">
-                        <div style="width:${r.pct}%;height:100%;background:linear-gradient(90deg,var(--green),var(--blue));border-radius:6px;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:600;color:#000">${r.pct}%</div>
+        <!-- FICHA: APROBADA -->
+        <div class="ficha">
+            <div class="ficha-header">
+                <div class="left">
+                    <div class="avatar">👩</div>
+                    <div>
+                        <div class="name">Doña María</div>
+                        <div class="biz">Almacén El Sol · San Lorenzo</div>
                     </div>
-                    <div style="width:90px;text-align:right;font-size:12px;color:var(--text-sec)">${r.volume}</div>
-                    <div style="width:40px;text-align:right;font-size:12px;color:${r.growth.startsWith('+') ? 'var(--green)' : 'var(--red)'}">${r.growth}</div>
                 </div>
-            `).join('')}
-        </div>
-        <div class="v-card" style="grid-column:1/-1">
-            <div class="v-label" style="margin-bottom:12px">Tasa de morosidad por rubro</div>
-            <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
-                ${Object.entries(d.morosidad.por_rubro).map(([k, v]) => `
-                    <div style="text-align:center">
-                        <div style="font-size:24px;font-weight:900;color:${parseInt(v) > 20 ? 'var(--red)' : parseInt(v) > 15 ? 'var(--yellow)' : 'var(--green)'}">${v}</div>
-                        <div style="font-size:11px;color:var(--text-sec)">${k}</div>
+                <div class="semaforo semaforo-verde">🟢 Aprobado</div>
+            </div>
+            <div class="ficha-body">
+                <div class="ficha-row">
+                    <div class="ficha-dato">
+                        <div class="label">Ventas por día</div>
+                        <div class="valor">Gs. 850K</div>
+                        <div class="sub">Promedio últimos 8 meses</div>
                     </div>
-                `).join('')}
+                    <div class="ficha-dato">
+                        <div class="label">Ventas por mes</div>
+                        <div class="valor">Gs. 25.5M</div>
+                        <div class="sub">Verificadas por WhatsApp</div>
+                    </div>
+                    <div class="ficha-dato">
+                        <div class="label">Antigüedad</div>
+                        <div class="valor">8 meses</div>
+                        <div class="sub">1.847 transacciones</div>
+                    </div>
+                </div>
+                <div class="ficha-row">
+                    <div class="ficha-dato">
+                        <div class="label">Cobra sus fiados</div>
+                        <div class="valor" style="color:#00B894">82%</div>
+                        <div class="sub">De cada 100, cobra 82 a tiempo</div>
+                    </div>
+                    <div class="ficha-dato">
+                        <div class="label">Crecimiento</div>
+                        <div class="valor" style="color:#00B894">+12%</div>
+                        <div class="sub">Vs. mes anterior</div>
+                    </div>
+                    <div class="ficha-dato">
+                        <div class="label">Crédito máx. sugerido</div>
+                        <div class="valor" style="color:#6C5CE7">Gs. 15M</div>
+                        <div class="sub">Pide: Gs. 10M ✅</div>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="barra-section">
+                    <div class="barra-item">
+                        <div class="barra-label"><span class="name">Volumen de ventas</span><span class="val"
+                                style="color:#00B894">Bueno</span></div>
+                        <div class="barra">
+                            <div class="barra-fill" style="width:85%;background:#00B894"></div>
+                        </div>
+                    </div>
+                    <div class="barra-item">
+                        <div class="barra-label"><span class="name">Paga sus deudas</span><span class="val"
+                                style="color:#00B894">Bueno</span></div>
+                        <div class="barra">
+                            <div class="barra-fill" style="width:82%;background:#00B894"></div>
+                        </div>
+                    </div>
+                    <div class="barra-item">
+                        <div class="barra-label"><span class="name">Negocio estable</span><span class="val"
+                                style="color:#00B894">Muy bueno</span></div>
+                        <div class="barra">
+                            <div class="barra-fill" style="width:90%;background:#00B894"></div>
+                        </div>
+                    </div>
+                    <div class="barra-item">
+                        <div class="barra-label"><span class="name">Tiempo en el sistema</span><span class="val"
+                                style="color:#2ECC71">8 meses</span></div>
+                        <div class="barra">
+                            <div class="barra-fill" style="width:66%;background:#2ECC71"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="veredicto veredicto-verde">
+                    <strong>✅ Recomendación: Aprobar</strong>
+                    Doña María vende Gs. 850.000 por día hace 8 meses. Cobra el 82% de sus fiados. Su negocio está
+                    creciendo. Puede pagar un crédito de Gs. 10 millones sin problemas.
+                </div>
             </div>
         </div>
-    `;
-        }
 
-        function formatJSON(obj) {
-            const json = JSON.stringify(obj, null, 2);
-            return json
-                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-                .replace(/"([^"]+)":/g, '<span class="json-key">"$1"</span>:')
-                .replace(/: "([^"]+)"/g, ': <span class="json-str">"$1"</span>')
-                .replace(/: (\d+\.?\d*)/g, ': <span class="json-num">$1</span>')
-                .replace(/: (true|false|null)/g, ': <span class="json-bool">$1</span>');
-        }
-    </script>
+        <!-- STEP 3 - OTRO EJEMPLO -->
+        <div class="step" style="margin-top:48px">
+            <div class="step-num">3</div>
+            <div class="step-text">Pero no todos califican. Mirá este otro caso:</div>
+        </div>
+
+        <p style="font-size:14px;color:#666;margin-bottom:16px;">Roberto tiene un kiosco hace 1 mes y pide Gs. 5
+            millones:</p>
+
+        <div class="ficha">
+            <div class="ficha-header">
+                <div class="left">
+                    <div class="avatar">👦</div>
+                    <div>
+                        <div class="name">Roberto</div>
+                        <div class="biz">Kiosco Don Rober · Fernando de la Mora</div>
+                    </div>
+                </div>
+                <div class="semaforo semaforo-rojo">🔴 No recomendado</div>
+            </div>
+            <div class="ficha-body">
+                <div class="ficha-row">
+                    <div class="ficha-dato">
+                        <div class="label">Ventas por día</div>
+                        <div class="valor">Gs. 180K</div>
+                        <div class="sub">Promedio último mes</div>
+                    </div>
+                    <div class="ficha-dato">
+                        <div class="label">Ventas por mes</div>
+                        <div class="valor">Gs. 5.4M</div>
+                        <div class="sub">Solo 87 transacciones</div>
+                    </div>
+                    <div class="ficha-dato">
+                        <div class="label">Antigüedad</div>
+                        <div class="valor" style="color:#E74C3C">1 mes</div>
+                        <div class="sub">Poca data todavía</div>
+                    </div>
+                </div>
+                <div class="ficha-row">
+                    <div class="ficha-dato">
+                        <div class="label">Cobra sus fiados</div>
+                        <div class="valor" style="color:#E74C3C">45%</div>
+                        <div class="sub">Menos de la mitad</div>
+                    </div>
+                    <div class="ficha-dato">
+                        <div class="label">Crecimiento</div>
+                        <div class="valor" style="color:#999">Sin data</div>
+                        <div class="sub">Necesita más tiempo</div>
+                    </div>
+                    <div class="ficha-dato">
+                        <div class="label">Crédito máx. sugerido</div>
+                        <div class="valor" style="color:#E74C3C">Gs. 1.5M</div>
+                        <div class="sub">Pide: Gs. 5M ❌</div>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="barra-section">
+                    <div class="barra-item">
+                        <div class="barra-label"><span class="name">Volumen de ventas</span><span class="val"
+                                style="color:#E74C3C">Bajo</span></div>
+                        <div class="barra">
+                            <div class="barra-fill" style="width:25%;background:#E74C3C"></div>
+                        </div>
+                    </div>
+                    <div class="barra-item">
+                        <div class="barra-label"><span class="name">Paga sus deudas</span><span class="val"
+                                style="color:#E74C3C">Malo</span></div>
+                        <div class="barra">
+                            <div class="barra-fill" style="width:45%;background:#E74C3C"></div>
+                        </div>
+                    </div>
+                    <div class="barra-item">
+                        <div class="barra-label"><span class="name">Negocio estable</span><span class="val"
+                                style="color:#E67E22">Sin data</span></div>
+                        <div class="barra">
+                            <div class="barra-fill" style="width:35%;background:#E67E22"></div>
+                        </div>
+                    </div>
+                    <div class="barra-item">
+                        <div class="barra-label"><span class="name">Tiempo en el sistema</span><span class="val"
+                                style="color:#E74C3C">1 mes</span></div>
+                        <div class="barra">
+                            <div class="barra-fill" style="width:8%;background:#E74C3C"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="veredicto veredicto-rojo">
+                    <strong>🚫 Recomendación: No aprobar</strong>
+                    Roberto tiene solo 1 mes, vende poco (Gs. 180K/día) y no cobra ni la mitad de sus fiados. El monto
+                    que pide (Gs. 5M) es casi lo que vende en todo el mes. Sugerimos esperar 3 meses y reevaluar.
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTTOM CTA -->
+        <div class="bottom-cta">
+            <h3>¿Querés acceder a estos reportes?</h3>
+            <p>Cada vez que un comerciante pide un crédito, consultás NexoBot y tenés la respuesta en 1 segundo. Sin
+                verificadores, sin papeles.</p>
+            <a href="/empresas.html#contacto">Contactanos →</a>
+        </div>
+
+    </div>
 
 </body>
 
