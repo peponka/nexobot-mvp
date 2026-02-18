@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NexoBot — Así evaluamos un comerciante</title>
+    <title>NexoBot — Evaluación crediticia con datos transaccionales reales</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
         rel="stylesheet">
     <style>
@@ -377,26 +377,29 @@
     <div class="page">
 
         <div class="intro">
-            <h1>Así te ayudamos a decidir</h1>
-            <p>Un comerciante te pide un crédito. Hoy no tenés cómo verificar sus ventas. Con NexoBot, sí.</p>
+            <h1>Evaluación crediticia basada en datos reales</h1>
+            <p>NexoBot captura la actividad comercial diaria de cada comerciante vía WhatsApp. Con esa información,
+                generamos un perfil crediticio verificable que permite tomar decisiones fundamentadas en segundos.</p>
         </div>
 
         <!-- STEP 1 -->
         <div class="step">
             <div class="step-num">1</div>
-            <div class="step-text">El comerciante ya usa NexoBot todos los días</div>
+            <div class="step-text">Origen de los datos: registro transaccional vía WhatsApp</div>
         </div>
 
         <div class="chat-box">
-            <div class="chat-label">WhatsApp · Doña María · Almacén El Sol</div>
+            <div class="chat-label">Canal: WhatsApp · Comerciante: María González · Almacén El Sol</div>
             <div class="msg msg-user">vendí 450 mil a carlos fiado</div>
-            <div class="msg msg-bot">✅ Venta registrada: Gs. 450.000 a Carlos (fiado). Total hoy: Gs. 1.250.000</div>
+            <div class="msg msg-bot">✅ Venta registrada: Gs. 450.000 — Cliente: Carlos (crédito). Acumulado diario: Gs.
+                1.250.000</div>
             <div class="msg msg-user">cobré 200 mil de jorge</div>
-            <div class="msg msg-bot">✅ Cobro registrado: Gs. 200.000 de Jorge. Le quedan Gs. 150.000 pendientes.</div>
-            <div class="msg msg-user">cuanto vendí esta semana</div>
-            <div class="msg msg-bot">📊 Esta semana vendiste Gs. 5.840.000 (23 ventas). Fiados pendientes: Gs. 1.2M
+            <div class="msg msg-bot">✅ Cobro registrado: Gs. 200.000 — Cliente: Jorge. Saldo pendiente: Gs. 150.000
             </div>
-            <div class="msg-time">Doña María usa NexoBot hace 8 meses</div>
+            <div class="msg msg-user">cuanto vendí esta semana</div>
+            <div class="msg msg-bot">📊 Resumen semanal: Gs. 5.840.000 en 23 operaciones. Cuentas por cobrar: Gs.
+                1.200.000</div>
+            <div class="msg-time">Historial de actividad: 8 meses · 1.847 transacciones registradas</div>
         </div>
 
         <!-- ARROW -->
@@ -405,11 +408,11 @@
         <!-- STEP 2 -->
         <div class="step">
             <div class="step-num">2</div>
-            <div class="step-text">Doña María va a tu cooperativa y pide un crédito de Gs. 10 millones</div>
+            <div class="step-text">Reporte crediticio generado: solicitud de Gs. 10.000.000</div>
         </div>
 
-        <p style="font-size:14px;color:#666;margin-bottom:16px;">Vos consultás NexoBot y en 1 segundo recibís esta
-            ficha:</p>
+        <p style="font-size:14px;color:#666;margin-bottom:16px;">Al consultar el perfil del solicitante, su institución
+            recibe el siguiente informe en tiempo real:</p>
 
         <!-- FICHA: APROBADA -->
         <div class="ficha">
@@ -417,45 +420,45 @@
                 <div class="left">
                     <div class="avatar">👩</div>
                     <div>
-                        <div class="name">Doña María</div>
-                        <div class="biz">Almacén El Sol · San Lorenzo</div>
+                        <div class="name">María González</div>
+                        <div class="biz">Almacén El Sol · San Lorenzo, Central</div>
                     </div>
                 </div>
-                <div class="semaforo semaforo-verde">🟢 Aprobado</div>
+                <div class="semaforo semaforo-verde">🟢 Riesgo bajo</div>
             </div>
             <div class="ficha-body">
                 <div class="ficha-row">
                     <div class="ficha-dato">
-                        <div class="label">Ventas por día</div>
+                        <div class="label">Ingreso diario promedio</div>
                         <div class="valor">Gs. 850K</div>
-                        <div class="sub">Promedio últimos 8 meses</div>
+                        <div class="sub">Media verificada — 8 meses</div>
                     </div>
                     <div class="ficha-dato">
-                        <div class="label">Ventas por mes</div>
+                        <div class="label">Facturación mensual</div>
                         <div class="valor">Gs. 25.5M</div>
-                        <div class="sub">Verificadas por WhatsApp</div>
+                        <div class="sub">Datos transaccionales verificados</div>
                     </div>
                     <div class="ficha-dato">
-                        <div class="label">Antigüedad</div>
+                        <div class="label">Antigüedad en plataforma</div>
                         <div class="valor">8 meses</div>
-                        <div class="sub">1.847 transacciones</div>
+                        <div class="sub">1.847 operaciones registradas</div>
                     </div>
                 </div>
                 <div class="ficha-row">
                     <div class="ficha-dato">
-                        <div class="label">Cobra sus fiados</div>
+                        <div class="label">Tasa de recuperación</div>
                         <div class="valor" style="color:#00B894">82%</div>
-                        <div class="sub">De cada 100, cobra 82 a tiempo</div>
+                        <div class="sub">Créditos comerciales cobrados a término</div>
                     </div>
                     <div class="ficha-dato">
-                        <div class="label">Crecimiento</div>
+                        <div class="label">Variación intermensual</div>
                         <div class="valor" style="color:#00B894">+12%</div>
-                        <div class="sub">Vs. mes anterior</div>
+                        <div class="sub">Tendencia positiva sostenida</div>
                     </div>
                     <div class="ficha-dato">
-                        <div class="label">Crédito máx. sugerido</div>
+                        <div class="label">Capacidad de endeudamiento</div>
                         <div class="valor" style="color:#6C5CE7">Gs. 15M</div>
-                        <div class="sub">Pide: Gs. 10M ✅</div>
+                        <div class="sub">Monto solicitado: Gs. 10M ✅</div>
                     </div>
                 </div>
 
@@ -463,28 +466,28 @@
 
                 <div class="barra-section">
                     <div class="barra-item">
-                        <div class="barra-label"><span class="name">Volumen de ventas</span><span class="val"
-                                style="color:#00B894">Bueno</span></div>
+                        <div class="barra-label"><span class="name">Volumen transaccional</span><span class="val"
+                                style="color:#00B894">Alto</span></div>
                         <div class="barra">
                             <div class="barra-fill" style="width:85%;background:#00B894"></div>
                         </div>
                     </div>
                     <div class="barra-item">
-                        <div class="barra-label"><span class="name">Paga sus deudas</span><span class="val"
-                                style="color:#00B894">Bueno</span></div>
+                        <div class="barra-label"><span class="name">Comportamiento de pago</span><span class="val"
+                                style="color:#00B894">Favorable</span></div>
                         <div class="barra">
                             <div class="barra-fill" style="width:82%;background:#00B894"></div>
                         </div>
                     </div>
                     <div class="barra-item">
-                        <div class="barra-label"><span class="name">Negocio estable</span><span class="val"
-                                style="color:#00B894">Muy bueno</span></div>
+                        <div class="barra-label"><span class="name">Estabilidad operativa</span><span class="val"
+                                style="color:#00B894">Sólida</span></div>
                         <div class="barra">
                             <div class="barra-fill" style="width:90%;background:#00B894"></div>
                         </div>
                     </div>
                     <div class="barra-item">
-                        <div class="barra-label"><span class="name">Tiempo en el sistema</span><span class="val"
+                        <div class="barra-label"><span class="name">Profundidad del historial</span><span class="val"
                                 style="color:#2ECC71">8 meses</span></div>
                         <div class="barra">
                             <div class="barra-fill" style="width:66%;background:#2ECC71"></div>
@@ -493,9 +496,11 @@
                 </div>
 
                 <div class="veredicto veredicto-verde">
-                    <strong>✅ Recomendación: Aprobar</strong>
-                    Doña María vende Gs. 850.000 por día hace 8 meses. Cobra el 82% de sus fiados. Su negocio está
-                    creciendo. Puede pagar un crédito de Gs. 10 millones sin problemas.
+                    <strong>✅ Dictamen: Aprobación recomendada</strong>
+                    La solicitante presenta un ingreso promedio diario de Gs. 850.000 sostenido durante 8 meses, con una
+                    tasa de recuperación de créditos comerciales del 82% y crecimiento intermensual positivo del 12%. El
+                    monto solicitado (Gs. 10.000.000) se encuentra dentro de su capacidad de endeudamiento estimada (Gs.
+                    15.000.000). Nivel de riesgo: bajo.
                 </div>
             </div>
         </div>
@@ -503,11 +508,11 @@
         <!-- STEP 3 - OTRO EJEMPLO -->
         <div class="step" style="margin-top:48px">
             <div class="step-num">3</div>
-            <div class="step-text">Pero no todos califican. Mirá este otro caso:</div>
+            <div class="step-text">Caso con riesgo elevado: perfil insuficiente</div>
         </div>
 
-        <p style="font-size:14px;color:#666;margin-bottom:16px;">Roberto tiene un kiosco hace 1 mes y pide Gs. 5
-            millones:</p>
+        <p style="font-size:14px;color:#666;margin-bottom:16px;">El siguiente solicitante presenta indicadores que no
+            alcanzan los umbrales mínimos para la aprobación:</p>
 
         <div class="ficha">
             <div class="ficha-header">
@@ -523,36 +528,36 @@
             <div class="ficha-body">
                 <div class="ficha-row">
                     <div class="ficha-dato">
-                        <div class="label">Ventas por día</div>
+                        <div class="label">Ingreso diario promedio</div>
                         <div class="valor">Gs. 180K</div>
-                        <div class="sub">Promedio último mes</div>
+                        <div class="sub">Muestra insuficiente — 1 mes</div>
                     </div>
                     <div class="ficha-dato">
-                        <div class="label">Ventas por mes</div>
+                        <div class="label">Facturación mensual</div>
                         <div class="valor">Gs. 5.4M</div>
-                        <div class="sub">Solo 87 transacciones</div>
+                        <div class="sub">87 operaciones — bajo volumen</div>
                     </div>
                     <div class="ficha-dato">
-                        <div class="label">Antigüedad</div>
+                        <div class="label">Antigüedad en plataforma</div>
                         <div class="valor" style="color:#E74C3C">1 mes</div>
-                        <div class="sub">Poca data todavía</div>
+                        <div class="sub">Historial insuficiente</div>
                     </div>
                 </div>
                 <div class="ficha-row">
                     <div class="ficha-dato">
-                        <div class="label">Cobra sus fiados</div>
+                        <div class="label">Tasa de recuperación</div>
                         <div class="valor" style="color:#E74C3C">45%</div>
-                        <div class="sub">Menos de la mitad</div>
+                        <div class="sub">Por debajo del umbral mínimo (60%)</div>
                     </div>
                     <div class="ficha-dato">
-                        <div class="label">Crecimiento</div>
-                        <div class="valor" style="color:#999">Sin data</div>
-                        <div class="sub">Necesita más tiempo</div>
+                        <div class="label">Variación intermensual</div>
+                        <div class="valor" style="color:#999">N/D</div>
+                        <div class="sub">Requiere mínimo 2 meses</div>
                     </div>
                     <div class="ficha-dato">
-                        <div class="label">Crédito máx. sugerido</div>
+                        <div class="label">Capacidad de endeudamiento</div>
                         <div class="valor" style="color:#E74C3C">Gs. 1.5M</div>
-                        <div class="sub">Pide: Gs. 5M ❌</div>
+                        <div class="sub">Monto solicitado: Gs. 5M ❌</div>
                     </div>
                 </div>
 
@@ -560,28 +565,28 @@
 
                 <div class="barra-section">
                     <div class="barra-item">
-                        <div class="barra-label"><span class="name">Volumen de ventas</span><span class="val"
-                                style="color:#E74C3C">Bajo</span></div>
+                        <div class="barra-label"><span class="name">Volumen transaccional</span><span class="val"
+                                style="color:#E74C3C">Insuficiente</span></div>
                         <div class="barra">
                             <div class="barra-fill" style="width:25%;background:#E74C3C"></div>
                         </div>
                     </div>
                     <div class="barra-item">
-                        <div class="barra-label"><span class="name">Paga sus deudas</span><span class="val"
-                                style="color:#E74C3C">Malo</span></div>
+                        <div class="barra-label"><span class="name">Comportamiento de pago</span><span class="val"
+                                style="color:#E74C3C">Deficiente</span></div>
                         <div class="barra">
                             <div class="barra-fill" style="width:45%;background:#E74C3C"></div>
                         </div>
                     </div>
                     <div class="barra-item">
-                        <div class="barra-label"><span class="name">Negocio estable</span><span class="val"
-                                style="color:#E67E22">Sin data</span></div>
+                        <div class="barra-label"><span class="name">Estabilidad operativa</span><span class="val"
+                                style="color:#E67E22">Sin datos</span></div>
                         <div class="barra">
                             <div class="barra-fill" style="width:35%;background:#E67E22"></div>
                         </div>
                     </div>
                     <div class="barra-item">
-                        <div class="barra-label"><span class="name">Tiempo en el sistema</span><span class="val"
+                        <div class="barra-label"><span class="name">Profundidad del historial</span><span class="val"
                                 style="color:#E74C3C">1 mes</span></div>
                         <div class="barra">
                             <div class="barra-fill" style="width:8%;background:#E74C3C"></div>
@@ -590,19 +595,21 @@
                 </div>
 
                 <div class="veredicto veredicto-rojo">
-                    <strong>🚫 Recomendación: No aprobar</strong>
-                    Roberto tiene solo 1 mes, vende poco (Gs. 180K/día) y no cobra ni la mitad de sus fiados. El monto
-                    que pide (Gs. 5M) es casi lo que vende en todo el mes. Sugerimos esperar 3 meses y reevaluar.
+                    <strong>🚫 Dictamen: Rechazo recomendado</strong>
+                    El solicitante presenta un historial de solo 30 días con facturación mensual de Gs. 5.400.000 y una
+                    tasa de recuperación del 45%, por debajo del umbral mínimo (60%). El monto solicitado (Gs.
+                    5.000.000) equivale al 93% de su facturación mensual, lo que representa un riesgo elevado de impago.
+                    Se recomienda reevaluar con un mínimo de 90 días de actividad registrada.
                 </div>
             </div>
         </div>
 
         <!-- BOTTOM CTA -->
         <div class="bottom-cta">
-            <h3>¿Querés acceder a estos reportes?</h3>
-            <p>Cada vez que un comerciante pide un crédito, consultás NexoBot y tenés la respuesta en 1 segundo. Sin
-                verificadores, sin papeles.</p>
-            <a href="/empresas.html#contacto">Contactanos →</a>
+            <h3>Integrá NexoBot en tu proceso de evaluación crediticia</h3>
+            <p>Disponible como consulta individual o integración vía API. Resultados en tiempo real, sin necesidad de
+                verificación presencial. Compatible con sus sistemas actuales.</p>
+            <a href="/empresas.html#contacto">Solicitar acceso →</a>
         </div>
 
     </div>
