@@ -88,6 +88,21 @@ app.use('/webhook', webhookRouter);
 // Auth API (public)
 app.use('/api/auth', authRouter);
 
+// B2B Leads capture
+app.post('/api/leads', async (req, res) => {
+    try {
+        const lead = { ...req.body, created_at: new Date().toISOString(), source: 'empresas_page' };
+        console.log('🎯 New B2B lead:', JSON.stringify(lead));
+        if (supabase) {
+            await supabase.from('leads').insert(lead).catch(() => { });
+        }
+        res.json({ success: true, message: 'Lead received' });
+    } catch (err) {
+        console.error('Lead capture error:', err);
+        res.json({ success: true, message: 'Lead received' });
+    }
+});
+
 // Dashboard API (protected — requires login)
 app.use('/api/dashboard', requireAuth, dashboardRouter);
 

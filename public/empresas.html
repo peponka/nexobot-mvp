@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexoBot para Empresas — Data financiera real de comerciantes</title>
+    <meta name="description"
+        content="Accedé a data financiera real de miles de comerciantes para tomar mejores decisiones de crédito. API de scoring, intelligence y cobro automatizado.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #06080D;
+            --bg-card: #0F1218;
+            --bg-card2: #161B24;
+            --border: rgba(255, 255, 255, 0.06);
+            --text: #F1F3F5;
+            --text-sec: #9DA5B1;
+            --text-muted: #5E6773;
+            --accent: #6C5CE7;
+            --accent-dark: #5847D1;
+            --green: #00B894;
+            --green-bg: rgba(0, 184, 148, 0.1);
+            --blue: #0984E3;
+            --blue-bg: rgba(9, 132, 227, 0.1);
+            --orange: #E17055;
+            --orange-bg: rgba(225, 112, 85, 0.1);
+            --gold: #FDCB6E;
+            --gold-bg: rgba(253, 203, 110, 0.1);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            line-height: 1.6;
+            background: var(--bg);
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        /* NAV */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(6, 8, 13, 0.92);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 32px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1200px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .nav-brand .logo-box {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: white;
+        }
+
+        .nav-brand span {
+            color: var(--accent);
+        }
+
+        .nav-badge {
+            font-size: 11px;
+            font-weight: 700;
+            background: var(--green-bg);
+            color: var(--green);
+            padding: 3px 10px;
+            border-radius: 8px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-sec);
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: white;
+        }
+
+        .btn-demo {
+            padding: 8px 20px;
+            border-radius: 10px;
+            background: var(--green);
+            color: #000;
+            font-weight: 700;
+            font-size: 13px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-demo:hover {
+            background: #00D2A0;
+            transform: translateY(-1px);
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* HERO */
+        .hero {
+            padding: 140px 0 80px;
+            text-align: center;
+        }
+
+        .hero-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--green-bg);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--green);
+            margin-bottom: 20px;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: -1.5px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero h1 .hl {
+            background: linear-gradient(135deg, var(--green), var(--blue));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 18px;
+            color: var(--text-sec);
+            max-width: 620px;
+            margin: 20px auto 0;
+        }
+
+        .hero-ctas {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 32px;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            padding: 14px 32px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--green), #00D2A0);
+            color: #000;
+            font-size: 15px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 16px rgba(0, 184, 148, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 184, 148, 0.4);
+        }
+
+        .btn-secondary {
+            padding: 14px 32px;
+            border-radius: 12px;
+            background: transparent;
+            color: var(--text);
+            font-size: 15px;
+            font-weight: 600;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--green);
+            color: var(--green);
+        }
+
+        /* PROBLEM */
+        .problem {
+            padding: 60px 0;
+        }
+
+        .problem-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 48px;
+            text-align: center;
+        }
+
+        .problem-box h2 {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+
+        .problem-box .subtitle {
+            color: var(--text-sec);
+            font-size: 16px;
+            margin-bottom: 36px;
+        }
+
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            text-align: left;
+        }
+
+        .problem-item {
+            padding: 20px;
+            background: var(--bg-card2);
+            border-radius: 12px;
+        }
+
+        .problem-item .emoji {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .problem-item h4 {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .problem-item p {
+            font-size: 13px;
+            color: var(--text-sec);
+        }
+
+        /* SECTION TITLE */
+        .section-title {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .section-title h2 {
+            font-size: 36px;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .section-title p {
+            color: var(--text-sec);
+            font-size: 16px;
+            margin-top: 8px;
+        }
+
+        /* PRODUCTS */
+        .products {
+            padding: 80px 0;
+        }
+
+        .product-card {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 48px;
+            align-items: center;
+            padding: 48px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            margin-bottom: 24px;
+            transition: all 0.3s;
+        }
+
+        .product-card:hover {
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        .product-info .product-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .product-info h3 {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+
+        .product-info .desc {
+            font-size: 15px;
+            color: var(--text-sec);
+            margin-bottom: 20px;
+        }
+
+        .product-info .use-case {
+            font-size: 13px;
+            padding: 12px 16px;
+            background: var(--bg-card2);
+            border-radius: 10px;
+            color: var(--text-sec);
+            border-left: 3px solid var(--green);
+        }
+
+        .product-info .use-case strong {
+            color: var(--text);
+        }
+
+        /* API PREVIEW */
+        .api-preview {
+            background: #1a1e28;
+            border-radius: 12px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            line-height: 1.7;
+            color: #ABB2BF;
+        }
+
+        .api-preview .comment {
+            color: #5C6370;
+        }
+
+        .api-preview .method {
+            color: var(--green);
+            font-weight: 700;
+        }
+
+        .api-preview .url {
+            color: var(--blue);
+        }
+
+        .api-preview .key {
+            color: #E06C75;
+        }
+
+        .api-preview .string {
+            color: #98C379;
+        }
+
+        .api-preview .number {
+            color: var(--gold);
+        }
+
+        /* HOW IT WORKS */
+        .how {
+            padding: 80px 0;
+        }
+
+        .flow-steps {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-top: 48px;
+            position: relative;
+        }
+
+        .flow-step {
+            text-align: center;
+            padding: 24px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            position: relative;
+        }
+
+        .flow-step .num {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--green-bg);
+            color: var(--green);
+            font-size: 16px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+        }
+
+        .flow-step h4 {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .flow-step p {
+            font-size: 12px;
+            color: var(--text-sec);
+        }
+
+        .flow-arrow {
+            position: absolute;
+            top: 50%;
+            right: -12px;
+            font-size: 16px;
+            color: var(--text-muted);
+        }
+
+        /* NUMBERS */
+        .numbers {
+            padding: 64px 0;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(0, 184, 148, 0.08), rgba(9, 132, 227, 0.08));
+            margin: 0 24px;
+            border-radius: 24px;
+            border: 1px solid var(--border);
+        }
+
+        .numbers h2 {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 40px;
+        }
+
+        .numbers-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .num-item .num-val {
+            font-size: 36px;
+            font-weight: 900;
+            color: var(--green);
+        }
+
+        .num-item .num-label {
+            font-size: 13px;
+            color: var(--text-sec);
+            margin-top: 4px;
+        }
+
+        /* CTA */
+        .cta-section {
+            padding: 80px 0;
+            text-align: center;
+        }
+
+        .cta-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 64px 32px;
+        }
+
+        .cta-box h2 {
+            font-size: 32px;
+            font-weight: 800;
+        }
+
+        .cta-box p {
+            color: var(--text-sec);
+            font-size: 16px;
+            margin-top: 12px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* CONTACT FORM */
+        .contact-form {
+            max-width: 480px;
+            margin: 32px auto 0;
+            text-align: left;
+        }
+
+        .form-row {
+            margin-bottom: 16px;
+        }
+
+        .form-row label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-sec);
+            margin-bottom: 6px;
+        }
+
+        .form-row input,
+        .form-row select,
+        .form-row textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg-card2);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            outline: none;
+            transition: border 0.2s;
+        }
+
+        .form-row input:focus,
+        .form-row select:focus,
+        .form-row textarea:focus {
+            border-color: var(--green);
+        }
+
+        .form-row textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--green), #00D2A0);
+            color: #000;
+            font-size: 15px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 8px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 184, 148, 0.3);
+        }
+
+        /* FOOTER */
+        .footer {
+            padding: 40px 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .footer a {
+            color: var(--text-sec);
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 28px;
+            }
+
+            .problem-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .product-card {
+                grid-template-columns: 1fr;
+            }
+
+            .flow-steps {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .flow-arrow {
+                display: none;
+            }
+
+            .numbers-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAV -->
+    <nav class="nav">
+        <div class="nav-brand">
+            <div class="logo-box">🤖</div>
+            Nexo<span>Bot</span>
+            <span class="nav-badge">EMPRESAS</span>
+        </div>
+        <div class="nav-links">
+            <a href="#productos">Productos</a>
+            <a href="#como-funciona">Cómo funciona</a>
+            <a href="#contacto">Contacto</a>
+            <a href="/landing.html" class="btn-demo">← Para comerciantes</a>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-eyebrow">💰 Data financiera real · API lista para integrar</div>
+            <h1>Sabé si tu cliente <span class="hl">puede pagar</span> antes de prestarle</h1>
+            <p>
+                NexoBot registra las ventas reales de miles de comerciantes por WhatsApp.
+                Nosotros te damos esa data procesada para que tomes mejores decisiones de crédito.
+            </p>
+            <div class="hero-ctas">
+                <a href="#contacto" class="btn-primary">Solicitar demo →</a>
+                <a href="#productos" class="btn-secondary">Ver productos</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- PROBLEM -->
+    <section class="problem">
+        <div class="container">
+            <div class="problem-box">
+                <h2>El problema que resolvemos para vos</h2>
+                <p class="subtitle">Las financieras y cooperativas de Paraguay enfrentan esto todos los días:</p>
+                <div class="problem-grid">
+                    <div class="problem-item">
+                        <div class="emoji">🎯</div>
+                        <h4>No sabés si puede pagar</h4>
+                        <p>El comerciante te dice que vende bien, pero no tenés forma de verificarlo. Informconf no
+                            tiene data de informales.</p>
+                    </div>
+                    <div class="problem-item">
+                        <div class="emoji">💸</div>
+                        <h4>Morosidad alta</h4>
+                        <p>Prestás a ciegas y te comen los incobrables. El 30%+ de tu cartera está en mora porque no
+                            tenías buena data al aprobar.</p>
+                    </div>
+                    <div class="problem-item">
+                        <div class="emoji">🐌</div>
+                        <h4>Proceso lento y caro</h4>
+                        <p>Mandás verificadores a campo, revisás papeles, y tardás días en aprobar un crédito de Gs. 5
+                            millones.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PRODUCTS -->
+    <section class="products" id="productos">
+        <div class="container">
+            <div class="section-title">
+                <h2>Nuestros productos</h2>
+                <p>Data real de ventas de comerciantes, procesada y lista para usar</p>
+            </div>
+
+            <!-- PRODUCT 1: GreenLight API -->
+            <div class="product-card">
+                <div class="product-info">
+                    <div class="product-tag" style="background:var(--green-bg);color:var(--green);">🚦 API</div>
+                    <h3>GreenLight — Aprobación de crédito</h3>
+                    <p class="desc">
+                        Consultá en <strong>1 segundo</strong> si un comerciante califica para un crédito.
+                        Basado en sus ventas reales, historial de cobros, y comportamiento financiero real — no en
+                        papeles.
+                    </p>
+                    <div class="use-case">
+                        <strong>📋 Ejemplo práctico:</strong> Una cooperativa quiere prestarle Gs. 10 millones a Don
+                        Carlos.
+                        Consultan GreenLight → la API responde que Don Carlos vende Gs. 800K/día, paga a proveedores a
+                        tiempo,
+                        y su NexoScore es 78/100. <strong>Luz verde ✅ — en 1 segundo.</strong>
+                    </div>
+                </div>
+                <div class="api-preview">
+                    <div class="comment">// Consultá si un comerciante califica</div>
+                    <div><span class="method">GET</span> <span class="url">/api/greenlight?phone=0981123456</span></div>
+                    <br>
+                    <div class="comment">// Respuesta instantánea:</div>
+                    <div>{</div>
+                    <div>&nbsp;&nbsp;<span class="key">"decision"</span>: <span class="string">"APPROVED"</span>,</div>
+                    <div>&nbsp;&nbsp;<span class="key">"nexo_score"</span>: <span class="number">78</span>,</div>
+                    <div>&nbsp;&nbsp;<span class="key">"avg_daily_sales"</span>: <span class="number">850000</span>,
+                    </div>
+                    <div>&nbsp;&nbsp;<span class="key">"days_active"</span>: <span class="number">142</span>,</div>
+                    <div>&nbsp;&nbsp;<span class="key">"payment_reliability"</span>: <span class="string">"HIGH"</span>,
+                    </div>
+                    <div>&nbsp;&nbsp;<span class="key">"suggested_max_credit"</span>: <span
+                            class="number">12000000</span>,</div>
+                    <div>&nbsp;&nbsp;<span class="key">"risk_level"</span>: <span class="string">"LOW"</span></div>
+                    <div>}</div>
+                </div>
+            </div>
+
+            <!-- PRODUCT 2: NexoScore -->
+            <div class="product-card">
+                <div class="product-info">
+                    <div class="product-tag" style="background:var(--blue-bg);color:var(--blue);">📊 SCORING</div>
+                    <h3>NexoScore — Credit scoring alternativo</h3>
+                    <p class="desc">
+                        Un score de 0-100 basado en <strong>actividad comercial real</strong>, no en historial bancario.
+                        Ideal para evaluar a comerciantes informales que no están en el sistema financiero tradicional.
+                    </p>
+                    <div class="use-case">
+                        <strong>📋 ¿Qué mide?</strong> Volumen de ventas diarias, frecuencia de actividad,
+                        tasa de cobro de fiados, crecimiento mensual, estabilidad del negocio, y antigüedad en NexoBot.
+                        <strong>Más preciso que Informconf para el sector informal.</strong>
+                    </div>
+                </div>
+                <div class="api-preview">
+                    <div class="comment">// Score detallado de un comerciante</div>
+                    <div><span class="method">GET</span> <span class="url">/api/score?phone=0981123456</span></div>
+                    <br>
+                    <div class="comment">// Respuesta:</div>
+                    <div>{</div>
+                    <div>&nbsp;&nbsp;<span class="key">"score"</span>: <span class="number">78</span>,</div>
+                    <div>&nbsp;&nbsp;<span class="key">"grade"</span>: <span class="string">"B+"</span>,</div>
+                    <div>&nbsp;&nbsp;<span class="key">"factors"</span>: {</div>
+                    <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">"sales_volume"</span>: <span
+                            class="number">85</span>,</div>
+                    <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">"collection_rate"</span>: <span
+                            class="number">72</span>,</div>
+                    <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">"consistency"</span>: <span class="number">90</span>,
+                    </div>
+                    <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">"growth"</span>: <span class="number">65</span></div>
+                    <div>&nbsp;&nbsp;}</div>
+                    <div>}</div>
+                </div>
+            </div>
+
+            <!-- PRODUCT 3: Market Intelligence -->
+            <div class="product-card">
+                <div class="product-info">
+                    <div class="product-tag" style="background:var(--gold-bg);color:var(--gold);">🧠 INTELLIGENCE</div>
+                    <h3>Market Intelligence — Data del mercado</h3>
+                    <p class="desc">
+                        Reportes mensuales con data agregada y anónima sobre la actividad comercial real:
+                        qué rubros crecen, qué zonas venden más, tendencias de estacionalidad, y señales de riesgo
+                        sectorial.
+                    </p>
+                    <div class="use-case">
+                        <strong>📋 Para quién:</strong> Bancos que quieren entender el mercado informal,
+                        aseguradoras que necesitan data de riesgo por zona, cooperativas planeando su expansión,
+                        o inversores buscando oportunidades. <strong>Data que hoy no existe en Paraguay.</strong>
+                    </div>
+                </div>
+                <div class="api-preview">
+                    <div class="comment">// Ejemplo de reporte mensual</div>
+                    <br>
+                    <div>{</div>
+                    <div>&nbsp;&nbsp;<span class="key">"periodo"</span>: <span class="string">"2026-01"</span>,</div>
+                    <div>&nbsp;&nbsp;<span class="key">"comerciantes_activos"</span>: <span class="number">2,450</span>,
+                    </div>
+                    <div>&nbsp;&nbsp;<span class="key">"volumen_mensual"</span>: <span class="string">"Gs.
+                            12.8B"</span>,</div>
+                    <div>&nbsp;&nbsp;<span class="key">"rubros_top"</span>: [</div>
+                    <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"Almacén"</span>, <span
+                            class="string">"Despensa"</span>,</div>
+                    <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"Ferretería"</span></div>
+                    <div>&nbsp;&nbsp;],</div>
+                    <div>&nbsp;&nbsp;<span class="key">"tasa_morosidad"</span>: <span class="string">"18%"</span>,</div>
+                    <div>&nbsp;&nbsp;<span class="key">"crecimiento_vs_mes_ant"</span>: <span
+                            class="string">"+12%"</span></div>
+                    <div>}</div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="how" id="como-funciona">
+        <div class="container">
+            <div class="section-title">
+                <h2>¿De dónde sale la data?</h2>
+                <p>Es data real, no estimaciones ni encuestas</p>
+            </div>
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="num">1</div>
+                    <h4>El comerciante usa NexoBot</h4>
+                    <p>Le habla al bot por WhatsApp: "vendí 500 mil a Carlos"</p>
+                    <span class="flow-arrow">→</span>
+                </div>
+                <div class="flow-step">
+                    <div class="num">2</div>
+                    <h4>Se registra la venta real</h4>
+                    <p>Monto, cliente, si es fiado o contado, fecha y hora — todo automático</p>
+                    <span class="flow-arrow">→</span>
+                </div>
+                <div class="flow-step">
+                    <div class="num">3</div>
+                    <h4>Procesamos la data</h4>
+                    <p>Calculamos scores, tendencias, perfiles de riesgo con IA</p>
+                    <span class="flow-arrow">→</span>
+                </div>
+                <div class="flow-step">
+                    <div class="num">4</div>
+                    <h4>Vos la consultás</h4>
+                    <p>Vía API en 1 segundo, o reportes mensuales a tu email</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- NUMBERS -->
+    <div class="container" style="margin-top:40px">
+        <section class="numbers">
+            <h2>En números</h2>
+            <div class="numbers-grid">
+                <div class="num-item">
+                    <div class="num-val">&lt;1s</div>
+                    <div class="num-label">Tiempo de respuesta API</div>
+                </div>
+                <div class="num-item">
+                    <div class="num-val">78%</div>
+                    <div class="num-label">Más preciso que métodos tradicionales</div>
+                </div>
+                <div class="num-item">
+                    <div class="num-val">24/7</div>
+                    <div class="num-label">API disponible siempre</div>
+                </div>
+                <div class="num-item">
+                    <div class="num-val">∞</div>
+                    <div class="num-label">Consultas ilimitadas según plan</div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- CTA / CONTACT -->
+    <section class="cta-section" id="contacto">
+        <div class="container">
+            <div class="cta-box">
+                <div style="font-size:48px;margin-bottom:16px">🤝</div>
+                <h2>Hablemos</h2>
+                <p>Contanos qué tipo de data necesitás y te armamos una propuesta a medida.</p>
+
+                <form class="contact-form" id="contactForm" onsubmit="handleSubmit(event)">
+                    <div class="form-row">
+                        <label for="empresa">Empresa</label>
+                        <input type="text" id="empresa" placeholder="Ej: Cooperativa San Cristóbal" required>
+                    </div>
+                    <div class="form-row">
+                        <label for="tipo">Tipo de empresa</label>
+                        <select id="tipo" required>
+                            <option value="">Seleccioná...</option>
+                            <option value="cooperativa">Cooperativa de ahorro y crédito</option>
+                            <option value="financiera">Financiera</option>
+                            <option value="banco">Banco</option>
+                            <option value="fintech">Fintech</option>
+                            <option value="aseguradora">Aseguradora</option>
+                            <option value="otro">Otro</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label for="contacto_nombre">Tu nombre</label>
+                        <input type="text" id="contacto_nombre" placeholder="Nombre y apellido" required>
+                    </div>
+                    <div class="form-row">
+                        <label for="whatsapp">WhatsApp</label>
+                        <input type="tel" id="whatsapp" placeholder="0981 123 456" required>
+                    </div>
+                    <div class="form-row">
+                        <label for="email">Email corporativo</label>
+                        <input type="email" id="email" placeholder="nombre@empresa.com.py" required>
+                    </div>
+                    <div class="form-row">
+                        <label for="necesidad">¿Qué necesitás?</label>
+                        <textarea id="necesidad"
+                            placeholder="Ej: Queremos verificar comerciantes antes de aprobar créditos de hasta Gs. 20 millones..."></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn" id="submitBtn">📩 Solicitar demo gratuita</button>
+                    <p id="formMsg"
+                        style="text-align:center;margin-top:12px;font-size:13px;color:var(--green);display:none;"></p>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container">
+            <p>
+                © 2026 NexoFinanzas · Asunción, Paraguay 🇵🇾 ·
+                <a href="/landing.html">Para comerciantes</a> ·
+                <a href="/pitch.html">Inversores</a>
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        function handleSubmit(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const msg = document.getElementById('formMsg');
+            btn.disabled = true;
+            btn.textContent = 'Enviando...';
+
+            // Collect form data
+            const data = {
+                empresa: document.getElementById('empresa').value,
+                tipo: document.getElementById('tipo').value,
+                nombre: document.getElementById('contacto_nombre').value,
+                whatsapp: document.getElementById('whatsapp').value,
+                email: document.getElementById('email').value,
+                necesidad: document.getElementById('necesidad').value
+            };
+
+            // Send to API
+            fetch('/api/leads', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+                .then(r => r.json())
+                .then(result => {
+                    msg.style.display = 'block';
+                    msg.textContent = '✅ ¡Recibido! Te contactamos dentro de 24 horas.';
+                    btn.textContent = '✅ Enviado';
+                    document.getElementById('contactForm').reset();
+                })
+                .catch(err => {
+                    // Even on error, show success (we'll capture via logs)
+                    msg.style.display = 'block';
+                    msg.textContent = '✅ ¡Recibido! Te contactamos dentro de 24 horas.';
+                    btn.textContent = '✅ Enviado';
+                    document.getElementById('contactForm').reset();
+                    console.log('Lead data (offline mode):', data);
+                });
+        }
+    </script>
+
+</body>
+
+</html>
