@@ -21,6 +21,7 @@ import { startReminderCron } from './services/reminders.js';
 import { startSummaryCron } from './services/dailySummary.js';
 import { startScoringCron } from './services/scoring.js';
 import { startExchangeRateCron } from './services/currency.js';
+import { startEmailCron } from './services/email.js';
 import { processMessage } from './services/nlp.js';
 import { handleMessage } from './services/bot.js';
 
@@ -257,6 +258,7 @@ const server = app.listen(PORT, () => {
     startSummaryCron();        // 8pm PY - daily summary
     startScoringCron();        // 2am PY - recalculate all NexoScores
     startExchangeRateCron();   // Every 6h - update USD/PYG rate
+    startEmailCron();          // Monday 8am PY - weekly summary emails
 });
 
 // =============================================

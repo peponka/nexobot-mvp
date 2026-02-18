@@ -4,6 +4,7 @@
 
 import { Router } from 'express';
 import supabase from '../config/supabase.js';
+import { getFullAnalytics } from '../services/analytics.js';
 
 const router = Router();
 
@@ -129,6 +130,31 @@ router.get('/:phone', async (req, res) => {
         });
     } catch (err) {
         console.error('Dashboard API error:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+/**
+ * GET /api/dashboard/:phone/analytics
+ * Advanced analytics for a merchant
+ */
+router.get('/:phone/analytics', async (req, res) => {
+    try {
+        if (!supabase) return res.json({ error: 'Supabase not configured' });
+
+        const { phone } = req.params;
+        const { data: merchant } = await supabase
+            .from('merchants')
+            .select('id')
+            .eq('phone', phone)
+            .single();
+
+        if (!merchant) return res.status(404).json({ error: 'Not found' });
+
+        const analytics = await getFullAnalytics(merchant.id);
+        res.json(analytics);
+    } catch (err) {
+        console.error('Analytics API error:', err);
         res.status(500).json({ error: err.message });
     }
 });
