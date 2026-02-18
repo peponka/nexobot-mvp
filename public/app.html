@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexoBot — Analytics Avanzados</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #06080D;
+            --bg-card: #111623;
+            --bg-card-2: #161C2E;
+            --bg-input: #1B2236;
+            --border: rgba(255, 255, 255, 0.06);
+            --text: #F0F2F5;
+            --text-sec: #8B95A5;
+            --text-muted: #4D5668;
+            --accent: #6C5CE7;
+            --accent-light: #A29BFE;
+            --green: #00D2A0;
+            --green-bg: rgba(0, 210, 160, 0.1);
+            --red: #FF6B6B;
+            --red-bg: rgba(255, 107, 107, 0.1);
+            --blue: #48DBFB;
+            --blue-bg: rgba(72, 219, 251, 0.1);
+            --orange: #FF9F43;
+            --orange-bg: rgba(255, 159, 67, 0.1);
+            --yellow: #FECA57;
+            --radius: 16px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* Auth guard */
+        .auth-required {
+            display: none;
+        }
+
+        .auth-required.visible {
+            display: block;
+        }
+
+        /* Top nav */
+        .topnav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(6, 8, 13, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .topnav-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .topnav-logo {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--accent), #4834d4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .topnav h1 {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .topnav h1 span {
+            color: var(--accent-light);
+        }
+
+        .topnav-tabs {
+            display: flex;
+            gap: 4px;
+        }
+
+        .tab-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            background: transparent;
+            color: var(--text-sec);
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-btn:hover {
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text);
+        }
+
+        .tab-btn.active {
+            background: var(--accent);
+            color: white;
+        }
+
+        .topnav-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .merchant-name {
+            font-size: 13px;
+            color: var(--text-sec);
+        }
+
+        .btn-logout {
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-sec);
+            font-family: inherit;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-logout:hover {
+            border-color: var(--red);
+            color: var(--red);
+        }
+
+        /* Main */
+        .main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        /* Views */
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            transition: border-color 0.3s;
+        }
+
+        .card:hover {
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .badge {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 10px;
+            background: rgba(108, 92, 231, 0.15);
+            color: var(--accent-light);
+        }
+
+        .badge.green {
+            background: var(--green-bg);
+            color: var(--green);
+        }
+
+        .badge.red {
+            background: var(--red-bg);
+            color: var(--red);
+        }
+
+        .badge.blue {
+            background: var(--blue-bg);
+            color: var(--blue);
+        }
+
+        /* Grid */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        /* Stat cards */
+        .stat-mini {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-mini::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+        }
+
+        .stat-mini:nth-child(1)::before {
+            background: linear-gradient(90deg, var(--accent), var(--blue));
+        }
+
+        .stat-mini:nth-child(2)::before {
+            background: linear-gradient(90deg, var(--green), #00CEC9);
+        }
+
+        .stat-mini:nth-child(3)::before {
+            background: linear-gradient(90deg, var(--orange), var(--yellow));
+        }
+
+        .stat-mini:nth-child(4)::before {
+            background: linear-gradient(90deg, var(--blue), var(--accent));
+        }
+
+        .stat-emoji {
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+
+        .stat-val {
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 2px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-sec);
+        }
+
+        .stat-change {
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 6px;
+        }
+
+        .stat-change.up {
+            color: var(--green);
+            background: var(--green-bg);
+        }
+
+        .stat-change.down {
+            color: var(--red);
+            background: var(--red-bg);
+        }
+
+        /* Chart */
+        .chart-box {
+            height: 260px;
+            position: relative;
+        }
+
+        /* Table */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            text-align: left;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            padding: 8px 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .data-table td {
+            padding: 10px;
+            font-size: 13px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .data-table tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Progress bar */
+        .progress {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.6s ease;
+        }
+
+        /* Hour chart */
+        .hour-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 3px;
+            height: 100px;
+            padding-top: 8px;
+        }
+
+        .hour-bar {
+            flex: 1;
+            min-width: 10px;
+            background: rgba(108, 92, 231, 0.3);
+            border-radius: 3px 3px 0 0;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .hour-bar:hover {
+            background: var(--accent);
+        }
+
+        .hour-bar .tip {
+            position: absolute;
+            top: -24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-card-2);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.15s;
+        }
+
+        .hour-bar:hover .tip {
+            opacity: 1;
+        }
+
+        .hour-labels {
+            display: flex;
+            gap: 3px;
+            margin-top: 4px;
+        }
+
+        .hour-labels span {
+            flex: 1;
+            text-align: center;
+            font-size: 9px;
+            color: var(--text-muted);
+        }
+
+        /* Prediction */
+        .prediction-box {
+            text-align: center;
+            padding: 24px;
+            background: linear-gradient(135deg, rgba(108, 92, 231, 0.08), rgba(0, 210, 160, 0.05));
+            border-radius: 12px;
+            margin-top: 12px;
+        }
+
+        .prediction-value {
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+        .prediction-label {
+            font-size: 12px;
+            color: var(--text-sec);
+            margin-top: 4px;
+        }
+
+        .trend-arrow {
+            font-size: 18px;
+        }
+
+        .trend-arrow.up {
+            color: var(--green);
+        }
+
+        .trend-arrow.down {
+            color: var(--red);
+        }
+
+        /* Customer card */
+        .customer-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .customer-row:last-child {
+            border-bottom: none;
+        }
+
+        .customer-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .customer-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .customer-avatar.high {
+            background: var(--red-bg);
+            color: var(--red);
+        }
+
+        .customer-avatar.medium {
+            background: var(--orange-bg);
+            color: var(--orange);
+        }
+
+        .customer-avatar.low {
+            background: var(--green-bg);
+            color: var(--green);
+        }
+
+        .customer-name {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .customer-meta {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .customer-value {
+            font-size: 14px;
+            font-weight: 700;
+            text-align: right;
+        }
+
+        .customer-debt {
+            font-size: 11px;
+            color: var(--red);
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: var(--text-sec);
+        }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .grid-4 {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .topnav-tabs {
+                display: none;
+            }
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Top Navigation -->
+    <nav class="topnav">
+        <div class="topnav-brand">
+            <div class="topnav-logo">🤖</div>
+            <h1>Nexo<span>Bot</span></h1>
+        </div>
+        <div class="topnav-tabs">
+            <button class="tab-btn active" onclick="switchView('overview')" id="tab-overview">📊 Overview</button>
+            <button class="tab-btn" onclick="switchView('analytics')" id="tab-analytics">📈 Analytics</button>
+            <button class="tab-btn" onclick="switchView('customers')" id="tab-customers">👥 Clientes</button>
+            <button class="tab-btn" onclick="switchView('billing')" id="tab-billing">💰 Billing</button>
+        </div>
+        <div class="topnav-right">
+            <span class="merchant-name" id="merchantName"></span>
+            <button class="btn-logout" onclick="logout()">Salir ↗</button>
+        </div>
+    </nav>
+
+    <main class="main">
+        <!-- OVERVIEW VIEW -->
+        <div class="view active" id="view-overview">
+            <div class="loading" id="overviewLoading">
+                <div class="spinner"></div>
+                <p>Cargando datos...</p>
+            </div>
+            <div id="overviewContent"></div>
+        </div>
+
+        <!-- ANALYTICS VIEW -->
+        <div class="view" id="view-analytics">
+            <div class="loading" id="analyticsLoading">
+                <div class="spinner"></div>
+                <p>Calculando analytics...</p>
+            </div>
+            <div id="analyticsContent"></div>
+        </div>
+
+        <!-- CUSTOMERS VIEW -->
+        <div class="view" id="view-customers">
+            <div id="customersContent"></div>
+        </div>
+
+        <!-- BILLING VIEW -->
+        <div class="view" id="view-billing">
+            <div id="billingContent"></div>
+        </div>
+    </main>
+
+    <script>
+        const API = window.location.origin;
+        const TOKEN = localStorage.getItem('nexo_token');
+        const MERCHANT = JSON.parse(localStorage.getItem('nexo_merchant') || '{}');
+        let dashData = null, analyticsData = null;
+        let charts = {};
+
+        if (!TOKEN) window.location.href = '/login.html';
+
+        // Display merchant name
+        document.getElementById('merchantName').textContent = MERCHANT.name || '';
+
+        function headers() {
+            return { 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' };
+        }
+
+        function logout() { localStorage.clear(); window.location.href = '/login.html'; }
+
+        function formatPYG(a) {
+            if (!a) return 'Gs. 0';
+            if (a >= 1e6) return `Gs. ${(a / 1e6).toFixed(1)}M`;
+            if (a >= 1000) return `Gs. ${Math.round(a / 1000)}K`;
+            return `Gs. ${a.toLocaleString('es-PY')}`;
+        }
+
+        function switchView(view) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`view-${view}`).classList.add('active');
+            document.getElementById(`tab-${view}`).classList.add('active');
+
+            if (view === 'analytics' && !analyticsData) loadAnalytics();
+            if (view === 'customers' && analyticsData) renderCustomers(analyticsData.customers);
+            if (view === 'billing') renderBilling();
+        }
+
+        // ── OVERVIEW ──
+        async function loadOverview() {
+            try {
+                const phone = MERCHANT.phone;
+                const res = await fetch(`${API}/api/dashboard/${phone}`, { headers: headers() });
+                if (res.status === 401) { logout(); return; }
+                dashData = await res.json();
+                renderOverview(dashData);
+            } catch (e) {
+                document.getElementById('overviewContent').innerHTML = '<p style="color:var(--red)">Error cargando datos</p>';
+            }
+            document.getElementById('overviewLoading').style.display = 'none';
+        }
+
+        function renderOverview(d) {
+            const { stats, dailyChart, debtors, recentTransactions } = d;
+            const collRate = stats.totalWeeklySales > 0 ? Math.round(stats.totalWeeklyCollected / stats.totalWeeklySales * 100) : 0;
+
+            document.getElementById('overviewContent').innerHTML = `
+                <div class="grid-4 fade-in">
+                    <div class="stat-mini">
+                        <div class="stat-emoji">💰</div>
+                        <div class="stat-val">${formatPYG(stats.totalWeeklySales)}</div>
+                        <div class="stat-label">Ventas esta semana</div>
+                        <div class="stat-change up">📈 ${stats.weeklyTxCount} ops</div>
+                    </div>
+                    <div class="stat-mini">
+                        <div class="stat-emoji">✅</div>
+                        <div class="stat-val">${formatPYG(stats.totalWeeklyCollected)}</div>
+                        <div class="stat-label">Cobrado</div>
+                        <div class="stat-change ${collRate >= 70 ? 'up' : 'down'}">${collRate}% tasa</div>
+                    </div>
+                    <div class="stat-mini">
+                        <div class="stat-emoji">📋</div>
+                        <div class="stat-val">${formatPYG(stats.totalDebt)}</div>
+                        <div class="stat-label">Deuda pendiente</div>
+                        <div class="stat-change down">${stats.debtorsCount} deudores</div>
+                    </div>
+                    <div class="stat-mini">
+                        <div class="stat-emoji">👥</div>
+                        <div class="stat-val">${stats.totalCustomers}</div>
+                        <div class="stat-label">Clientes</div>
+                        <div class="stat-change up">Ticket: ${formatPYG(stats.avgTicket)}</div>
+                    </div>
+                </div>
+
+                <div class="grid-2 fade-in">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">📊 Ventas vs Cobros — 7 días</div>
+                            <span class="badge">Semanal</span>
+                        </div>
+                        <div class="chart-box"><canvas id="chartSales"></canvas></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">🔴 Top Deudores</div>
+                            <span class="badge red">${debtors.length}</span>
+                        </div>
+                        ${debtors.length === 0 ? '<p style="color:var(--text-sec);text-align:center;padding:24px">🎉 ¡Todos al día!</p>' :
+                    debtors.slice(0, 6).map(d => `
+                            <div class="customer-row">
+                                <div class="customer-left">
+                                    <div class="customer-avatar ${d.risk_level || 'medium'}">${d.name.charAt(0)}</div>
+                                    <div><div class="customer-name">${d.name}</div><div class="customer-meta">${d.total_transactions || 0} ops</div></div>
+                                </div>
+                                <div class="customer-value" style="color:var(--red)">${formatPYG(d.total_debt)}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div class="card fade-in">
+                    <div class="card-header">
+                        <div class="card-title">📝 Últimas transacciones</div>
+                        <span class="badge">${recentTransactions.length}</span>
+                    </div>
+                    <table class="data-table">
+                        <thead><tr><th>Fecha</th><th>Tipo</th><th>Cliente</th><th>Monto</th></tr></thead>
+                        <tbody>
+                        ${recentTransactions.slice(0, 10).map(tx => {
+                        const types = { SALE_CASH: ['💵 Contado', 'var(--blue)'], SALE_CREDIT: ['📋 Fiado', 'var(--orange)'], PAYMENT: ['✅ Cobro', 'var(--green)'] };
+                        const [label, color] = types[tx.type] || [tx.type, 'var(--text-sec)'];
+                        return `<tr>
+                                <td style="color:var(--text-muted)">${new Date(tx.created_at).toLocaleDateString('es-PY', { day: '2-digit', month: 'short' })}</td>
+                                <td><span style="color:${color};font-weight:600;font-size:12px">${label}</span></td>
+                                <td>${tx.merchant_customers?.name || '-'}</td>
+                                <td style="font-weight:700;color:${tx.type === 'PAYMENT' ? 'var(--green)' : 'var(--text)'}">${tx.type === 'PAYMENT' ? '+' : ''}${formatPYG(tx.amount)}</td>
+                            </tr>`;
+                    }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            // Render sales chart
+            if (charts.sales) charts.sales.destroy();
+            const salesCtx = document.getElementById('chartSales');
+            if (salesCtx) {
+                charts.sales = new Chart(salesCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: dailyChart.map(d => d.dayName),
+                        datasets: [
+                            { label: 'Ventas', data: dailyChart.map(d => d.sales), backgroundColor: 'rgba(108,92,231,0.5)', borderColor: '#6C5CE7', borderWidth: 1, borderRadius: 6 },
+                            { label: 'Cobros', data: dailyChart.map(d => d.payments), backgroundColor: 'rgba(0,210,160,0.5)', borderColor: '#00D2A0', borderWidth: 1, borderRadius: 6 }
+                        ]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { position: 'top', labels: { color: '#8B95A5', font: { family: 'Inter', size: 11 }, boxWidth: 10 } } },
+                        scales: {
+                            x: { grid: { display: false }, ticks: { color: '#4D5668' } },
+                            y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#4D5668', callback: v => v >= 1e6 ? `${(v / 1e6).toFixed(1)}M` : v >= 1e3 ? `${v / 1e3}K` : v } }
+                        }
+                    }
+                });
+            }
+        }
+
+        // ── ANALYTICS ──
+        async function loadAnalytics() {
+            try {
+                const res = await fetch(`${API}/api/dashboard/${MERCHANT.phone}/analytics`, { headers: headers() });
+                if (res.status === 401) { logout(); return; }
+                analyticsData = await res.json();
+                renderAnalytics(analyticsData);
+            } catch (e) {
+                document.getElementById('analyticsContent').innerHTML = '<p style="color:var(--red)">Error</p>';
+            }
+            document.getElementById('analyticsLoading').style.display = 'none';
+        }
+
+        function renderAnalytics(a) {
+            const { trends, monthly, peakHours, topProducts, prediction } = a;
+            const maxHour = Math.max(...(peakHours || [1]));
+
+            document.getElementById('analyticsContent').innerHTML = `
+                <div class="grid-4 fade-in">
+                    <div class="stat-mini">
+                        <div class="stat-emoji">📅</div>
+                        <div class="stat-val">${formatPYG(monthly?.totalRevenue || 0)}</div>
+                        <div class="stat-label">Revenue 30 días</div>
+                        ${trends?.growth?.sales !== undefined ? `<div class="stat-change ${trends.growth.sales >= 0 ? 'up' : 'down'}">${trends.growth.sales >= 0 ? '↑' : '↓'} ${Math.abs(trends.growth.sales)}% vs semana ant.</div>` : ''}
+                    </div>
+                    <div class="stat-mini">
+                        <div class="stat-emoji">📊</div>
+                        <div class="stat-val">${formatPYG(monthly?.avgDaily || 0)}</div>
+                        <div class="stat-label">Promedio diario</div>
+                    </div>
+                    <div class="stat-mini">
+                        <div class="stat-emoji">🧾</div>
+                        <div class="stat-val">${monthly?.txCount || 0}</div>
+                        <div class="stat-label">Operaciones 30d</div>
+                    </div>
+                    <div class="stat-mini">
+                        <div class="stat-emoji">📈</div>
+                        <div class="stat-val">${monthly?.collectionRate || 0}%</div>
+                        <div class="stat-label">Tasa de cobro</div>
+                    </div>
+                </div>
+
+                <div class="grid-2 fade-in">
+                    <!-- Monthly chart -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">📈 Tendencia mensual</div>
+                            <span class="badge">30 días</span>
+                        </div>
+                        <div class="chart-box"><canvas id="chartMonthly"></canvas></div>
+                    </div>
+
+                    <!-- Prediction -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">🔮 Predicción</div>
+                            <span class="badge blue">IA</span>
+                        </div>
+                        ${prediction ? `
+                        <div class="prediction-box">
+                            <div class="trend-arrow ${prediction.trend}">${prediction.trend === 'up' ? '📈' : prediction.trend === 'down' ? '📉' : '➡️'}</div>
+                            <div class="prediction-value">${formatPYG(prediction.prediction)}</div>
+                            <div class="prediction-label">Estimado próxima semana</div>
+                            <div style="margin-top:8px;font-size:12px;color:var(--text-sec)">
+                                Promedio semanal: ${formatPYG(prediction.avgWeekly)} · 
+                                Tendencia: <span style="color:${prediction.trend === 'up' ? 'var(--green)' : 'var(--red)'}">${prediction.trendPercent >= 0 ? '+' : ''}${prediction.trendPercent}%</span>
+                            </div>
+                        </div>` : '<p style="color:var(--text-sec);text-align:center;padding:24px">Necesitás más datos para predicciones</p>'}
+                    </div>
+                </div>
+
+                <div class="grid-2 fade-in">
+                    <!-- Peak hours -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">⏰ Horas pico</div>
+                            <span class="badge">Actividad por hora</span>
+                        </div>
+                        <div class="hour-bars">
+                            ${(peakHours || Array(24).fill(0)).map((count, h) => `
+                                <div class="hour-bar" style="height:${maxHour > 0 ? Math.max(4, count / maxHour * 100) : 4}%">
+                                    <span class="tip">${h}:00 — ${count} ops</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="hour-labels">
+                            ${Array.from({ length: 24 }, (_, i) => `<span>${i % 3 === 0 ? i : ''}</span>`).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Top products -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">🏆 Top Productos</div>
+                            <span class="badge green">${topProducts?.length || 0}</span>
+                        </div>
+                        ${!topProducts?.length ? '<p style="color:var(--text-sec);text-align:center;padding:24px">Sin datos de productos aún</p>' :
+                    `<table class="data-table">
+                            <thead><tr><th>Producto</th><th>Ventas</th><th>Revenue</th></tr></thead>
+                            <tbody>
+                            ${topProducts.slice(0, 8).map((p, i) => `<tr>
+                                <td><span style="color:var(--accent-light);font-weight:600">${i + 1}.</span> ${p.name}</td>
+                                <td style="color:var(--text-sec)">${p.count}×</td>
+                                <td style="font-weight:700">${formatPYG(p.revenue)}</td>
+                            </tr>`).join('')}
+                            </tbody>
+                        </table>`}
+                    </div>
+                </div>
+            `;
+
+            // Monthly chart
+            if (monthly?.dailyBreakdown?.length) {
+                if (charts.monthly) charts.monthly.destroy();
+                charts.monthly = new Chart(document.getElementById('chartMonthly'), {
+                    type: 'line',
+                    data: {
+                        labels: monthly.dailyBreakdown.map(d => d.date.substring(5)),
+                        datasets: [{
+                            label: 'Revenue', data: monthly.dailyBreakdown.map(d => d.sales),
+                            borderColor: '#6C5CE7', backgroundColor: 'rgba(108,92,231,0.1)',
+                            fill: true, tension: 0.3, pointRadius: 2
+                        }, {
+                            label: 'Cobrado', data: monthly.dailyBreakdown.map(d => d.collected),
+                            borderColor: '#00D2A0', backgroundColor: 'rgba(0,210,160,0.05)',
+                            fill: true, tension: 0.3, pointRadius: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { labels: { color: '#8B95A5', font: { family: 'Inter', size: 11 } } } },
+                        scales: {
+                            x: { grid: { display: false }, ticks: { color: '#4D5668', font: { size: 10 }, maxTicksLimit: 10 } },
+                            y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#4D5668', callback: v => v >= 1e6 ? `${(v / 1e6).toFixed(1)}M` : v >= 1e3 ? `${v / 1e3}K` : v } }
+                        }
+                    }
+                });
+            }
+        }
+
+        // ── CUSTOMERS ──
+        function renderCustomers(customers) {
+            if (!customers?.length) {
+                document.getElementById('customersContent').innerHTML = '<p style="color:var(--text-sec);text-align:center;padding:60px">Sin datos de clientes</p>';
+                return;
+            }
+
+            document.getElementById('customersContent').innerHTML = `
+                <div class="grid-3 fade-in" style="margin-bottom:16px">
+                    <div class="stat-mini">
+                        <div class="stat-emoji">👥</div>
+                        <div class="stat-val">${customers.length}</div>
+                        <div class="stat-label">Total clientes</div>
+                    </div>
+                    <div class="stat-mini">
+                        <div class="stat-emoji">💎</div>
+                        <div class="stat-val">${formatPYG(customers.reduce((s, c) => s + c.monthlyValue, 0))}</div>
+                        <div class="stat-label">Valor mensual total</div>
+                    </div>
+                    <div class="stat-mini">
+                        <div class="stat-emoji">⚠️</div>
+                        <div class="stat-val">${customers.filter(c => c.riskLevel === 'high').length}</div>
+                        <div class="stat-label">Alto riesgo</div>
+                    </div>
+                </div>
+                <div class="card fade-in">
+                    <div class="card-header">
+                        <div class="card-title">👥 Todos los clientes</div>
+                        <span class="badge">${customers.length}</span>
+                    </div>
+                    <table class="data-table">
+                        <thead><tr><th>Cliente</th><th>Compras totales</th><th>Deuda</th><th>Valor mensual</th><th>Riesgo</th></tr></thead>
+                        <tbody>
+                        ${customers.map(c => `<tr>
+                            <td>
+                                <div style="display:flex;align-items:center;gap:8px">
+                                    <div class="customer-avatar ${c.riskLevel}" style="width:28px;height:28px;font-size:11px">${c.name.charAt(0)}</div>
+                                    <div>
+                                        <div style="font-weight:600">${c.name}</div>
+                                        <div style="font-size:11px;color:var(--text-muted)">${c.totalTransactions} transacciones</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="font-weight:600">${formatPYG(c.totalPurchased)}</td>
+                            <td style="color:${c.totalDebt > 0 ? 'var(--red)' : 'var(--green)'}; font-weight:600">${c.totalDebt > 0 ? formatPYG(c.totalDebt) : '✅ Al día'}</td>
+                            <td>${formatPYG(c.monthlyValue)}<span style="font-size:10px;color:var(--text-muted)">/mes</span></td>
+                            <td><span class="badge ${c.riskLevel === 'high' ? 'red' : c.riskLevel === 'medium' ? '' : 'green'}">${c.riskLevel === 'high' ? '🔴 Alto' : c.riskLevel === 'medium' ? '🟡 Medio' : '🟢 Bajo'}</span></td>
+                        </tr>`).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        // ── BILLING ──
+        function renderBilling() {
+            document.getElementById('billingContent').innerHTML = `
+                <div class="grid-2 fade-in">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">💰 Plan actual</div>
+                            <span class="badge green">Activo</span>
+                        </div>
+                        <div style="text-align:center;padding:24px">
+                            <div style="font-size:32px;margin-bottom:8px">🤖</div>
+                            <div style="font-size:20px;font-weight:800">NexoBot MVP</div>
+                            <div style="color:var(--text-sec);font-size:14px;margin-top:4px">Plan Fundador — Gratis</div>
+                            <div style="margin-top:16px;padding:12px;background:rgba(0,210,160,0.1);border-radius:10px;color:var(--green);font-size:13px;font-weight:600">
+                                ✅ Acceso completo al dashboard<br>
+                                ✅ NLP inteligente (OpenAI)<br>
+                                ✅ Recordatorios automáticos<br>
+                                ✅ Resumen semanal por email
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">📊 API GreenLight</div>
+                            <span class="badge blue">Para financieras</span>
+                        </div>
+                        <div style="padding:16px">
+                            <table class="data-table">
+                                <thead><tr><th>Plan</th><th>Requests</th><th>Precio</th></tr></thead>
+                                <tbody>
+                                    <tr><td>Free</td><td>100/mes</td><td>Gratis</td></tr>
+                                    <tr><td>Starter</td><td>500/mes</td><td>$0.05/req</td></tr>
+                                    <tr><td>Pro</td><td>5,000/mes</td><td>$0.03/req</td></tr>
+                                    <tr><td>Enterprise</td><td>Ilimitado</td><td>Personalizado</td></tr>
+                                </tbody>
+                            </table>
+                            <p style="color:var(--text-sec);font-size:12px;margin-top:12px;text-align:center">
+                                Contactá a ventas@nexofinanzas.com para planes Enterprise
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ── INIT ──
+        loadOverview();
+    </script>
+</body>
+
+</html>

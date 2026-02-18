@@ -430,7 +430,7 @@
                     localStorage.setItem('nexo_expires', data.expiresAt);
 
                     // Redirect to dashboard
-                    window.location.href = '/dashboard.html';
+                    window.location.href = '/app.html';
                 } else {
                     showError(data.error || 'Error de autenticación');
                 }
@@ -453,7 +453,7 @@
                 });
                 const data = await res.json();
                 if (data.valid) {
-                    window.location.href = '/dashboard.html';
+                    window.location.href = '/app.html';
                 } else {
                     localStorage.removeItem('nexo_token');
                     localStorage.removeItem('nexo_merchant');
