@@ -22,6 +22,8 @@ import { startSummaryCron } from './services/dailySummary.js';
 import { startScoringCron } from './services/scoring.js';
 import { startExchangeRateCron } from './services/currency.js';
 import { startEmailCron } from './services/email.js';
+import { trackApiUsage, startBillingCron } from './services/billing.js';
+import billingRouter from './routes/billing.js';
 import { processMessage } from './services/nlp.js';
 import { handleMessage } from './services/bot.js';
 
@@ -108,11 +110,14 @@ app.use('/api/auth', authRouter);
 // Dashboard API (protected — requires login)
 app.use('/api/dashboard', requireAuth, dashboardRouter);
 
-// Score API (public for financieras, protected by API key)
-app.use('/api/score', scoreRouter);
+// Score API (public for financieras, tracked for billing)
+app.use('/api/score', trackApiUsage, scoreRouter);
 
-// GreenLight API (real-time credit authorization)
-app.use('/api/greenlight', greenlightRouter);
+// GreenLight API (real-time credit authorization, tracked)
+app.use('/api/greenlight', trackApiUsage, greenlightRouter);
+
+// Billing API (partners check usage/invoices)
+app.use('/api/billing', billingRouter);
 
 // Privacy Policy (required by Meta)
 app.get('/privacy', (req, res) => {
@@ -259,6 +264,7 @@ const server = app.listen(PORT, () => {
     startScoringCron();        // 2am PY - recalculate all NexoScores
     startExchangeRateCron();   // Every 6h - update USD/PYG rate
     startEmailCron();          // Monday 8am PY - weekly summary emails
+    startBillingCron();        // Daily - API usage billing summaries
 });
 
 // =============================================
