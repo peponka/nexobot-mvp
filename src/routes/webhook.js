@@ -7,6 +7,7 @@ import { Router } from 'express';
 import { processMessage } from '../services/nlp.js';
 import { handleMessage } from '../services/bot.js';
 import { sendMessage, markAsRead, extractMessageFromWebhook } from '../services/whatsapp.js';
+import { expectsImage } from '../services/onboarding.js';
 
 const router = Router();
 
@@ -41,19 +42,49 @@ router.post('/', async (req, res) => {
     try {
         const messageData = extractMessageFromWebhook(req.body);
 
-        if (!messageData || messageData.type !== 'text') {
-            return; // Ignore non-text messages for now
+        if (!messageData) return;
+
+        // Handle image messages (cédula photos during onboarding)
+        if (messageData.type === 'image') {
+            console.log(`\n📸 Image from ${messageData.from} (${messageData.image?.mimeType})`);
+
+            // Check if this user is in onboarding and expects an image
+            if (expectsImage(messageData.from)) {
+                await markAsRead(messageData.messageId);
+
+                const response = await handleMessage(
+                    messageData.from,
+                    messageData.contactName,
+                    messageData.image?.caption || '[Foto de cédula]',
+                    { intent: 'IMAGE_CEDULA', entities: {}, confidence: 1 },
+                    { mediaId: messageData.image?.id, mimeType: messageData.image?.mimeType }
+                );
+
+                await sendMessage(messageData.from, response);
+                console.log(`📤 Response sent to ${messageData.from}`);
+            } else {
+                // Image received outside onboarding — send helpful message
+                await markAsRead(messageData.messageId);
+                await sendMessage(messageData.from,
+                    `📸 Recibí tu imagen, pero por ahora solo proceso fotos de *cédula* durante el registro.\n\n` +
+                    `Pronto podré leer facturas y remitos también. 🚀\n\n` +
+                    `Para registrar operaciones, escribime. Ej:\n` +
+                    `_"Vendí 500 mil a Carlos, fiado"_`
+                );
+            }
+            return;
+        }
+
+        if (messageData.type !== 'text') {
+            return; // Ignore other message types (audio, video, etc.)
         }
 
         console.log(`\n📩 From ${messageData.from}: "${messageData.text}"`);
 
-        // Mark as read immediately
         await markAsRead(messageData.messageId);
 
-        // Process with NLP
         const parsed = await processMessage(messageData.text);
 
-        // Handle business logic
         const response = await handleMessage(
             messageData.from,
             messageData.contactName,
@@ -61,9 +92,7 @@ router.post('/', async (req, res) => {
             parsed
         );
 
-        // Send response via WhatsApp
         await sendMessage(messageData.from, response);
-
         console.log(`📤 Response sent to ${messageData.from}`);
 
     } catch (error) {

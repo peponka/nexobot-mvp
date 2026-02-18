@@ -984,6 +984,35 @@
         const API_BASE = window.location.origin;
         let salesChart = null, donutChart = null;
 
+        // ── AUTH GUARD ──
+        const TOKEN = localStorage.getItem('nexo_token');
+        if (!TOKEN) {
+            window.location.href = '/login.html';
+        }
+
+        // Helper to add auth headers to all API calls
+        function authHeaders() {
+            return { 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' };
+        }
+
+        // Verify token on load
+        (async function verifySession() {
+            try {
+                const res = await fetch(`${API_BASE}/api/auth/verify`, { headers: authHeaders() });
+                const data = await res.json();
+                if (!data.valid) {
+                    localStorage.clear();
+                    window.location.href = '/login.html';
+                }
+            } catch { }
+        })();
+
+        // Logout function
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/login.html';
+        }
+
         function formatPYG(amount) {
             if (!amount) return 'Gs. 0';
             if (amount >= 1000000) return `Gs. ${(amount / 1000000).toFixed(1)}M`;
@@ -1008,7 +1037,7 @@
 
         async function loadMerchants() {
             try {
-                const res = await fetch(`${API_BASE}/api/dashboard/merchants`);
+                const res = await fetch(`${API_BASE}/api/dashboard/merchants`, { headers: authHeaders() });
                 const data = await res.json();
                 const sel = document.getElementById('phoneSelect');
                 if (data.merchants?.length) {
@@ -1024,7 +1053,7 @@
         async function loadDashboard(phone) {
             document.getElementById('mainContent').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
             try {
-                const res = await fetch(`${API_BASE}/api/dashboard/${phone}`);
+                const res = await fetch(`${API_BASE}/api/dashboard/${phone}`, { headers: authHeaders() });
                 const data = await res.json();
                 if (data.error) { showEmpty(); return; }
                 renderDashboard(data);

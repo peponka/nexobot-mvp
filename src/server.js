@@ -1,5 +1,5 @@
 // =============================================
-// NexoBot MVP — Express Server
+// NexoBot MVP — Express Server (Production-Ready)
 // =============================================
 
 import 'dotenv/config';
@@ -13,29 +13,41 @@ import { fileURLToPath } from 'url';
 
 import webhookRouter from './routes/webhook.js';
 import dashboardRouter from './routes/dashboard.js';
+import scoreRouter from './routes/score.js';
+import greenlightRouter from './routes/greenlight.js';
+import authRouter from './routes/auth.js';
+import { requireAuth } from './services/auth.js';
 import { startReminderCron } from './services/reminders.js';
 import { startSummaryCron } from './services/dailySummary.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import { startScoringCron } from './services/scoring.js';
+import { startExchangeRateCron } from './services/currency.js';
 import { processMessage } from './services/nlp.js';
 import { handleMessage } from './services/bot.js';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
 const PORT = process.env.PORT || 3000;
+const IS_PROD = process.env.NODE_ENV === 'production';
+const VERSION = '1.0.0';
+const startedAt = new Date().toISOString();
 
 // =============================================
 // MIDDLEWARE
 // =============================================
 
 // Security
+// Trust proxy (Render, Railway, etc. — behind reverse proxy)
+if (IS_PROD) app.set('trust proxy', 1);
+
 app.use(helmet({
     contentSecurityPolicy: false
 }));
 app.use(cors());
 
-// Logging
-app.use(morgan('dev'));
+// Logging — short in production, dev-style locally
+app.use(morgan(IS_PROD ? 'short' : 'dev'));
 
 // Body parsing
 app.use(express.json());
@@ -44,7 +56,9 @@ app.use(express.urlencoded({ extended: true }));
 // Rate limiting
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100
+    max: IS_PROD ? 200 : 1000,
+    standardHeaders: true,
+    legacyHeaders: false,
 });
 app.use('/api', limiter);
 
@@ -52,13 +66,20 @@ app.use('/api', limiter);
 // ROUTES
 // =============================================
 
-// Health check
+// Health check — Render pings this to know the service is alive
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'ok', version: VERSION, uptime: process.uptime() });
+});
+
+// Root info
 app.get('/', (req, res) => {
     res.json({
         name: 'NexoBot MVP',
-        version: '0.1.0',
+        version: VERSION,
         status: 'running',
+        startedAt,
         timestamp: new Date().toISOString(),
+        environment: IS_PROD ? 'production' : 'development',
         services: {
             database: process.env.SUPABASE_URL ? 'configured' : 'not configured (using memory)',
             nlp: process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY !== 'sk-your-openai-key'
@@ -69,14 +90,28 @@ app.get('/', (req, res) => {
     });
 });
 
-// Static files (dashboard)
+// Static files (login, dashboard)
 app.use(express.static(path.join(__dirname, '..', 'public')));
+
+// Root → redirect to login
+app.get('/', (req, res) => {
+    res.redirect('/login.html');
+});
 
 // WhatsApp webhook
 app.use('/webhook', webhookRouter);
 
-// Dashboard API
-app.use('/api/dashboard', dashboardRouter);
+// Auth API (public)
+app.use('/api/auth', authRouter);
+
+// Dashboard API (protected — requires login)
+app.use('/api/dashboard', requireAuth, dashboardRouter);
+
+// Score API (public for financieras, protected by API key)
+app.use('/api/score', scoreRouter);
+
+// GreenLight API (real-time credit authorization)
+app.use('/api/greenlight', greenlightRouter);
 
 // Privacy Policy (required by Meta)
 app.get('/privacy', (req, res) => {
@@ -177,11 +212,17 @@ app.get('/api/simulate/:message', async (req, res) => {
 // ERROR HANDLING
 // =============================================
 
+// 404 handler — must be after all routes
+app.use((req, res) => {
+    res.status(404).json({ error: 'Not found', path: req.originalUrl });
+});
+
+// Global error handler
 app.use((err, req, res, next) => {
     console.error('Unhandled error:', err);
     res.status(500).json({
         error: 'Internal server error',
-        message: process.env.NODE_ENV === 'development' ? err.message : undefined
+        message: IS_PROD ? undefined : err.message
     });
 });
 
@@ -189,26 +230,56 @@ app.use((err, req, res, next) => {
 // START SERVER
 // =============================================
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`
 ╔═══════════════════════════════════════════╗
-║          🤖 NexoBot MVP v0.2.0           ║
+║        🤖 NexoBot MVP v${VERSION}           ║
 ║═══════════════════════════════════════════║
-║  Server:    http://localhost:${PORT}         ║
-║  Webhook:   http://localhost:${PORT}/webhook  ║
-║  Simulate:  POST /api/simulate           ║
+║  Env:      ${IS_PROD ? '🟢 PRODUCTION' : '🟡 DEVELOPMENT'}                ║
+║  Server:   http://localhost:${PORT}          ║
+║  Health:   http://localhost:${PORT}/health    ║
+║  Webhook:  http://localhost:${PORT}/webhook   ║
 ╠═══════════════════════════════════════════╣
 ║  DB:   ${process.env.SUPABASE_URL ? '✅ Supabase connected' : '⚠️  Memory mode (no Supabase)'}      ║
 ║  NLP:  ${process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY !== 'sk-your-openai-key' ? '✅ OpenAI GPT-4o-mini' : '⚠️  Fallback parser (no OpenAI)'}    ║
 ║  WA:   ${process.env.WHATSAPP_TOKEN && process.env.WHATSAPP_TOKEN !== 'your-whatsapp-token' ? '✅ WhatsApp connected' : '⚠️  Simulated (no WhatsApp)'}     ║
 ║  🔔:  Reminders cron active              ║
 ║  📊:  Daily summary cron active          ║
+║  🎯:  NexoScore cron active (2am PY)     ║
+║  🟢:  GreenLight API: /api/greenlight    ║
+║  💱:  Exchange rate cron active (6h)     ║
+║  📈:  Score API: /api/score/:identifier  ║
 ╚═══════════════════════════════════════════╝
     `);
 
     // Start daily cron jobs
-    startReminderCron();   // 9am PY - debt reminders
-    startSummaryCron();    // 8pm PY - daily summary
+    startReminderCron();       // 9am PY - debt reminders
+    startSummaryCron();        // 8pm PY - daily summary
+    startScoringCron();        // 2am PY - recalculate all NexoScores
+    startExchangeRateCron();   // Every 6h - update USD/PYG rate
 });
+
+// =============================================
+// GRACEFUL SHUTDOWN
+// =============================================
+// Render sends SIGTERM before stopping the service.
+// We close the HTTP server cleanly so in-flight
+// requests finish before the process exits.
+
+const shutdown = (signal) => {
+    console.log(`\n⏳ ${signal} received — shutting down gracefully…`);
+    server.close(() => {
+        console.log('✅ HTTP server closed. Bye!');
+        process.exit(0);
+    });
+    // Force exit after 10s if connections won't close
+    setTimeout(() => {
+        console.error('⚠️  Forced exit after timeout');
+        process.exit(1);
+    }, 10_000);
+};
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
 
 export default app;

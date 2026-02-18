@@ -9,6 +9,8 @@ import * as Customer from '../models/customer.js';
 import * as Transaction from '../models/transaction.js';
 import { sendManualReminder } from './reminders.js';
 import { needsOnboarding, handleOnboarding } from './onboarding.js';
+import { formatAmount, formatDualCurrency, usdToPyg, getExchangeRate } from './currency.js';
+import { setPin } from './auth.js';
 
 /**
  * Format currency (Guaraníes)
@@ -37,7 +39,7 @@ function formatCompact(amount) {
  * @param {Object} parsed - NLP parsed result
  * @returns {string} Bot response text
  */
-export async function handleMessage(phone, contactName, rawMessage, parsed) {
+export async function handleMessage(phone, contactName, rawMessage, parsed, imageData = null) {
     // Get or create merchant
     const merchant = await Merchant.findOrCreate(phone, contactName);
 
@@ -47,7 +49,7 @@ export async function handleMessage(phone, contactName, rawMessage, parsed) {
 
     // Check if merchant needs onboarding (new user)
     if (needsOnboarding(merchant)) {
-        const onboardingResponse = await handleOnboarding(merchant, rawMessage);
+        const onboardingResponse = await handleOnboarding(merchant, rawMessage, imageData);
         if (onboardingResponse) return onboardingResponse;
     }
 
@@ -75,6 +77,9 @@ export async function handleMessage(phone, contactName, rawMessage, parsed) {
 
             case 'REMINDER':
                 return await handleReminder(merchant, entities);
+
+            case 'SET_PIN':
+                return await handleSetPin(merchant, entities);
 
             case 'GREETING':
                 return handleGreeting(merchant);
@@ -137,7 +142,13 @@ async function handleSaleCredit(merchant, entities, rawMessage) {
     // Build response
     let response = `✅ *Venta fiado registrada*\n\n`;
     response += `👤 Cliente: ${customer_name}\n`;
-    response += `💰 Monto: ${formatPYG(amount)}\n`;
+
+    if (currency === 'USD') {
+        const fmtDual = await formatDualCurrency(amount, 'USD');
+        response += `💰 Monto: ${fmtDual}\n`;
+    } else {
+        response += `💰 Monto: ${formatPYG(amount)}\n`;
+    }
 
     if (product) response += `📦 Producto: ${product}`;
     if (quantity) response += ` (x${quantity})`;
@@ -178,7 +189,14 @@ async function handleSaleCash(merchant, entities, rawMessage) {
     });
 
     let response = `✅ *Venta al contado registrada*\n\n`;
-    response += `💰 Monto: ${formatPYG(amount)}\n`;
+
+    if (currency === 'USD') {
+        const fmtDual = await formatDualCurrency(amount, 'USD');
+        response += `💰 Monto: ${fmtDual}\n`;
+    } else {
+        response += `💰 Monto: ${formatPYG(amount)}\n`;
+    }
+
     if (customer_name) response += `👤 Cliente: ${customer_name}\n`;
     if (product) response += `📦 Producto: ${product}`;
     if (quantity) response += ` (x${quantity})`;
@@ -220,7 +238,13 @@ async function handlePayment(merchant, entities, rawMessage) {
 
     let response = `✅ *Cobro registrado*\n\n`;
     response += `👤 Cliente: ${customer_name}\n`;
-    response += `💰 Cobrado: ${formatPYG(amount)}\n`;
+
+    if (currency === 'USD') {
+        const fmtDual = await formatDualCurrency(amount, 'USD');
+        response += `💰 Cobrado: ${fmtDual}\n`;
+    } else {
+        response += `💰 Cobrado: ${formatPYG(amount)}\n`;
+    }
 
     if (customer) {
         const updatedCustomer = await Customer.getById(customer.id);
@@ -398,6 +422,21 @@ function handleUnknown() {
         `📋 _"¿Cuánto me deben?"_\n` +
         `📊 _"¿Cómo me fue esta semana?"_\n\n` +
         `Escribí *ayuda* para ver todo lo que puedo hacer 💪`;
+}
+
+async function handleSetPin(merchant, entities) {
+    const { pin } = entities;
+    const result = await setPin(merchant.id, pin);
+
+    if (result.success) {
+        return `🔐 *PIN configurado correctamente*\n\n` +
+            `Tu PIN del dashboard es: *${pin}*\n` +
+            `Guardalo en un lugar seguro.\n\n` +
+            `📊 Accedé a tu dashboard en:\nhttps://nexobot-mvp-1.onrender.com\n\n` +
+            `Usá tu número de teléfono + este PIN para ingresar.`;
+    }
+
+    return `❌ ${result.error || 'Error configurando el PIN'}`;
 }
 
 export default { handleMessage };

@@ -1,14 +1,15 @@
 // =============================================
-// NexoBot MVP — Onboarding Service v2
+// NexoBot MVP — Onboarding Service v3
 // =============================================
 // Guides new merchants through a setup flow
 // collecting identity data for the NexoFinanzas database.
 // 
-// Flow: Welcome → Nombre completo → Cédula → Dirección → 
-//       Ciudad → Tipo de negocio → Nombre del negocio → Volumen
+// Flow: Welcome → Nombre completo → Cédula (texto o FOTO) → Email →
+//       Dirección → Ciudad → Tipo de negocio → Nombre del negocio → Volumen
 // After completing → normal bot mode
 
 import supabase from '../config/supabase.js';
+import { downloadWhatsAppImage, extractCedulaData } from './ocr.js';
 
 // In-memory onboarding state (survives during server uptime)
 // Key: phone number, Value: { step, data }
@@ -22,12 +23,14 @@ const STEPS = {
     WELCOME: 0,
     FULL_NAME: 1,
     CEDULA: 2,
-    ADDRESS: 3,
-    CITY: 4,
-    BUSINESS_TYPE: 5,
-    BUSINESS_NAME: 6,
-    VOLUME: 7,
-    COMPLETE: 8
+    CEDULA_PHOTO: 2.5,  // Sub-step: processing cédula photo
+    EMAIL: 3,
+    ADDRESS: 4,
+    CITY: 5,
+    BUSINESS_TYPE: 6,
+    BUSINESS_NAME: 7,
+    VOLUME: 8,
+    COMPLETE: 9
 };
 
 const BUSINESS_TYPES = {
@@ -68,7 +71,7 @@ export function needsOnboarding(merchant) {
  * Handle onboarding step
  * @returns {string} Bot response for the current step
  */
-export async function handleOnboarding(merchant, message) {
+export async function handleOnboarding(merchant, message, imageData = null) {
     const phone = merchant.phone;
     const lower = message.toLowerCase().trim();
 
@@ -111,21 +114,52 @@ export async function handleOnboarding(merchant, message) {
             state.step = STEPS.CEDULA;
             return `👍 *${state.data.full_name}* — ¡un gusto!\n\n` +
                 `🪪 *¿Cuál es tu número de cédula?*\n` +
-                `_(Solo los números, sin puntos. Ej: 4523871)_`;
+                `_(Solo los números, sin puntos. Ej: 4523871)_\n\n` +
+                `📸 *O mejor:* mandame una *foto de tu cédula* y extraigo los datos automáticamente.`;
 
         case STEPS.CEDULA:
-            // Extract only digits
+            // Check if an image was sent
+            if (imageData) {
+                return await handleCedulaPhoto(state, imageData);
+            }
+
+            // Extract only digits from text
             const cedulaDigits = message.replace(/[^0-9]/g, '');
             if (cedulaDigits.length < 5 || cedulaDigits.length > 10) {
                 return `⚠️ Ese número no parece una cédula válida.\n\n` +
                     `🪪 *Escribí tu número de cédula* (solo los números).\n` +
-                    `_(Ej: 4523871)_`;
+                    `_(Ej: 4523871)_\n\n` +
+                    `📸 O mandame una *foto de tu cédula*.`;
             }
             state.data.cedula = cedulaDigits;
-            // Format with dots for display
             state.data.cedula_display = formatCedula(cedulaDigits);
-            state.step = STEPS.ADDRESS;
+            state.step = STEPS.EMAIL;
             return `✅ Cédula: *${state.data.cedula_display}*\n\n` +
+                `📧 *¿Cuál es tu email?*\n` +
+                `_(Ej: juan@gmail.com)_\n\n` +
+                `_Escribí "saltar" si no tenés o querés ponerlo después_`;
+
+        case STEPS.EMAIL:
+            // Validate email or allow skip
+            if (lower === 'saltar' || lower === 'skip' || lower === 'no' || lower === 'no tengo') {
+                state.data.email = null;
+                state.step = STEPS.ADDRESS;
+                return `👍 Sin problema, podés agregarlo después.\n\n` +
+                    `🏠 *¿Cuál es tu dirección?*\n` +
+                    `_(Calle, número, barrio. Ej: "Av. Mariscal López 1234, Barrio Jara")_`;
+            }
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const emailClean = message.trim().toLowerCase();
+            if (!emailRegex.test(emailClean)) {
+                return `⚠️ Ese email no parece válido.\n\n` +
+                    `📧 *Escribí tu email correctamente*\n` +
+                    `_(Ej: juan@gmail.com)_\n\n` +
+                    `_O escribí "saltar" si no tenés_`;
+            }
+            state.data.email = emailClean;
+            state.step = STEPS.ADDRESS;
+            return `✅ Email: *${state.data.email}*\n\n` +
                 `🏠 *¿Cuál es tu dirección?*\n` +
                 `_(Calle, número, barrio. Ej: "Av. Mariscal López 1234, Barrio Jara")_`;
 
@@ -213,6 +247,7 @@ export async function handleOnboarding(merchant, message) {
                 `━━━━━━━━━━━━━━━━━━\n` +
                 `👤 ${state.data.full_name}\n` +
                 `🪪 CI: ${state.data.cedula_display}\n` +
+                (state.data.email ? `📧 ${state.data.email}\n` : '') +
                 `🏠 ${state.data.address}\n` +
                 `📍 ${state.data.city}\n` +
                 `🏪 ${state.data.business_name} (${capitalize(state.data.business_type)})\n` +
@@ -247,11 +282,14 @@ async function saveOnboardingData(merchantId, data) {
     const updates = {
         name: data.full_name,
         cedula: data.cedula,
+        email: data.email || null,
         address: data.address,
         city: data.city,
         business_name: data.business_name,
         business_type: data.business_type,
         monthly_volume: data.volume,
+        cedula_verified: data.cedula_verified || false,
+        cedula_ocr_data: data.cedula_ocr_data || null,
         onboarded_at: new Date().toISOString()
     };
 
@@ -290,4 +328,88 @@ export function resetOnboarding(phone) {
     onboardingState.delete(phone);
 }
 
-export default { needsOnboarding, handleOnboarding, resetOnboarding };
+// =============================================
+// CEDULA PHOTO HANDLER (OCR)
+// =============================================
+
+/**
+ * Process a cédula photo sent during onboarding
+ * Downloads the image from WhatsApp and runs OCR
+ */
+async function handleCedulaPhoto(state, imageData) {
+    try {
+        // Download image from WhatsApp
+        const imageDataUrl = await downloadWhatsAppImage(imageData.mediaId);
+
+        if (!imageDataUrl) {
+            return `⚠️ No pude descargar la imagen. Intentá de nuevo o escribí tu número de cédula manualmente.\n\n` +
+                `🪪 *¿Cuál es tu número de cédula?*\n` +
+                `_(Ej: 4523871)_`;
+        }
+
+        // Run OCR
+        const ocrResult = await extractCedulaData(imageDataUrl);
+
+        if (!ocrResult || !ocrResult.es_cedula) {
+            return `⚠️ No pude reconocer una cédula en esa imagen.\n\n` +
+                `📸 Intentá con otra foto (más nítida, buena luz), o escribí tu número de cédula manualmente.\n` +
+                `_(Ej: 4523871)_`;
+        }
+
+        // Extract data from OCR
+        const cedulaDigits = (ocrResult.numero_cedula || '').replace(/[^0-9]/g, '');
+
+        if (cedulaDigits.length < 5) {
+            return `⚠️ Reconocí la cédula pero no pude leer el número claramente.\n\n` +
+                `🪪 *Escribí tu número de cédula manualmente:*\n` +
+                `_(Ej: 4523871)_`;
+        }
+
+        // Save OCR data
+        state.data.cedula = cedulaDigits;
+        state.data.cedula_display = formatCedula(cedulaDigits);
+        state.data.cedula_verified = true;
+        state.data.cedula_ocr_data = ocrResult;
+
+        // If OCR found the name and it's different/better, offer to use it
+        if (ocrResult.nombre_completo && ocrResult.confianza >= 0.7) {
+            const ocrName = capitalize(ocrResult.nombre_completo);
+            if (ocrName !== state.data.full_name) {
+                state.data.full_name_ocr = ocrName;
+            }
+        }
+
+        state.step = STEPS.EMAIL;
+
+        let response = `📸 *¡Cédula escaneada con éxito!*\n\n`;
+        response += `🪪 CI: *${state.data.cedula_display}*\n`;
+        if (ocrResult.nombre_completo) {
+            response += `👤 Nombre: *${ocrResult.nombre_completo}*\n`;
+        }
+        if (ocrResult.fecha_nacimiento) {
+            response += `📅 Nacimiento: ${ocrResult.fecha_nacimiento}\n`;
+        }
+        response += `✅ Verificación: ${Math.round((ocrResult.confianza || 0) * 100)}% confianza\n`;
+        response += `\n📧 *¿Cuál es tu email?*\n`;
+        response += `_(Ej: juan@gmail.com)_\n\n`;
+        response += `_Escribí "saltar" si no tenés_`;
+
+        return response;
+
+    } catch (error) {
+        console.error('❌ Cédula photo processing error:', error);
+        return `⚠️ Hubo un error procesando la foto. Escribí tu número de cédula manualmente.\n\n` +
+            `🪪 *¿Cuál es tu número de cédula?*\n` +
+            `_(Ej: 4523871)_`;
+    }
+}
+
+/**
+ * Check if onboarding is expecting an image at the current step
+ */
+export function expectsImage(phone) {
+    const state = onboardingState.get(phone);
+    return state && state.step === STEPS.CEDULA;
+}
+
+export default { needsOnboarding, handleOnboarding, resetOnboarding, expectsImage };

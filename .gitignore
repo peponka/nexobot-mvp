@@ -1,14 +1,43 @@
+# Dependencies
 node_modules/
+
+# Environment variables (NEVER commit)
 .env
+.env.local
+.env.production
+
+# Logs
 *.log
 debug-*
+server-log.txt
+server-err.txt
+ngrok-output.txt
+
+# Test artifacts
 test-*.mjs
 test-*.txt
 check.*
+
+# Seed scripts (dev only)
 seed-demo.mjs
 seed-result.txt
-server-log.txt
-server-err.txt
-test-supabase-result.txt
+
+# Git helper files
 git-*.txt
-ngrok-output.txt
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Boot test
+boot-test.log
+boot-check.mjs
+
+# Secrets / temp keys (NEVER commit)
+render-env-vars*
+*-secrets*
+*-keys*

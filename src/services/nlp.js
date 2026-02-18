@@ -65,6 +65,15 @@ function fastParser(message) {
 
     // ─── INTENT DETECTION ─── (order matters!)
 
+    // 0. SET PIN (dashboard access)
+    const pinMatch = lower.match(/^pin\s+(\d{4,6})$/);
+    if (pinMatch) {
+        result.intent = 'SET_PIN';
+        result.confidence = 0.99;
+        result.entities.pin = pinMatch[1];
+        return result;
+    }
+
     // 1. GREETINGS (short messages, check first)
     if (/^(hola|buenas?|buen[oa]?s?\s*(d[ií]as?|tardes?|noches?)?|qu[eé]\s*tal|hey|hi|ola|epa|que\s*hay|alo|aló|mba[''´]?[eé]ichapa|nde\s*haku|mba[''´]?eichapa\s*nde|iporã|ipo|terere|holi|holaa*|buena|wenas|saludos|bienvenido)/i.test(lower) && lower.length < 40) {
         result.intent = 'GREETING';
@@ -177,11 +186,52 @@ function fastParser(message) {
 function extractEntities(lower, original, result) {
     // ─── AMOUNT PARSING ───
     let amount = null;
+    let detectedCurrency = 'PYG'; // Default
+
+    // ─── USD Detection FIRST (before PYG) ───
+
+    // "$50", "$100", "$1500" — dollar sign prefix
+    let amountMatch = lower.match(/\$\s*(\d+[.,]?\d*)/);
+    if (amountMatch) {
+        amount = parseFloat(amountMatch[1].replace(',', '.'));
+        detectedCurrency = 'USD';
+    }
+
+    // "50 dólares", "100 dolares", "200 dolar"
+    if (!amount) {
+        amountMatch = lower.match(/(\d+[.,]?\d*)\s*d[oó]lar(?:es)?/i);
+        if (amountMatch) {
+            amount = parseFloat(amountMatch[1].replace(',', '.'));
+            detectedCurrency = 'USD';
+        }
+    }
+
+    // "50 verdes" (Paraguayan slang for USD)
+    if (!amount) {
+        amountMatch = lower.match(/(\d+[.,]?\d*)\s*verdes?/i);
+        if (amountMatch) {
+            amount = parseFloat(amountMatch[1].replace(',', '.'));
+            detectedCurrency = 'USD';
+        }
+    }
+
+    // "50 usd", "100 USD"
+    if (!amount) {
+        amountMatch = lower.match(/(\d+[.,]?\d*)\s*usd/i);
+        if (amountMatch) {
+            amount = parseFloat(amountMatch[1].replace(',', '.'));
+            detectedCurrency = 'USD';
+        }
+    }
+
+    // ─── PYG Amounts ───
 
     // "1 millón", "2 millones", "1.5 millón", "medio millón"
-    let amountMatch = lower.match(/medio\s*mill[oó]n/i);
-    if (amountMatch) {
-        amount = 500000;
+    if (!amount) {
+        amountMatch = lower.match(/medio\s*mill[oó]n/i);
+        if (amountMatch) {
+            amount = 500000;
+        }
     }
 
     if (!amount) {
@@ -243,8 +293,11 @@ function extractEntities(lower, original, result) {
         result.entities.amount = amount;
     }
 
-    // ─── CURRENCY ───
-    result.entities.currency = /d[oó]lar(es)?|usd|\$\s*\d/i.test(lower) ? 'USD' : 'PYG';
+    // ─── CURRENCY ─── (can also be set above during amount detection)
+    if (/d[oó]lar(es)?|usd|\$\s*\d|verdes?\b/i.test(lower)) {
+        detectedCurrency = 'USD';
+    }
+    result.entities.currency = detectedCurrency;
 
     // ─── CUSTOMER NAME EXTRACTION ───
     const skipWords = new Set([

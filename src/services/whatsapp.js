@@ -101,7 +101,7 @@ export function extractMessageFromWebhook(body) {
         const message = value.messages[0];
         const contact = value.contacts?.[0];
 
-        return {
+        const result = {
             messageId: message.id,
             from: message.from,
             timestamp: message.timestamp,
@@ -110,6 +110,18 @@ export function extractMessageFromWebhook(body) {
             contactName: contact?.profile?.name || 'Unknown',
             phoneNumberId: value.metadata?.phone_number_id
         };
+
+        // Extract image data if present
+        if (message.type === 'image' && message.image) {
+            result.image = {
+                id: message.image.id,
+                mimeType: message.image.mime_type,
+                sha256: message.image.sha256,
+                caption: message.image.caption || ''
+            };
+        }
+
+        return result;
     } catch (error) {
         console.error('Failed to extract message:', error.message);
         return null;

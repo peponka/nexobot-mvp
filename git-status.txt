@@ -4,70 +4,20 @@ Your branch is up to date with 'origin/main'.
 Changes not staged for commit:
   (use "git add <file>..." to update what will be committed)
   (use "git restore <file>..." to discard changes in working directory)
-	modified:   .gitignore
-	modified:   package-lock.json
-	modified:   package.json
-	modified:   src/routes/webhook.js
-	modified:   src/server.js
+	modified:   git-status.txt
+	modified:   src/models/merchant.js
+	modified:   src/models/transaction.js
+	modified:   src/services/bot.js
+	modified:   src/services/onboarding.js
+	modified:   supabase/schema-clean.sql
+	modified:   supabase/schema.sql
 
 Untracked files:
   (use "git add <file>..." to include in what will be committed)
-	git-info.txt
-	git-status.txt
-	ngrok-output.txt
-	public/
-	render.yaml
-	src/routes/dashboard.js
-	supabase/schema-clean.sql
-	test-send-result.txt
+	server-err.txt
+	supabase/migration_add_identity_fields.sql
+	supabase/migration_add_personal_data.sql
+	test-onboarding-result.txt
+	test-result.txt
 
 no changes added to commit (use "git add" and/or "git commit -a")
-git : warning: in the 
-working copy of 
-'package-lock.json', LF 
-will be replaced by CRLF 
-the next time Git touches it
-En línea: 1 Carácter: 59
-+ ... >&1 | Out-File 
--Encoding utf8 
-git-status.txt; git add -A 
-2>&1 | Out-F ...
-+                           
-                        
-~~~~~~~~~~~~~~~
-    + CategoryInfo          
-    : NotSpecified: (warni  
-  ng: in the... Git touch   
- es it:String) [], Remot    
-eException
-    + FullyQualifiedErrorId 
-    : NativeCommandError
- 
-warning: in the working 
-copy of 'package.json', LF 
-will be replaced by CRLF 
-the next time Git touches it
-On branch main
-Your branch is up to date with 'origin/main'.
-
-Changes to be committed:
-  (use "git restore --staged <file>..." to unstage)
-	modified:   .gitignore
-	new file:   git-info.txt
-	new file:   git-status.txt
-	new file:   ngrok-output.txt
-	modified:   package-lock.json
-	modified:   package.json
-	new file:   public/dashboard.html
-	new file:   render.yaml
-	new file:   src/routes/dashboard.js
-	modified:   src/routes/webhook.js
-	modified:   src/server.js
-	new file:   supabase/schema-clean.sql
-	new file:   test-send-result.txt
-
-Changes not staged for commit:
-  (use "git add <file>..." to update what will be committed)
-  (use "git restore <file>..." to discard changes in working directory)
-	modified:   git-status.txt
-

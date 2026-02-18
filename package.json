@@ -1,9 +1,12 @@
 {
   "name": "nexobot-mvp",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "NexoFinanzas — WhatsApp bot for informal commerce in LATAM",
   "main": "src/server.js",
   "type": "module",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
