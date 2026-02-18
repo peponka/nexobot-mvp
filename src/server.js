@@ -74,26 +74,7 @@ app.get('/health', (req, res) => {
     res.status(200).json({ status: 'ok', version: VERSION, uptime: process.uptime() });
 });
 
-// Root info
-app.get('/', (req, res) => {
-    res.json({
-        name: 'NexoBot MVP',
-        version: VERSION,
-        status: 'running',
-        startedAt,
-        timestamp: new Date().toISOString(),
-        environment: IS_PROD ? 'production' : 'development',
-        services: {
-            database: process.env.SUPABASE_URL ? 'configured' : 'not configured (using memory)',
-            nlp: process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY !== 'sk-your-openai-key'
-                ? 'configured (OpenAI)' : 'fallback (regex)',
-            whatsapp: process.env.WHATSAPP_TOKEN && process.env.WHATSAPP_TOKEN !== 'your-whatsapp-token'
-                ? 'configured' : 'simulated'
-        }
-    });
-});
-
-// Static files (login, dashboard)
+// Static files (login, dashboard, landing)
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // Root → landing page
