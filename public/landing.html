@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexoBot — Tu negocio en WhatsApp</title>
+    <meta name="description"
+        content="NexoBot es el asistente financiero por WhatsApp para comerciantes. Registrá ventas, cobrá deudas y controlá tu negocio, todo por chat.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #FAFBFC;
+            --bg-card: #FFFFFF;
+            --bg-dark: #06080D;
+            --border: rgba(0, 0, 0, 0.08);
+            --text: #1A1D21;
+            --text-sec: #5E6773;
+            --text-muted: #9DA5B1;
+            --accent: #6C5CE7;
+            --accent-dark: #5847D1;
+            --accent-light: #A29BFE;
+            --green: #00B894;
+            --green-bg: rgba(0, 184, 148, 0.08);
+            --blue: #0984E3;
+            --orange: #E17055;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            line-height: 1.6;
+            background: var(--bg);
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        /* NAV */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(250, 251, 252, 0.92);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 32px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1200px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .nav-brand .logo-box {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: white;
+        }
+
+        .nav-brand span {
+            color: var(--accent);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 28px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-sec);
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text);
+        }
+
+        .btn-nav {
+            padding: 8px 20px;
+            border-radius: 10px;
+            background: var(--accent);
+            color: white;
+            font-weight: 600;
+            font-size: 13px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-nav:hover {
+            background: var(--accent-dark);
+            transform: translateY(-1px);
+        }
+
+        /* CONTAINER */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* HERO */
+        .hero {
+            padding: 140px 0 80px;
+            text-align: center;
+            background: linear-gradient(180deg, #F3F0FF 0%, var(--bg) 100%);
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(108, 92, 231, 0.08);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 20px;
+        }
+
+        .hero h1 {
+            font-size: 52px;
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: -1.5px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .hero h1 .hl {
+            background: linear-gradient(135deg, var(--accent), var(--blue));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 18px;
+            color: var(--text-sec);
+            max-width: 540px;
+            margin: 20px auto 0;
+        }
+
+        .hero-ctas {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 32px;
+        }
+
+        .btn-primary {
+            padding: 14px 32px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            color: white;
+            font-size: 15px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 16px rgba(108, 92, 231, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(108, 92, 231, 0.4);
+        }
+
+        .btn-secondary {
+            padding: 14px 32px;
+            border-radius: 12px;
+            background: white;
+            color: var(--text);
+            font-size: 15px;
+            font-weight: 600;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* CHAT MOCKUP */
+        .hero-chat {
+            max-width: 380px;
+            margin: 48px auto 0;
+            background: #0B141A;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.15);
+            text-align: left;
+            color: white;
+        }
+
+        .chat-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            margin-bottom: 16px;
+        }
+
+        .chat-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), #4834d4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .chat-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .chat-status {
+            font-size: 11px;
+            color: var(--green);
+        }
+
+        .bubble {
+            max-width: 82%;
+            padding: 10px 14px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            line-height: 1.5;
+            animation: bubbleIn 0.3s ease;
+        }
+
+        .bubble-r {
+            background: #005C4B;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+
+        .bubble-l {
+            background: #1F2C33;
+            border-bottom-left-radius: 4px;
+        }
+
+        @keyframes bubbleIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* FEATURES */
+        .features {
+            padding: 80px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .section-title h2 {
+            font-size: 36px;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .section-title p {
+            color: var(--text-sec);
+            font-size: 16px;
+            margin-top: 8px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06);
+        }
+
+        .feature-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            margin-bottom: 16px;
+        }
+
+        .feature-card h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .feature-card p {
+            font-size: 14px;
+            color: var(--text-sec);
+        }
+
+        .f-purple {
+            background: rgba(108, 92, 231, 0.08);
+        }
+
+        .f-green {
+            background: rgba(0, 184, 148, 0.08);
+        }
+
+        .f-blue {
+            background: rgba(9, 132, 227, 0.08);
+        }
+
+        .f-orange {
+            background: rgba(225, 112, 85, 0.08);
+        }
+
+        /* STATS */
+        .stats {
+            padding: 64px 0;
+            text-align: center;
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            color: white;
+            margin: 0 24px;
+            border-radius: 24px;
+        }
+
+        .stats h2 {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 40px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .stat-item .stat-num {
+            font-size: 40px;
+            font-weight: 900;
+        }
+
+        .stat-item .stat-label {
+            font-size: 13px;
+            opacity: 0.8;
+            margin-top: 4px;
+        }
+
+        /* HOW IT WORKS */
+        .how {
+            padding: 80px 0;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            margin-top: 48px;
+        }
+
+        .step {
+            text-align: center;
+        }
+
+        .step-num {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(108, 92, 231, 0.08);
+            color: var(--accent);
+            font-size: 20px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+        }
+
+        .step h4 {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .step p {
+            font-size: 13px;
+            color: var(--text-sec);
+        }
+
+        /* PRICING */
+        .pricing {
+            padding: 80px 0;
+        }
+
+        .pricing-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 48px;
+        }
+
+        .price-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .price-card.popular {
+            border-color: var(--accent);
+            position: relative;
+            box-shadow: 0 8px 32px rgba(108, 92, 231, 0.12);
+        }
+
+        .price-card.popular::before {
+            content: '⭐ Recomendado';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent);
+            color: white;
+            padding: 4px 16px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .price-card h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .price-amount {
+            font-size: 40px;
+            font-weight: 900;
+            margin: 16px 0 4px;
+        }
+
+        .price-period {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .price-features {
+            list-style: none;
+            margin-top: 24px;
+            text-align: left;
+        }
+
+        .price-features li {
+            font-size: 14px;
+            padding: 8px 0;
+            color: var(--text-sec);
+            display: flex;
+            gap: 8px;
+        }
+
+        .price-features li::before {
+            content: '✅';
+            font-size: 14px;
+        }
+
+        /* CTA */
+        .cta-section {
+            padding: 80px 0;
+            text-align: center;
+        }
+
+        .cta-box {
+            background: linear-gradient(135deg, #F3F0FF, #E8F4FD);
+            border-radius: 24px;
+            padding: 64px 32px;
+        }
+
+        .cta-box h2 {
+            font-size: 32px;
+            font-weight: 800;
+        }
+
+        .cta-box p {
+            color: var(--text-sec);
+            font-size: 16px;
+            margin-top: 12px;
+            max-width: 480px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* FOOTER */
+        .footer {
+            padding: 40px 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .footer a {
+            color: var(--text-sec);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .steps {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .pricing-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAV -->
+    <nav class="nav">
+        <div class="nav-brand">
+            <div class="logo-box">🤖</div>
+            Nexo<span>Bot</span>
+        </div>
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#como-funciona">Cómo funciona</a>
+            <a href="#pricing">Planes</a>
+            <a href="/login.html" class="btn-nav">Dashboard →</a>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-badge">🇵🇾 Hecho en Paraguay · Para toda Latinoamérica</div>
+            <h1>Tu negocio entero en <span class="hl">WhatsApp</span></h1>
+            <p>
+                Registrá ventas, controlá fiados, cobrá deudas y mirá analytics — todo hablándole al bot por WhatsApp.
+                Sin apps, sin aprender nada.
+            </p>
+            <div class="hero-ctas">
+                <a href="https://wa.me/595981000000?text=Hola%20NexoBot" class="btn-primary" target="_blank">
+                    📱 Probá gratis por WhatsApp
+                </a>
+                <a href="#como-funciona" class="btn-secondary">
+                    Cómo funciona →
+                </a>
+            </div>
+
+            <!-- Chat Mockup -->
+            <div class="hero-chat">
+                <div class="chat-header">
+                    <div class="chat-avatar">🤖</div>
+                    <div>
+                        <div class="chat-name">NexoBot</div>
+                        <div class="chat-status">● En línea</div>
+                    </div>
+                </div>
+                <div class="bubble bubble-r">Vendí 500 mil a Carlos, fiado</div>
+                <div class="bubble bubble-l">
+                    ✅ <strong>Venta registrada!</strong><br>
+                    📋 Cliente: Carlos<br>
+                    💰 Gs. 500.000 (fiado)<br>
+                    📊 Su deuda total: Gs. 1.200.000
+                </div>
+                <div class="bubble bubble-r">Cuánto me deben en total?</div>
+                <div class="bubble bubble-l">
+                    📋 <strong>5 deudores</strong><br>
+                    💰 Total: Gs. 3.200.000<br>
+                    🔴 2 urgentes · 🟡 2 al día · 🟢 1 nuevo
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-title">
+                <h2>Todo lo que necesitás</h2>
+                <p>Sin descargar apps, sin aprender sistemas. Solo hablá.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon f-purple">🤖</div>
+                    <h3>Chat inteligente</h3>
+                    <p>NLP avanzado que entiende español informal, guaraní y abreviaciones. GPT-4 como fallback.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon f-green">💰</div>
+                    <h3>Ventas y fiados</h3>
+                    <p>Registrá ventas al contado, fiados, y cobros en 5 segundos. Todo queda guardado automáticamente.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon f-blue">📊</div>
+                    <h3>Dashboard web</h3>
+                    <p>Dashboard premium con analytics, tendencias, predicciones IA y gestión de clientes.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon f-orange">🔔</div>
+                    <h3>Recordatorios automáticos</h3>
+                    <p>El bot cobra por vos. Envía recordatorios escalonados a deudores morosos.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon f-purple">🏦</div>
+                    <h3>NexoScore</h3>
+                    <p>Score crediticio alternativo basado en tu actividad real. Accedé a microcréditos.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon f-green">💱</div>
+                    <h3>Multi-moneda</h3>
+                    <p>Guaraníes y dólares. Tipo de cambio actualizado automáticamente.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- STATS -->
+    <div class="container">
+        <section class="stats">
+            <h2>Números que importan</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-num">5 seg</div>
+                    <div class="stat-label">Para registrar una venta</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-num">$0</div>
+                    <div class="stat-label">Para empezar</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-num">24/7</div>
+                    <div class="stat-label">Disponible siempre</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-num">0</div>
+                    <div class="stat-label">Apps que descargar</div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- HOW IT WORKS -->
+    <section class="how" id="como-funciona">
+        <div class="container">
+            <div class="section-title">
+                <h2>Cómo funciona</h2>
+                <p>3 pasos y estás listo</p>
+            </div>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-num">1</div>
+                    <h4>Escribí al bot</h4>
+                    <p>Mandá "Hola" al número de NexoBot por WhatsApp</p>
+                </div>
+                <div class="step">
+                    <div class="step-num">2</div>
+                    <h4>Registrá tu negocio</h4>
+                    <p>Nombre, rubro, y listo. El onboarding toma 2 minutos.</p>
+                </div>
+                <div class="step">
+                    <div class="step-num">3</div>
+                    <h4>Vendé y cobrá</h4>
+                    <p>Dictale las ventas al bot. Él las registra, te avisa, y cobra por vos.</p>
+                </div>
+                <div class="step">
+                    <div class="step-num">4</div>
+                    <h4>Crecé</h4>
+                    <p>Mirá tus analytics, mejorá tu NexoScore, y accedé a crédito.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PRICING -->
+    <section class="pricing" id="pricing">
+        <div class="container">
+            <div class="section-title">
+                <h2>Planes simples</h2>
+                <p>Empezá gratis, crecé cuando quieras</p>
+            </div>
+            <div class="pricing-cards">
+                <div class="price-card">
+                    <h3>Gratis</h3>
+                    <div class="price-amount">Gs. 0</div>
+                    <div class="price-period">para siempre</div>
+                    <ul class="price-features">
+                        <li>Ventas, fiados y cobros ilimitados</li>
+                        <li>Dashboard básico</li>
+                        <li>Recordatorios de deuda</li>
+                        <li>Resumen semanal</li>
+                    </ul>
+                </div>
+                <div class="price-card popular">
+                    <h3>Pro</h3>
+                    <div class="price-amount" style="color:var(--accent)">Gs. 50.000</div>
+                    <div class="price-period">/mes (~$7 USD)</div>
+                    <ul class="price-features">
+                        <li>Todo del plan Gratis</li>
+                        <li>Analytics avanzados + predicción IA</li>
+                        <li>NexoScore premium</li>
+                        <li>Email reports personalizados</li>
+                        <li>Multi-moneda (USD/PYG)</li>
+                    </ul>
+                </div>
+                <div class="price-card">
+                    <h3>Negocio</h3>
+                    <div class="price-amount">Gs. 150.000</div>
+                    <div class="price-period">/mes (~$20 USD)</div>
+                    <ul class="price-features">
+                        <li>Todo del plan Pro</li>
+                        <li>Multi-sucursal</li>
+                        <li>Inventario avanzado</li>
+                        <li>API access</li>
+                        <li>Soporte prioritario</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-box">
+                <div style="font-size:48px;margin-bottom:16px">🤖</div>
+                <h2>¿Listo para controlar tu negocio?</h2>
+                <p>Empezá hoy mismo. Solo necesitás WhatsApp.</p>
+                <div style="margin-top:28px">
+                    <a href="https://wa.me/595981000000?text=Hola%20NexoBot" class="btn-primary" target="_blank"
+                        style="display:inline-block">
+                        Empezar gratis por WhatsApp →
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container">
+            <p>
+                © 2026 NexoFinanzas · Asunción, Paraguay 🇵🇾 ·
+                <a href="/privacy">Privacidad</a> ·
+                <a href="/pitch.html">Inversores</a> ·
+                <a href="/login.html">Dashboard</a>
+            </p>
+        </div>
+    </footer>
+
+</body>
+
+</html>

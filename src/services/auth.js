@@ -6,7 +6,10 @@
 // and uses it to access their dashboard.
 
 import crypto from 'crypto';
+import bcrypt from 'bcrypt';
 import supabase from '../config/supabase.js';
+
+const SALT_ROUNDS = 10;
 
 const TOKEN_EXPIRY_HOURS = 72; // 3 days
 const SECRET = process.env.NEXO_API_KEY || 'nexo-dev-secret-key';
@@ -72,9 +75,19 @@ export async function login(phone, pin) {
             return { success: false, error: 'PIN no configurado. Enviá "pin 1234" al bot para crear tu PIN.' };
         }
 
-        // Verify PIN
-        if (merchant.dashboard_pin !== pin) {
+        // Verify PIN (bcrypt hash or legacy plaintext)
+        const pinMatch = merchant.dashboard_pin.startsWith('$2')
+            ? await bcrypt.compare(pin, merchant.dashboard_pin)
+            : merchant.dashboard_pin === pin;
+
+        if (!pinMatch) {
             return { success: false, error: 'PIN incorrecto' };
+        }
+
+        // Migrate plaintext PIN to hashed on successful login
+        if (!merchant.dashboard_pin.startsWith('$2')) {
+            const hashed = await bcrypt.hash(pin, SALT_ROUNDS);
+            await supabase.from('merchants').update({ dashboard_pin: hashed }).eq('id', merchant.id);
         }
 
         // Generate token
@@ -172,9 +185,11 @@ export async function setPin(merchantId, pin) {
             return { success: false, error: 'Database not configured' };
         }
 
+        const hashedPin = await bcrypt.hash(pin, SALT_ROUNDS);
+
         const { error } = await supabase
             .from('merchants')
-            .update({ dashboard_pin: pin })
+            .update({ dashboard_pin: hashedPin })
             .eq('id', merchantId);
 
         if (error) throw error;

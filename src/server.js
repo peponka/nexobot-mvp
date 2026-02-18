@@ -96,9 +96,9 @@ app.get('/', (req, res) => {
 // Static files (login, dashboard)
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
-// Root → redirect to login
+// Root → landing page
 app.get('/', (req, res) => {
-    res.redirect('/login.html');
+    res.redirect('/landing.html');
 });
 
 // WhatsApp webhook
