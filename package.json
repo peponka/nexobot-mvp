@@ -10,7 +10,7 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "test": "echo \"No tests yet\" && exit 0"
+    "test": "node tests/core.test.js"
   },
   "keywords": [
     "fintech",
