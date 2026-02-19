@@ -524,7 +524,6 @@
         function submitForm(e) {
             e.preventDefault();
 
-            // Collect form data
             const data = {
                 nombre: document.getElementById('nombre').value,
                 apellido: document.getElementById('apellido').value,
@@ -533,18 +532,19 @@
                 empresa: document.getElementById('empresa').value,
                 tipo: document.getElementById('tipo').value,
                 interes: document.getElementById('interes').value,
-                mensaje: document.getElementById('mensaje').value,
-                timestamp: new Date().toISOString()
+                mensaje: document.getElementById('mensaje').value
             };
 
-            console.log('📩 Formulario de contacto:', data);
+            // Send to backend
+            fetch('/api/contact', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            }).catch(() => { });
 
-            // Show success message
+            // Show success immediately
             document.getElementById('formContent').style.display = 'none';
             document.getElementById('formSuccess').style.display = 'block';
-
-            // In production, this would POST to an API endpoint
-            // fetch('/api/v1/contact', { method: 'POST', body: JSON.stringify(data) });
         }
     </script>
 

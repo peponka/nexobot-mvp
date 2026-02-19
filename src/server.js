@@ -91,7 +91,7 @@ app.use('/api/auth', authRouter);
 // B2B Leads capture
 app.post('/api/leads', async (req, res) => {
     try {
-        const lead = { ...req.body, created_at: new Date().toISOString(), source: 'empresas_page' };
+        const lead = { ...req.body, created_at: new Date().toISOString(), source: req.body.source || 'empresas_page' };
         console.log('🎯 New B2B lead:', JSON.stringify(lead));
         if (supabase) {
             await supabase.from('leads').insert(lead).catch(() => { });
@@ -100,6 +100,31 @@ app.post('/api/leads', async (req, res) => {
     } catch (err) {
         console.error('Lead capture error:', err);
         res.json({ success: true, message: 'Lead received' });
+    }
+});
+
+// Contact form (alias for leads with contact source)
+app.post('/api/contact', async (req, res) => {
+    try {
+        const lead = {
+            name: `${req.body.nombre} ${req.body.apellido}`,
+            email: req.body.email,
+            phone: req.body.telefono,
+            company: req.body.empresa,
+            type: req.body.tipo,
+            interest: req.body.interes,
+            message: req.body.mensaje,
+            created_at: new Date().toISOString(),
+            source: 'contacto_page'
+        };
+        console.log('📩 Contact form:', JSON.stringify(lead));
+        if (supabase) {
+            await supabase.from('leads').insert(lead).catch(() => { });
+        }
+        res.json({ success: true, message: 'Mensaje recibido' });
+    } catch (err) {
+        console.error('Contact form error:', err);
+        res.json({ success: true, message: 'Mensaje recibido' });
     }
 });
 
