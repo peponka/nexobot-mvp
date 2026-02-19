@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexoBot — Métricas Internas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --accent: #6C5CE7;
+            --green: #00B894;
+            --red: #E74C3C;
+            --yellow: #F59E0B;
+            --blue: #3B82F6;
+            --pink: #E84393;
+            --bg: #0F1117;
+            --card: #1A1D26;
+            --card-hover: #22252F;
+            --border: #2D3039;
+            --text: #F1F2F6;
+            --text-sec: #9CA3AF;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* TOP BAR */
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 32px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(26, 29, 38, 0.95);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .topbar-brand {
+            font-size: 18px;
+            font-weight: 900;
+        }
+
+        .topbar-brand span {
+            color: var(--accent);
+        }
+
+        .topbar-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: rgba(108, 92, 231, 0.15);
+            color: var(--accent);
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .topbar-right {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .topbar-time {
+            font-size: 12px;
+            color: var(--text-sec);
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--green);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        /* MAIN LAYOUT */
+        .main {
+            padding: 24px 32px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* SECTION */
+        .section-title {
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-sec);
+            margin-bottom: 16px;
+            margin-top: 32px;
+        }
+
+        .section-title:first-child {
+            margin-top: 0;
+        }
+
+        /* KPI ROW */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+        }
+
+        .kpi-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            transition: all 0.2s;
+        }
+
+        .kpi-card:hover {
+            background: var(--card-hover);
+            border-color: rgba(108, 92, 231, 0.3);
+        }
+
+        .kpi-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-sec);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .kpi-value {
+            font-size: 32px;
+            font-weight: 900;
+            margin-top: 6px;
+        }
+
+        .kpi-change {
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        .kpi-up {
+            color: var(--green);
+        }
+
+        .kpi-down {
+            color: var(--red);
+        }
+
+        /* CHART GRID */
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 16px;
+        }
+
+        .chart-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 24px;
+        }
+
+        .chart-title {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chart-badge {
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 10px;
+            background: rgba(0, 184, 148, 0.15);
+            color: var(--green);
+            font-weight: 700;
+        }
+
+        /* CANVAS */
+        canvas {
+            width: 100% !important;
+            height: 200px !important;
+        }
+
+        /* TABLE */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-sec);
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .data-table td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(45, 48, 57, 0.5);
+            font-size: 13px;
+        }
+
+        .data-table tr:hover td {
+            background: rgba(108, 92, 231, 0.04);
+        }
+
+        /* STATUS DOT */
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .status-active {
+            background: rgba(0, 184, 148, 0.15);
+            color: var(--green);
+        }
+
+        .status-trial {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--blue);
+        }
+
+        .status-pending {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--yellow);
+        }
+
+        .status-churned {
+            background: rgba(231, 76, 60, 0.15);
+            color: var(--red);
+        }
+
+        /* MINI BAR */
+        .mini-bar {
+            display: flex;
+            height: 6px;
+            border-radius: 3px;
+            overflow: hidden;
+            gap: 2px;
+            margin-top: 12px;
+        }
+
+        .mini-bar div {
+            border-radius: 3px;
+        }
+
+        /* ACTIVITY FEED */
+        .feed {
+            list-style: none;
+        }
+
+        .feed li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(45, 48, 57, 0.5);
+        }
+
+        .feed-icon {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .feed-text {
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .feed-time {
+            font-size: 11px;
+            color: var(--text-sec);
+            margin-top: 2px;
+        }
+
+        /* FUNNEL */
+        .funnel-step {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+        }
+
+        .funnel-bar-wrap {
+            flex: 1;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .funnel-bar {
+            height: 100%;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            padding-left: 8px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .funnel-label {
+            font-size: 12px;
+            font-weight: 600;
+            min-width: 120px;
+        }
+
+        .funnel-count {
+            font-size: 12px;
+            font-weight: 700;
+            min-width: 40px;
+            text-align: right;
+        }
+
+        /* GRID 3 */
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 1024px) {
+            .kpi-row {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .kpi-row {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .main {
+                padding: 16px;
+            }
+
+            .topbar {
+                padding: 12px 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="topbar">
+        <div style="display:flex;align-items:center;gap:12px;">
+            <span class="topbar-brand">🤖 Nexo<span>Bot</span></span>
+            <span class="topbar-badge">FOUNDER DASHBOARD</span>
+        </div>
+        <div class="topbar-right">
+            <div class="live-dot"></div>
+            <span class="topbar-time" id="clock"></span>
+        </div>
+    </div>
+
+    <div class="main">
+
+        <!-- KPIs -->
+        <div class="section-title">📊 Métricas clave</div>
+        <div class="kpi-row">
+            <div class="kpi-card">
+                <div class="kpi-label">Comerciantes registrados</div>
+                <div class="kpi-value" id="kMerchants">0</div>
+                <div class="kpi-change kpi-up">↑ 23 esta semana</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Transacciones (hoy)</div>
+                <div class="kpi-value" id="kTxToday">0</div>
+                <div class="kpi-change kpi-up">↑ 12% vs ayer</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">API Calls (mes)</div>
+                <div class="kpi-value" id="kApiCalls">0</div>
+                <div class="kpi-change kpi-up">↑ 34% vs mes anterior</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Revenue estimado (mes)</div>
+                <div class="kpi-value" id="kRevenue">0</div>
+                <div class="kpi-change kpi-up">↑ Gs. 4.2M vs anterior</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Instituciones activas</div>
+                <div class="kpi-value" id="kInstitutions">0</div>
+                <div class="kpi-change kpi-up">↑ 2 de pipeline</div>
+            </div>
+        </div>
+
+        <!-- CHARTS ROW -->
+        <div class="section-title" style="margin-top:28px;">📈 Crecimiento</div>
+        <div class="chart-grid">
+            <div class="chart-card">
+                <div class="chart-title">
+                    Comerciantes registrados (últimos 6 meses)
+                    <span class="chart-badge">+340% growth</span>
+                </div>
+                <canvas id="chartMerchants"></canvas>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">Revenue mensual</div>
+                <canvas id="chartRevenue"></canvas>
+            </div>
+        </div>
+
+        <!-- FUNNEL + FEED + PARTNERS -->
+        <div class="section-title">🎯 Pipeline & Actividad</div>
+        <div class="grid-3">
+            <!-- FUNNEL -->
+            <div class="chart-card">
+                <div class="chart-title">Funnel de conversión B2B</div>
+                <div class="funnel-step">
+                    <span class="funnel-label">Leads</span>
+                    <div class="funnel-bar-wrap">
+                        <div class="funnel-bar" style="width:100%;background:var(--accent);">48</div>
+                    </div>
+                    <span class="funnel-count">48</span>
+                </div>
+                <div class="funnel-step">
+                    <span class="funnel-label">Demo agendada</span>
+                    <div class="funnel-bar-wrap">
+                        <div class="funnel-bar" style="width:54%;background:var(--blue);">26</div>
+                    </div>
+                    <span class="funnel-count">26</span>
+                </div>
+                <div class="funnel-step">
+                    <span class="funnel-label">Piloto activo</span>
+                    <div class="funnel-bar-wrap">
+                        <div class="funnel-bar" style="width:23%;background:var(--yellow);">11</div>
+                    </div>
+                    <span class="funnel-count">11</span>
+                </div>
+                <div class="funnel-step">
+                    <span class="funnel-label">Contrato firmado</span>
+                    <div class="funnel-bar-wrap">
+                        <div class="funnel-bar" style="width:10%;background:var(--green);">5</div>
+                    </div>
+                    <span class="funnel-count">5</span>
+                </div>
+                <div style="margin-top:12px;font-size:12px;color:var(--text-sec);">Tasa de conversión: <strong
+                        style="color:var(--green);">10.4%</strong></div>
+            </div>
+
+            <!-- ACTIVITY FEED -->
+            <div class="chart-card">
+                <div class="chart-title">Actividad reciente</div>
+                <ul class="feed">
+                    <li>
+                        <span class="feed-icon">🏪</span>
+                        <div>
+                            <div class="feed-text"><strong>María García</strong> registró 14 ventas hoy</div>
+                            <div class="feed-time">Hace 8 min</div>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="feed-icon">🏦</span>
+                        <div>
+                            <div class="feed-text"><strong>Cooperativa Medalla</strong> consultó 32 scores</div>
+                            <div class="feed-time">Hace 1h</div>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="feed-icon">📩</span>
+                        <div>
+                            <div class="feed-text">Nuevo lead: <strong>Banco Atlas</strong> pidió demo</div>
+                            <div class="feed-time">Hace 2h</div>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="feed-icon">🟢</span>
+                        <div>
+                            <div class="feed-text"><strong>Financiera El Comercio</strong> hizo 8 GreenLight</div>
+                            <div class="feed-time">Hace 3h</div>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="feed-icon">👤</span>
+                        <div>
+                            <div class="feed-text"><strong>+5 comerciantes</strong> completaron onboarding</div>
+                            <div class="feed-time">Hoy</div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- API USAGE BREAKDOWN -->
+            <div class="chart-card">
+                <div class="chart-title">Uso de API por producto</div>
+                <canvas id="chartApiBreakdown"></canvas>
+                <div style="margin-top:16px;">
+                    <div
+                        style="display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-bottom:1px solid var(--border);">
+                        <span>🟢 GreenLight</span><span style="font-weight:700;">847 calls</span>
+                    </div>
+                    <div
+                        style="display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-bottom:1px solid var(--border);">
+                        <span>📊 NexoScore</span><span style="font-weight:700;">423 calls</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 0;">
+                        <span>🔍 Intelligence</span><span style="font-weight:700;">189 calls</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PARTNERS TABLE -->
+        <div class="section-title">🏦 Instituciones financieras</div>
+        <div class="chart-card">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Institución</th>
+                        <th>Tipo</th>
+                        <th>Estado</th>
+                        <th>API Calls (mes)</th>
+                        <th>Revenue</th>
+                        <th>Último acceso</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Cooperativa Medalla Milagrosa</strong></td>
+                        <td>Cooperativa</td>
+                        <td><span class="status status-active">Activo</span></td>
+                        <td>432</td>
+                        <td style="color:var(--green);font-weight:700;">Gs. 22.880.000</td>
+                        <td>Hace 1h</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Financiera El Comercio</strong></td>
+                        <td>Financiera</td>
+                        <td><span class="status status-active">Activo</span></td>
+                        <td>298</td>
+                        <td style="color:var(--green);font-weight:700;">Gs. 15.790.000</td>
+                        <td>Hace 3h</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Cooperativa San Cristóbal</strong></td>
+                        <td>Cooperativa</td>
+                        <td><span class="status status-active">Activo</span></td>
+                        <td>187</td>
+                        <td style="color:var(--green);font-weight:700;">Gs. 9.905.000</td>
+                        <td>Hoy</td>
+                    </tr>
+                    <tr>
+                        <td><strong>MiPyME Capital</strong></td>
+                        <td>Fintech</td>
+                        <td><span class="status status-trial">Prueba</span></td>
+                        <td>89</td>
+                        <td style="color:var(--text-sec);">Gs. 0 (trial)</td>
+                        <td>Ayer</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Banco Atlas</strong></td>
+                        <td>Banco</td>
+                        <td><span class="status status-pending">Pipeline</span></td>
+                        <td>—</td>
+                        <td style="color:var(--text-sec);">—</td>
+                        <td>—</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Visión Banco</strong></td>
+                        <td>Banco</td>
+                        <td><span class="status status-pending">Pipeline</span></td>
+                        <td>—</td>
+                        <td style="color:var(--text-sec);">—</td>
+                        <td>—</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- MERCHANT HEALTH -->
+        <div class="section-title">🏪 Salud de comerciantes</div>
+        <div class="chart-grid">
+            <div class="chart-card">
+                <div class="chart-title">Distribución de NexoScore</div>
+                <canvas id="chartScoreDist"></canvas>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">Retención semanal</div>
+                <div style="margin-top:8px;">
+                    <div
+                        style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+                        <span style="font-size:13px;">Semana 1</span>
+                        <div
+                            style="flex:1;margin:0 12px;height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden;">
+                            <div style="width:100%;height:100%;background:var(--green);border-radius:4px;"></div>
+                        </div>
+                        <span style="font-size:13px;font-weight:700;">100%</span>
+                    </div>
+                    <div
+                        style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+                        <span style="font-size:13px;">Semana 2</span>
+                        <div
+                            style="flex:1;margin:0 12px;height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden;">
+                            <div style="width:78%;height:100%;background:var(--green);border-radius:4px;"></div>
+                        </div>
+                        <span style="font-size:13px;font-weight:700;">78%</span>
+                    </div>
+                    <div
+                        style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+                        <span style="font-size:13px;">Semana 4</span>
+                        <div
+                            style="flex:1;margin:0 12px;height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden;">
+                            <div style="width:62%;height:100%;background:var(--blue);border-radius:4px;"></div>
+                        </div>
+                        <span style="font-size:13px;font-weight:700;">62%</span>
+                    </div>
+                    <div
+                        style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+                        <span style="font-size:13px;">Mes 2</span>
+                        <div
+                            style="flex:1;margin:0 12px;height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden;">
+                            <div style="width:51%;height:100%;background:var(--blue);border-radius:4px;"></div>
+                        </div>
+                        <span style="font-size:13px;font-weight:700;">51%</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;">
+                        <span style="font-size:13px;">Mes 3+</span>
+                        <div
+                            style="flex:1;margin:0 12px;height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden;">
+                            <div style="width:44%;height:100%;background:var(--yellow);border-radius:4px;"></div>
+                        </div>
+                        <span style="font-size:13px;font-weight:700;">44%</span>
+                    </div>
+                </div>
+                <div
+                    style="margin-top:16px;padding:12px;background:rgba(0,184,148,0.08);border-radius:8px;font-size:12px;color:var(--green);">
+                    💡 Target: 50% retención Mes 3. Actual: 44% — casi ahí!
+                </div>
+            </div>
+        </div>
+
+        <!-- SYSTEM STATUS -->
+        <div class="section-title">⚙️ Estado del sistema</div>
+        <div class="kpi-row" style="grid-template-columns:repeat(4,1fr);">
+            <div class="kpi-card">
+                <div class="kpi-label">Server uptime</div>
+                <div class="kpi-value" style="color:var(--green);font-size:24px;">99.7%</div>
+                <div style="font-size:11px;color:var(--text-sec);margin-top:4px;">Render · Node.js</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">API latencia (p95)</div>
+                <div class="kpi-value" style="color:var(--green);font-size:24px;">187ms</div>
+                <div style="font-size:11px;color:var(--text-sec);margin-top:4px;">Target: &lt;500ms ✅</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">WhatsApp webhook</div>
+                <div class="kpi-value" style="color:var(--green);font-size:24px;">Activo</div>
+                <div style="font-size:11px;color:var(--text-sec);margin-top:4px;">Meta Verified ✅</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Supabase DB</div>
+                <div class="kpi-value" style="color:var(--green);font-size:24px;">Healthy</div>
+                <div style="font-size:11px;color:var(--text-sec);margin-top:4px;">412 rows · 2.1MB</div>
+            </div>
+        </div>
+
+        <div style="text-align:center;padding:32px;font-size:12px;color:var(--text-sec);">
+            🤖 NexoBot Founder Dashboard · Datos demo · A Unicornio © 2026
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        // Clock
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').textContent = now.toLocaleString('es-PY', { dateStyle: 'medium', timeStyle: 'short' });
+        }
+        updateClock();
+        setInterval(updateClock, 60000);
+
+        // Animate counters
+        function animateCounter(id, target, prefix = '', suffix = '') {
+            const el = document.getElementById(id);
+            let current = 0;
+            const step = Math.ceil(target / 40);
+            const timer = setInterval(() => {
+                current += step;
+                if (current >= target) { current = target; clearInterval(timer); }
+                el.textContent = prefix + current.toLocaleString('es-PY') + suffix;
+            }, 30);
+        }
+
+        setTimeout(() => {
+            animateCounter('kMerchants', 847);
+            animateCounter('kTxToday', 1423);
+            animateCounter('kApiCalls', 1459);
+            animateCounter('kRevenue', 48575000, 'Gs. ');
+            animateCounter('kInstitutions', 5);
+        }, 300);
+
+        // Charts
+        Chart.defaults.color = '#9CA3AF';
+        Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
+
+        // Merchants growth
+        new Chart(document.getElementById('chartMerchants'), {
+            type: 'line',
+            data: {
+                labels: ['Sep', 'Oct', 'Nov', 'Dic', 'Ene', 'Feb'],
+                datasets: [{
+                    label: 'Comerciantes',
+                    data: [45, 112, 234, 398, 621, 847],
+                    borderColor: '#6C5CE7',
+                    backgroundColor: 'rgba(108,92,231,0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 3,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#6C5CE7'
+                }]
+            },
+            options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+        });
+
+        // Revenue
+        new Chart(document.getElementById('chartRevenue'), {
+            type: 'bar',
+            data: {
+                labels: ['Oct', 'Nov', 'Dic', 'Ene', 'Feb'],
+                datasets: [{
+                    label: 'Revenue (M Gs)',
+                    data: [2.1, 8.4, 18.7, 32.5, 48.6],
+                    backgroundColor: ['rgba(0,184,148,0.3)', 'rgba(0,184,148,0.4)', 'rgba(0,184,148,0.5)', 'rgba(0,184,148,0.7)', 'rgba(0,184,148,1)'],
+                    borderRadius: 6
+                }]
+            },
+            options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+        });
+
+        // API Breakdown (doughnut)
+        new Chart(document.getElementById('chartApiBreakdown'), {
+            type: 'doughnut',
+            data: {
+                labels: ['GreenLight', 'NexoScore', 'Intelligence'],
+                datasets: [{
+                    data: [847, 423, 189],
+                    backgroundColor: ['#00B894', '#6C5CE7', '#F59E0B'],
+                    borderWidth: 0
+                }]
+            },
+            options: { plugins: { legend: { display: false } }, cutout: '65%' }
+        });
+
+        // Score Distribution
+        new Chart(document.getElementById('chartScoreDist'), {
+            type: 'bar',
+            data: {
+                labels: ['0-20', '21-40', '41-60', '61-80', '81-100'],
+                datasets: [{
+                    label: 'Comerciantes',
+                    data: [28, 87, 245, 312, 175],
+                    backgroundColor: ['#E74C3C', '#F59E0B', '#3B82F6', '#6C5CE7', '#00B894'],
+                    borderRadius: 6
+                }]
+            },
+            options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+        });
+    </script>
+
+</body>
+
+</html>
