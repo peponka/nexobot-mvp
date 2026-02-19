@@ -697,13 +697,13 @@
             <div class="kpi-row animate delay-1">
                 <div class="kpi">
                     <div class="kpi-icon">💰</div>
-                    <div class="kpi-value" id="kpiVentas">Gs. 2.8M</div>
+                    <div class="kpi-value" id="kpiVentas">Gs. 2.800.000</div>
                     <div class="kpi-label">Ventas hoy</div>
                     <div class="kpi-change up">↑ 12% vs ayer</div>
                 </div>
                 <div class="kpi">
                     <div class="kpi-icon">📊</div>
-                    <div class="kpi-value" id="kpiMes">Gs. 72.8M</div>
+                    <div class="kpi-value" id="kpiMes">Gs. 72.800.000</div>
                     <div class="kpi-label">Este mes</div>
                     <div class="kpi-change up">↑ 8% vs mes pasado</div>
                 </div>
@@ -713,7 +713,7 @@
                     <div class="kpi-icon">📋</div>
                     <div class="kpi-value" id="kpiFiados">3</div>
                     <div class="kpi-label">Fiados pendientes</div>
-                    <div class="kpi-change" style="color:var(--yellow)">Gs. 4.2M total</div>
+                    <div class="kpi-change" style="color:var(--yellow)">Gs. 4.200.000 total</div>
                 </div>
                 <div class="kpi">
                     <div class="kpi-icon">✅</div>
@@ -764,17 +764,17 @@
                     <div
                         style="display:flex;justify-content:space-between;font-size:12px;padding:8px 0;border-top:1px solid var(--border);">
                         <span style="color:var(--text-muted);">Total del período</span>
-                        <span style="font-weight:800;" id="ventasTotal">Gs. 19.6M</span>
+                        <span style="font-weight:800;" id="ventasTotal">Gs. 19.600.000</span>
                     </div>
                     <div
                         style="display:flex;justify-content:space-between;font-size:12px;padding:8px 0;border-top:1px solid var(--border);">
                         <span style="color:var(--text-muted);">Promedio diario</span>
-                        <span style="font-weight:800;" id="ventasAvg">Gs. 2.8M</span>
+                        <span style="font-weight:800;" id="ventasAvg">Gs. 2.800.000</span>
                     </div>
                     <div
                         style="display:flex;justify-content:space-between;font-size:12px;padding:8px 0;border-top:1px solid var(--border);">
                         <span style="color:var(--text-muted);">Mejor día</span>
-                        <span style="font-weight:800;color:var(--green);" id="ventasBest">Gs. 4.1M (Sábado)</span>
+                        <span style="font-weight:800;color:var(--green);" id="ventasBest">Gs. 4.100.000 (Sábado)</span>
                     </div>
                 </div>
             </div>
@@ -1014,7 +1014,7 @@
             const max = Math.max(...weekData);
             container.innerHTML = weekData.map((v, i) =>
                 `<div class="chart-bar" style="height:${(v / max) * 100}%;background:${i === 5 ? 'var(--green)' : 'var(--accent)'};">
-            <span class="chart-bar-val">Gs. ${(v / 1000000).toFixed(1)}M</span>
+            <span class="chart-bar-val">Gs. ${formatGs(v)}</span>
         </div>`
             ).join('');
             labels.innerHTML = weekLabels.map(l => `<span>${l}</span>`).join('');
@@ -1029,22 +1029,22 @@
                 data = weekData;
                 lbls = weekLabels;
                 const total = data.reduce((a, b) => a + b, 0);
-                document.getElementById('ventasTotal').textContent = `Gs. ${(total / 1000000).toFixed(1)}M`;
-                document.getElementById('ventasAvg').textContent = `Gs. ${(total / 7 / 1000000).toFixed(1)}M`;
-                document.getElementById('ventasBest').textContent = `Gs. 4.1M (Sábado)`;
+                document.getElementById('ventasTotal').textContent = `Gs. ${formatGs(total)}`;
+                document.getElementById('ventasAvg').textContent = `Gs. ${formatGs(Math.round(total / 7))}`;
+                document.getElementById('ventasBest').textContent = `Gs. 4.100.000 (Sábado)`;
             } else if (period === 'month') {
                 data = monthData.filter(v => v > 0);
                 lbls = data.map((_, i) => i + 1);
                 const total = data.reduce((a, b) => a + b, 0);
-                document.getElementById('ventasTotal').textContent = `Gs. ${(total).toFixed(1)}M`;
-                document.getElementById('ventasAvg').textContent = `Gs. ${(total / data.length).toFixed(1)}M`;
-                document.getElementById('ventasBest').textContent = `Gs. 3.5M (Día 18)`;
+                document.getElementById('ventasTotal').textContent = `Gs. ${formatGs(total * 1000000)}`;
+                document.getElementById('ventasAvg').textContent = `Gs. ${formatGs(Math.round(total / data.length * 1000000))}`;
+                document.getElementById('ventasBest').textContent = `Gs. 3.500.000 (Día 18)`;
             } else {
                 data = sixMonthData;
                 lbls = sixMonthLabels;
-                document.getElementById('ventasTotal').textContent = `Gs. 410M`;
-                document.getElementById('ventasAvg').textContent = `Gs. 68.3M/mes`;
-                document.getElementById('ventasBest').textContent = `Gs. 78M (Febrero)`;
+                document.getElementById('ventasTotal').textContent = `Gs. 410.000.000`;
+                document.getElementById('ventasAvg').textContent = `Gs. 68.300.000/mes`;
+                document.getElementById('ventasBest').textContent = `Gs. 78.000.000 (Febrero)`;
             }
 
             const max = Math.max(...data);
@@ -1087,10 +1087,10 @@
         // ==================== TYPE BREAKDOWN ====================
         function renderTypeBreakdown() {
             const types = [
-                { name: 'Efectivo', pct: 72, color: 'var(--green)', amount: 'Gs. 52.4M' },
-                { name: 'Fiado', pct: 18, color: 'var(--yellow)', amount: 'Gs. 13.1M' },
-                { name: 'Transferencia', pct: 7, color: 'var(--blue)', amount: 'Gs. 5.1M' },
-                { name: 'QR/Digital', pct: 3, color: 'var(--accent)', amount: 'Gs. 2.2M' },
+                { name: 'Efectivo', pct: 72, color: 'var(--green)', amount: 'Gs. 52.400.000' },
+                { name: 'Fiado', pct: 18, color: 'var(--yellow)', amount: 'Gs. 13.100.000' },
+                { name: 'Transferencia', pct: 7, color: 'var(--blue)', amount: 'Gs. 5.100.000' },
+                { name: 'QR/Digital', pct: 3, color: 'var(--accent)', amount: 'Gs. 2.200.000' },
             ];
             document.getElementById('typeBreakdown').innerHTML = types.map(t => `
         <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;">
@@ -1196,9 +1196,7 @@
 
         // ==================== HELPERS ====================
         function formatGs(n) {
-            if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
-            if (n >= 1000) return Math.round(n / 1000) + 'K';
-            return n.toString();
+            return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
         }
     </script>
 
