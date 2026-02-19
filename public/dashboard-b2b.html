@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexoBot — Dashboard B2B</title>
+    <meta name="description"
+        content="Panel de consulta crediticia para instituciones financieras. Accedé a NexoScore, GreenLight y análisis de comerciantes.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #F7F8FC;
+            --bg-white: #FFFFFF;
+            --bg-hover: #F0F2F8;
+            --border: #E8EBF0;
+            --text: #1A1D26;
+            --text-sec: #6B7280;
+            --text-muted: #9CA3AF;
+            --accent: #6C5CE7;
+            --accent-light: #EDE9FE;
+            --green: #00B894;
+            --green-light: #ECFDF5;
+            --red: #E74C3C;
+            --red-light: #FEF2F2;
+            --yellow: #F59E0B;
+            --yellow-light: #FFFBEB;
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --radius: 12px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* ==================== LOGIN ==================== */
+        .login-overlay {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #6C5CE7 0%, #4834D4 50%, #341F97 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.5s, transform 0.5s;
+        }
+
+        .login-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(1.05);
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            padding: 48px 40px;
+            width: 420px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        .login-logo {
+            font-size: 36px;
+            font-weight: 900;
+            margin-bottom: 4px;
+        }
+
+        .login-logo span {
+            color: #6C5CE7;
+        }
+
+        .login-subtitle {
+            font-size: 14px;
+            color: var(--text-sec);
+            margin-bottom: 32px;
+        }
+
+        .login-field {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            margin-bottom: 12px;
+            transition: border-color 0.2s;
+            outline: none;
+        }
+
+        .login-field:focus {
+            border-color: var(--accent);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: all 0.2s;
+        }
+
+        .login-btn:hover {
+            background: #5A4BD4;
+            transform: translateY(-1px);
+        }
+
+        .login-error {
+            color: var(--red);
+            font-size: 13px;
+            margin-top: 12px;
+            display: none;
+        }
+
+        .login-demo {
+            margin-top: 20px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .login-demo code {
+            background: #F3F4F6;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        /* ==================== LAYOUT ==================== */
+        .app {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: var(--bg-white);
+            border-right: 1px solid var(--border);
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            z-index: 10;
+        }
+
+        .sidebar-brand {
+            font-size: 20px;
+            font-weight: 900;
+            padding: 0 8px 24px;
+        }
+
+        .sidebar-brand span {
+            color: var(--accent);
+        }
+
+        .sidebar-section {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            padding: 16px 8px 8px;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-sec);
+            cursor: pointer;
+            transition: all 0.15s;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-family: inherit;
+        }
+
+        .sidebar-item:hover {
+            background: var(--bg-hover);
+            color: var(--text);
+        }
+
+        .sidebar-item.active {
+            background: var(--accent-light);
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .sidebar-item .icon {
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 16px 8px;
+            border-top: 1px solid var(--border);
+        }
+
+        .sidebar-user {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .sidebar-role {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .main {
+            margin-left: 260px;
+            flex: 1;
+            padding: 28px 32px;
+        }
+
+        /* ==================== HEADER ==================== */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+        }
+
+        .page-header h1 {
+            font-size: 24px;
+            font-weight: 800;
+        }
+
+        .page-header .subtitle {
+            font-size: 13px;
+            color: var(--text-sec);
+            margin-top: 2px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            border: none;
+            transition: all 0.15s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5A4BD4;
+        }
+
+        .btn-outline {
+            background: white;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .btn-outline:hover {
+            background: var(--bg-hover);
+        }
+
+        .btn-sm {
+            padding: 6px 14px;
+            font-size: 12px;
+        }
+
+        /* ==================== KPI CARDS ==================== */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .kpi-card {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .kpi-card .label {
+            font-size: 12px;
+            color: var(--text-sec);
+            font-weight: 500;
+        }
+
+        .kpi-card .value {
+            font-size: 28px;
+            font-weight: 900;
+            margin-top: 4px;
+        }
+
+        .kpi-card .change {
+            font-size: 12px;
+            margin-top: 6px;
+            font-weight: 600;
+        }
+
+        .kpi-card .change.up {
+            color: var(--green);
+        }
+
+        .kpi-card .change.down {
+            color: var(--red);
+        }
+
+        /* ==================== CARDS / TABLE ==================== */
+        .card {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-header h3 {
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .search-box {
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: inherit;
+            width: 280px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-box:focus {
+            border-color: var(--accent);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 14px 20px;
+            font-size: 13px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tr:hover td {
+            background: var(--bg-hover);
+        }
+
+        tr {
+            cursor: pointer;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .badge-green {
+            background: var(--green-light);
+            color: var(--green);
+        }
+
+        .badge-red {
+            background: var(--red-light);
+            color: var(--red);
+        }
+
+        .badge-yellow {
+            background: var(--yellow-light);
+            color: var(--yellow);
+        }
+
+        .score-circle {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 800;
+            color: white;
+        }
+
+        /* ==================== VIEW SECTIONS ==================== */
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        /* ==================== MERCHANT PROFILE ==================== */
+        .profile-header {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+            padding: 24px;
+            margin-bottom: 24px;
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .profile-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            background: var(--accent-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        .profile-info h2 {
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .profile-meta {
+            font-size: 13px;
+            color: var(--text-sec);
+            margin-top: 4px;
+        }
+
+        .profile-meta span {
+            margin-right: 16px;
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* Score Gauge */
+        .score-gauge {
+            text-align: center;
+            padding: 32px;
+        }
+
+        .gauge-container {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            margin: 0 auto 16px;
+        }
+
+        .gauge-svg {
+            transform: rotate(-90deg);
+            width: 180px;
+            height: 180px;
+        }
+
+        .gauge-bg {
+            fill: none;
+            stroke: #E8EBF0;
+            stroke-width: 12;
+        }
+
+        .gauge-fill {
+            fill: none;
+            stroke-width: 12;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1.5s ease;
+        }
+
+        .gauge-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .gauge-number {
+            font-size: 42px;
+            font-weight: 900;
+        }
+
+        .gauge-label {
+            font-size: 12px;
+            color: var(--text-sec);
+            font-weight: 600;
+        }
+
+        /* Data rows */
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+        }
+
+        .data-row:last-child {
+            border-bottom: none;
+        }
+
+        .data-row .label {
+            color: var(--text-sec);
+        }
+
+        .data-row .value {
+            font-weight: 700;
+        }
+
+        /* Chart placeholder */
+        .chart-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            height: 140px;
+            padding: 20px;
+        }
+
+        .chart-bar {
+            flex: 1;
+            border-radius: 6px 6px 0 0;
+            position: relative;
+            transition: height 1s ease;
+        }
+
+        .chart-bar-label {
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        /* ==================== GREENLIGHT ==================== */
+        .greenlight-result {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .greenlight-icon {
+            font-size: 56px;
+            margin-bottom: 12px;
+        }
+
+        .greenlight-verdict {
+            font-size: 24px;
+            font-weight: 900;
+            margin-bottom: 8px;
+        }
+
+        .greenlight-desc {
+            font-size: 14px;
+            color: var(--text-sec);
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .greenlight-factors {
+            margin-top: 24px;
+            text-align: left;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .factor-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+        }
+
+        .factor-bar {
+            width: 100px;
+            height: 6px;
+            background: #E8EBF0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .factor-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 1s ease;
+        }
+
+        /* ==================== RESPONSIVE ==================== */
+        @media (max-width: 900px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main {
+                margin-left: 0;
+            }
+
+            .kpi-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ==================== ANIMATIONS ==================== */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-in {
+            animation: fadeIn 0.4s ease forwards;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ==================== LOGIN ==================== -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-card">
+            <div class="login-logo">🏦 Nexo<span>Bot</span></div>
+            <div class="login-subtitle">Portal para instituciones financieras</div>
+            <input class="login-field" id="loginCode" type="text" placeholder="Código de institución" value="COOP001">
+            <input class="login-field" id="loginPass" type="password" placeholder="Contraseña" value="demo2026">
+            <button class="login-btn" id="loginBtn">Ingresar al portal</button>
+            <div class="login-error" id="loginError">Código o contraseña incorrectos</div>
+            <div class="login-demo">
+                Demo: Código <code>COOP001</code> · Contraseña <code>demo2026</code>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== APP ==================== -->
+    <div class="app">
+
+        <!-- SIDEBAR -->
+        <nav class="sidebar">
+            <div class="sidebar-brand">🏦 Nexo<span>Bot</span></div>
+
+            <div class="sidebar-section">Principal</div>
+            <button class="sidebar-item active" data-view="overview">
+                <span class="icon">📊</span> Overview
+            </button>
+            <button class="sidebar-item" data-view="merchants">
+                <span class="icon">🔍</span> Buscar comerciantes
+            </button>
+            <button class="sidebar-item" data-view="greenlight">
+                <span class="icon">🟢</span> GreenLight
+            </button>
+
+            <div class="sidebar-section">Reportes</div>
+            <button class="sidebar-item" data-view="usage">
+                <span class="icon">📈</span> Uso de API
+            </button>
+            <button class="sidebar-item" data-view="billing">
+                <span class="icon">💳</span> Facturación
+            </button>
+
+            <div class="sidebar-footer">
+                <div class="sidebar-user" id="sidebarUser">Cooperativa del Sur</div>
+                <div class="sidebar-role">Partner · Plan Pro</div>
+                <button class="sidebar-item" style="margin-top:8px; color:var(--red);" id="logoutBtn">
+                    <span class="icon">🚪</span> Cerrar sesión
+                </button>
+            </div>
+        </nav>
+
+        <!-- MAIN CONTENT -->
+        <main class="main">
+
+            <!-- ===== OVERVIEW ===== -->
+            <div class="view active" id="view-overview">
+                <div class="page-header">
+                    <div>
+                        <h1>Dashboard</h1>
+                        <div class="subtitle">Bienvenido, Cooperativa del Sur</div>
+                    </div>
+                    <div style="font-size:13px; color:var(--text-muted);">
+                        📅 Febrero 2026
+                    </div>
+                </div>
+
+                <div class="kpi-row animate-in">
+                    <div class="kpi-card">
+                        <div class="label">Consultas este mes</div>
+                        <div class="value">1,247</div>
+                        <div class="change up">↑ 23% vs mes anterior</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="label">Comerciantes evaluados</div>
+                        <div class="value">892</div>
+                        <div class="change up">↑ 15% vs mes anterior</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="label">Tasa de aprobación</div>
+                        <div class="value" style="color:var(--green)">68%</div>
+                        <div class="change up">↑ 5% vs mes anterior</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="label">Costo promedio</div>
+                        <div class="value">$0.12</div>
+                        <div class="change down">↓ 8% vs mes anterior</div>
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns:2fr 1fr; gap:20px;">
+                    <div class="card animate-in">
+                        <div class="card-header">
+                            <h3>📈 Consultas diarias — Febrero 2026</h3>
+                        </div>
+                        <div class="chart-bars" id="dailyChart"></div>
+                    </div>
+                    <div class="card animate-in">
+                        <div class="card-header">
+                            <h3>🎯 Distribución de riesgo</h3>
+                        </div>
+                        <div style="padding:20px;">
+                            <div class="data-row">
+                                <span class="label">🟢 Bajo (70-100)</span>
+                                <span class="value">42%</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="label">🟡 Medio (40-69)</span>
+                                <span class="value">31%</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="label">🔴 Alto (0-39)</span>
+                                <span class="value">27%</span>
+                            </div>
+                            <div
+                                style="margin-top:16px; padding:12px; background:var(--accent-light); border-radius:8px; font-size:12px; color:var(--accent); font-weight:600;">
+                                💡 La cartera tiene un perfil de riesgo moderado-bajo. Recomendación: mantener límites
+                                actuales.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card animate-in" style="margin-top:20px;">
+                    <div class="card-header">
+                        <h3>🕐 Consultas recientes</h3>
+                        <button class="btn btn-outline btn-sm" onclick="navigateTo('merchants')">Ver todos</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Comerciante</th>
+                                <th>Teléfono</th>
+                                <th>NexoScore</th>
+                                <th>GreenLight</th>
+                                <th>Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ===== MERCHANTS ===== -->
+            <div class="view" id="view-merchants">
+                <div class="page-header">
+                    <div>
+                        <h1>🔍 Buscar Comerciantes</h1>
+                        <div class="subtitle">Consultá el perfil crediticio de cualquier comerciante registrado</div>
+                    </div>
+                </div>
+
+                <div class="card animate-in">
+                    <div class="card-header">
+                        <input class="search-box" id="merchantSearch" type="text"
+                            placeholder="Buscar por nombre, teléfono o cédula...">
+                        <span style="font-size:12px; color:var(--text-muted);" id="resultCount">6 comerciantes</span>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Comerciante</th>
+                                <th>Rubro</th>
+                                <th>Teléfono</th>
+                                <th>NexoScore</th>
+                                <th>Riesgo</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="merchantsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ===== MERCHANT PROFILE ===== -->
+            <div class="view" id="view-profile">
+                <div class="page-header">
+                    <div>
+                        <button class="btn btn-outline btn-sm" onclick="navigateTo('merchants')">← Volver</button>
+                    </div>
+                </div>
+
+                <div class="profile-header animate-in">
+                    <div class="profile-avatar" id="profileAvatar">🏪</div>
+                    <div class="profile-info">
+                        <h2 id="profileName">—</h2>
+                        <div class="profile-meta">
+                            <span id="profileRubro">📋 —</span>
+                            <span id="profilePhone">📱 —</span>
+                            <span id="profileCedula">🪪 —</span>
+                        </div>
+                    </div>
+                    <div style="margin-left:auto; text-align:right;">
+                        <div style="font-size:11px; color:var(--text-muted); font-weight:600;">NEXOSCORE</div>
+                        <div id="profileScoreBig" style="font-size:42px; font-weight:900;">—</div>
+                    </div>
+                </div>
+
+                <div class="profile-grid">
+                    <!-- Score Gauge -->
+                    <div class="card animate-in">
+                        <div class="card-header">
+                            <h3>📊 NexoScore — Detalle</h3>
+                        </div>
+                        <div class="score-gauge">
+                            <div class="gauge-container">
+                                <svg class="gauge-svg" viewBox="0 0 180 180">
+                                    <circle class="gauge-bg" cx="90" cy="90" r="78" />
+                                    <circle class="gauge-fill" id="gaugeFill" cx="90" cy="90" r="78"
+                                        stroke-dasharray="490" stroke-dashoffset="490" />
+                                </svg>
+                                <div class="gauge-text">
+                                    <div class="gauge-number" id="gaugeNumber">—</div>
+                                    <div class="gauge-label">de 100</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="padding:0 20px 20px;">
+                            <div id="scoreFactors"></div>
+                        </div>
+                    </div>
+
+                    <!-- Financial Data -->
+                    <div class="card animate-in">
+                        <div class="card-header">
+                            <h3>💰 Datos Financieros</h3>
+                        </div>
+                        <div style="padding:20px;" id="financialData"></div>
+
+                        <div class="card-header" style="border-top:1px solid var(--border);">
+                            <h3>📊 Ventas últimos 6 meses</h3>
+                        </div>
+                        <div class="chart-bars" id="salesChart" style="height:100px;"></div>
+                        <div style="height:24px;"></div>
+                    </div>
+                </div>
+
+                <!-- GreenLight for this merchant -->
+                <div class="card animate-in" style="margin-top:20px;">
+                    <div class="card-header">
+                        <h3>🟢 Evaluación GreenLight</h3>
+                    </div>
+                    <div class="greenlight-result" id="profileGreenlight"></div>
+                </div>
+            </div>
+
+            <!-- ===== GREENLIGHT ===== -->
+            <div class="view" id="view-greenlight">
+                <div class="page-header">
+                    <div>
+                        <h1>🟢 GreenLight — Evaluación Instantánea</h1>
+                        <div class="subtitle">Aprobación o rechazo en 1 segundo basado en datos transaccionales reales
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card animate-in" style="max-width:600px;">
+                    <div class="card-header">
+                        <h3>Evaluar comerciante</h3>
+                    </div>
+                    <div style="padding:24px;">
+                        <input class="login-field" id="glPhone" type="text"
+                            placeholder="Teléfono del comerciante (ej: 595991234567)">
+                        <input class="login-field" id="glAmount" type="text"
+                            placeholder="Monto solicitado en Gs. (ej: 5000000)">
+                        <select class="login-field" id="glProduct">
+                            <option value="microcredito">Microcrédito</option>
+                            <option value="capital_trabajo">Capital de trabajo</option>
+                            <option value="inversion">Inversión</option>
+                        </select>
+                        <button class="login-btn" id="glSubmit" onclick="runGreenlight()">⚡ Evaluar ahora</button>
+                    </div>
+                </div>
+
+                <div class="card animate-in" style="max-width:600px; margin-top:20px; display:none;" id="glResultCard">
+                    <div class="greenlight-result" id="glResult"></div>
+                </div>
+            </div>
+
+            <!-- ===== API USAGE ===== -->
+            <div class="view" id="view-usage">
+                <div class="page-header">
+                    <div>
+                        <h1>📈 Uso de API</h1>
+                        <div class="subtitle">Detalle de consumo por producto</div>
+                    </div>
+                </div>
+
+                <div class="kpi-row animate-in">
+                    <div class="kpi-card">
+                        <div class="label">GreenLight</div>
+                        <div class="value">847</div>
+                        <div class="change" style="color:var(--text-sec);">$0.05 × 847 = $42.35</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="label">NexoScore</div>
+                        <div class="value">312</div>
+                        <div class="change" style="color:var(--text-sec);">$0.15 × 312 = $46.80</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="label">Intelligence</div>
+                        <div class="value">88</div>
+                        <div class="change" style="color:var(--text-sec);">$500.00 / mes</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="label">Total este mes</div>
+                        <div class="value" style="color:var(--accent);">$589.15</div>
+                        <div class="change up">Dentro del presupuesto</div>
+                    </div>
+                </div>
+
+                <div class="card animate-in">
+                    <div class="card-header">
+                        <h3>📋 Log de consultas recientes</h3>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Producto</th>
+                                <th>Teléfono</th>
+                                <th>Resultado</th>
+                                <th>Costo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usageTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ===== BILLING ===== -->
+            <div class="view" id="view-billing">
+                <div class="page-header">
+                    <div>
+                        <h1>💳 Facturación</h1>
+                        <div class="subtitle">Historial de pagos y facturas</div>
+                    </div>
+                </div>
+
+                <div class="card animate-in">
+                    <div class="card-header">
+                        <h3>Historial de facturas</h3>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Período</th>
+                                <th>Consultas</th>
+                                <th>Monto</th>
+                                <th>Estado</th>
+                                <th>Factura</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Febrero 2026</td>
+                                <td>1,247</td>
+                                <td><strong>$589.15</strong></td>
+                                <td><span class="badge badge-yellow">Pendiente</span></td>
+                                <td><button class="btn btn-outline btn-sm">📄 Descargar</button></td>
+                            </tr>
+                            <tr>
+                                <td>Enero 2026</td>
+                                <td>1,012</td>
+                                <td><strong>$478.30</strong></td>
+                                <td><span class="badge badge-green">Pagado</span></td>
+                                <td><button class="btn btn-outline btn-sm">📄 Descargar</button></td>
+                            </tr>
+                            <tr>
+                                <td>Diciembre 2025</td>
+                                <td>934</td>
+                                <td><strong>$423.80</strong></td>
+                                <td><span class="badge badge-green">Pagado</span></td>
+                                <td><button class="btn btn-outline btn-sm">📄 Descargar</button></td>
+                            </tr>
+                            <tr>
+                                <td>Noviembre 2025</td>
+                                <td>756</td>
+                                <td><strong>$356.40</strong></td>
+                                <td><span class="badge badge-green">Pagado</span></td>
+                                <td><button class="btn btn-outline btn-sm">📄 Descargar</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // ==================== DEMO DATA ====================
+        const merchants = [
+            { id: 1, name: 'María García', business: 'Despensa Doña María', rubro: 'Almacén', phone: '595991234567', cedula: '4.567.890', score: 82, risk: 'bajo', dailyAvg: 2800000, monthlyAvg: 72800000, debtors: 3, debtTotal: 4200000, onTime: 94, months: 14, sales6m: [58, 62, 71, 68, 73, 78] },
+            { id: 2, name: 'Carlos Benítez', business: 'Ferretería Don Carlos', rubro: 'Ferretería', phone: '595992345678', cedula: '3.456.789', score: 71, risk: 'bajo', dailyAvg: 4500000, monthlyAvg: 117000000, debtors: 5, debtTotal: 8900000, onTime: 87, months: 11, sales6m: [95, 88, 102, 98, 110, 115] },
+            { id: 3, name: 'Ana López', business: 'Boutique Ana', rubro: 'Indumentaria', phone: '595993456789', cedula: '5.678.901', score: 55, risk: 'medio', dailyAvg: 1900000, monthlyAvg: 49400000, debtors: 8, debtTotal: 12300000, onTime: 72, months: 7, sales6m: [42, 38, 45, 40, 48, 50] },
+            { id: 4, name: 'Roberto Martínez', business: 'Electrónica RM', rubro: 'Electrónica', phone: '595994567890', cedula: '2.345.678', score: 91, risk: 'bajo', dailyAvg: 6200000, monthlyAvg: 161200000, debtors: 2, debtTotal: 3100000, onTime: 97, months: 18, sales6m: [130, 142, 138, 155, 148, 162] },
+            { id: 5, name: 'Lucía Fernández', business: 'Kiosco Luci', rubro: 'Kiosco', phone: '595995678901', cedula: '6.789.012', score: 34, risk: 'alto', dailyAvg: 850000, monthlyAvg: 22100000, debtors: 12, debtTotal: 18500000, onTime: 58, months: 4, sales6m: [25, 22, 18, 20, 21, 19] },
+            { id: 6, name: 'Diego Acosta', business: 'Panadería Don Diego', rubro: 'Alimentos', phone: '595996789012', cedula: '7.890.123', score: 76, risk: 'bajo', dailyAvg: 3400000, monthlyAvg: 88400000, debtors: 4, debtTotal: 5600000, onTime: 91, months: 9, sales6m: [72, 78, 82, 80, 88, 92] },
+        ];
+
+        const usageLog = [
+            { ts: '19/02 14:23', product: 'GreenLight', phone: '595991234567', result: 'Aprobado', cost: '$0.05' },
+            { ts: '19/02 14:18', product: 'NexoScore', phone: '595994567890', result: 'Score: 91', cost: '$0.15' },
+            { ts: '19/02 13:55', product: 'GreenLight', phone: '595995678901', result: 'Rechazado', cost: '$0.05' },
+            { ts: '19/02 13:42', product: 'NexoScore', phone: '595993456789', result: 'Score: 55', cost: '$0.15' },
+            { ts: '19/02 13:30', product: 'GreenLight', phone: '595992345678', result: 'Aprobado', cost: '$0.05' },
+            { ts: '19/02 12:15', product: 'GreenLight', phone: '595996789012', result: 'Aprobado', cost: '$0.05' },
+            { ts: '19/02 11:44', product: 'NexoScore', phone: '595991234567', result: 'Score: 82', cost: '$0.15' },
+            { ts: '19/02 11:02', product: 'GreenLight', phone: '595993456789', result: 'Revisión', cost: '$0.05' },
+        ];
+
+        // ==================== LOGIN ====================
+        document.getElementById('loginBtn').addEventListener('click', doLogin);
+        document.getElementById('loginPass').addEventListener('keypress', e => { if (e.key === 'Enter') doLogin(); });
+
+        function doLogin() {
+            const code = document.getElementById('loginCode').value;
+            const pass = document.getElementById('loginPass').value;
+            if (code === 'COOP001' && pass === 'demo2026') {
+                document.getElementById('loginOverlay').classList.add('hidden');
+                initDashboard();
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+            }
+        }
+
+        // ==================== NAVIGATION ====================
+        document.querySelectorAll('.sidebar-item[data-view]').forEach(btn => {
+            btn.addEventListener('click', () => navigateTo(btn.dataset.view));
+        });
+
+        function navigateTo(viewId) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById('view-' + viewId).classList.add('active');
+            document.querySelectorAll('.sidebar-item[data-view]').forEach(b => b.classList.remove('active'));
+            const activeBtn = document.querySelector(`.sidebar-item[data-view="${viewId}"]`);
+            if (activeBtn) activeBtn.classList.add('active');
+        }
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            document.getElementById('loginOverlay').classList.remove('hidden');
+        });
+
+        // ==================== INIT ====================
+        function initDashboard() {
+            renderRecentTable();
+            renderMerchantsTable();
+            renderDailyChart();
+            renderUsageTable();
+        }
+
+        function renderRecentTable() {
+            const tbody = document.getElementById('recentTable');
+            const recent = merchants.slice(0, 5);
+            tbody.innerHTML = recent.map(m => `
+        <tr onclick="showProfile(${m.id})">
+            <td><strong>${m.business}</strong><br><span style="font-size:11px;color:var(--text-muted)">${m.name}</span></td>
+            <td>${m.phone}</td>
+            <td><span class="score-circle" style="background:${scoreColor(m.score)}">${m.score}</span></td>
+            <td><span class="badge ${m.risk === 'bajo' ? 'badge-green' : m.risk === 'medio' ? 'badge-yellow' : 'badge-red'}">${m.risk === 'bajo' ? '✅ Aprobado' : m.risk === 'medio' ? '⚠️ Revisión' : '❌ Rechazado'}</span></td>
+            <td style="color:var(--text-muted)">Hoy</td>
+        </tr>
+    `).join('');
+        }
+
+        function renderMerchantsTable(filter = '') {
+            const tbody = document.getElementById('merchantsTable');
+            const filtered = merchants.filter(m =>
+                m.name.toLowerCase().includes(filter.toLowerCase()) ||
+                m.business.toLowerCase().includes(filter.toLowerCase()) ||
+                m.phone.includes(filter) ||
+                m.cedula.includes(filter)
+            );
+            document.getElementById('resultCount').textContent = `${filtered.length} comerciantes`;
+            tbody.innerHTML = filtered.map(m => `
+        <tr onclick="showProfile(${m.id})">
+            <td><strong>${m.business}</strong><br><span style="font-size:11px;color:var(--text-muted)">${m.name}</span></td>
+            <td>${m.rubro}</td>
+            <td>${m.phone}</td>
+            <td><span class="score-circle" style="background:${scoreColor(m.score)}">${m.score}</span></td>
+            <td><span class="badge ${m.risk === 'bajo' ? 'badge-green' : m.risk === 'medio' ? 'badge-yellow' : 'badge-red'}">
+                ${m.risk.charAt(0).toUpperCase() + m.risk.slice(1)}
+            </span></td>
+            <td><button class="btn btn-primary btn-sm">Ver perfil</button></td>
+        </tr>
+    `).join('');
+        }
+
+        document.getElementById('merchantSearch')?.addEventListener('input', e => {
+            renderMerchantsTable(e.target.value);
+        });
+
+        function renderDailyChart() {
+            const container = document.getElementById('dailyChart');
+            const days = ['L', 'M', 'X', 'J', 'V', 'S', 'D', 'L', 'M', 'X', 'J', 'V', 'S', 'D', 'L', 'M', 'X', 'J', 'V'];
+            const values = [42, 38, 55, 61, 58, 22, 15, 48, 52, 63, 59, 67, 28, 18, 55, 62, 71, 68, 45];
+            const max = Math.max(...values);
+            container.innerHTML = values.map((v, i) => `
+        <div class="chart-bar" style="height:${(v / max) * 100}%;background:${v > 50 ? 'var(--accent)' : '#D4CCF9'};">
+            <span class="chart-bar-label">${days[i]}</span>
+        </div>
+    `).join('');
+        }
+
+        function renderUsageTable() {
+            const tbody = document.getElementById('usageTable');
+            tbody.innerHTML = usageLog.map(l => `
+        <tr>
+            <td style="color:var(--text-muted)">${l.ts}</td>
+            <td><span class="badge ${l.product === 'GreenLight' ? 'badge-green' : 'badge-yellow'}">${l.product}</span></td>
+            <td>${l.phone}</td>
+            <td>${l.result}</td>
+            <td style="font-weight:700;">${l.cost}</td>
+        </tr>
+    `).join('');
+        }
+
+        // ==================== MERCHANT PROFILE ====================
+        function showProfile(id) {
+            const m = merchants.find(x => x.id === id);
+            if (!m) return;
+
+            navigateTo('profile');
+
+            document.getElementById('profileName').textContent = m.business;
+            document.getElementById('profileRubro').textContent = '📋 ' + m.rubro;
+            document.getElementById('profilePhone').textContent = '📱 ' + m.phone;
+            document.getElementById('profileCedula').textContent = '🪪 ' + m.cedula;
+            document.getElementById('profileScoreBig').textContent = m.score;
+            document.getElementById('profileScoreBig').style.color = scoreColor(m.score);
+
+            // Gauge
+            const circumference = 2 * Math.PI * 78;
+            const offset = circumference - (m.score / 100) * circumference;
+            const gaugeFill = document.getElementById('gaugeFill');
+            gaugeFill.style.stroke = scoreColor(m.score);
+            gaugeFill.style.strokeDasharray = circumference;
+            setTimeout(() => { gaugeFill.style.strokeDashoffset = offset; }, 100);
+
+            document.getElementById('gaugeNumber').textContent = m.score;
+            document.getElementById('gaugeNumber').style.color = scoreColor(m.score);
+
+            // Score factors
+            const factors = [
+                { name: 'Consistencia de ventas', value: Math.min(m.onTime + 3, 100) },
+                { name: 'Historial de cobros', value: m.onTime },
+                { name: 'Antigüedad registrada', value: Math.min(m.months * 6, 100) },
+                { name: 'Ratio deuda/ingreso', value: Math.max(100 - (m.debtTotal / m.monthlyAvg) * 100, 10) },
+                { name: 'Diversidad de clientes', value: Math.min(m.debtors * 12, 100) },
+            ];
+            document.getElementById('scoreFactors').innerHTML = factors.map(f => `
+        <div class="factor-row">
+            <span>${f.name}</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+                <div class="factor-bar">
+                    <div class="factor-fill" style="width:${f.value}%;background:${factorColor(f.value)}"></div>
+                </div>
+                <span style="font-weight:700;font-size:12px;width:30px;text-align:right;">${Math.round(f.value)}</span>
+            </div>
+        </div>
+    `).join('');
+
+            // Financial data
+            document.getElementById('financialData').innerHTML = `
+        <div class="data-row"><span class="label">Ingreso diario promedio</span><span class="value">Gs. ${formatGs(m.dailyAvg)}</span></div>
+        <div class="data-row"><span class="label">Ingreso mensual estimado</span><span class="value">Gs. ${formatGs(m.monthlyAvg)}</span></div>
+        <div class="data-row"><span class="label">Clientes fiados activos</span><span class="value">${m.debtors}</span></div>
+        <div class="data-row"><span class="label">Deuda total pendiente</span><span class="value" style="color:var(--red)">Gs. ${formatGs(m.debtTotal)}</span></div>
+        <div class="data-row"><span class="label">Tasa de cobro a tiempo</span><span class="value" style="color:${m.onTime > 80 ? 'var(--green)' : 'var(--yellow)'}">${m.onTime}%</span></div>
+        <div class="data-row"><span class="label">Meses registrados</span><span class="value">${m.months}</span></div>
+    `;
+
+            // Sales chart
+            const salesContainer = document.getElementById('salesChart');
+            const months = ['Sep', 'Oct', 'Nov', 'Dic', 'Ene', 'Feb'];
+            const maxSale = Math.max(...m.sales6m);
+            salesContainer.innerHTML = m.sales6m.map((v, i) => `
+        <div class="chart-bar" style="height:${(v / maxSale) * 100}%;background:var(--accent);">
+            <span class="chart-bar-label">${months[i]}</span>
+        </div>
+    `).join('');
+
+            // GreenLight
+            const approved = m.score >= 60;
+            const review = m.score >= 40 && m.score < 60;
+            document.getElementById('profileGreenlight').innerHTML = `
+        <div class="greenlight-icon">${approved ? '✅' : review ? '⚠️' : '❌'}</div>
+        <div class="greenlight-verdict" style="color:${approved ? 'var(--green)' : review ? 'var(--yellow)' : 'var(--red)'}">
+            ${approved ? 'APROBADO' : review ? 'REQUIERE REVISIÓN' : 'RECHAZADO'}
+        </div>
+        <div class="greenlight-desc">
+            ${approved
+                    ? `Comerciante con perfil crediticio sólido. Recomendación: aprobar hasta Gs. ${formatGs(m.monthlyAvg * 0.5)}`
+                    : review
+                        ? 'Perfil con indicadores mixtos. Se recomienda análisis manual antes de aprobar.'
+                        : `Perfil de alto riesgo. Ratio deuda/ingreso elevado y baja consistencia. No se recomienda otorgar crédito.`
+                }
+        </div>
+        <div class="greenlight-factors">
+            <div class="factor-row"><span>Score crediticio</span><span style="font-weight:700;color:${scoreColor(m.score)}">${m.score}/100</span></div>
+            <div class="factor-row"><span>Meses de datos</span><span style="font-weight:700">${m.months}</span></div>
+            <div class="factor-row"><span>Cobro a tiempo</span><span style="font-weight:700">${m.onTime}%</span></div>
+            <div class="factor-row"><span>Límite sugerido</span><span style="font-weight:700">Gs. ${formatGs(approved ? m.monthlyAvg * 0.5 : 0)}</span></div>
+        </div>
+    `;
+        }
+
+        // ==================== GREENLIGHT ====================
+        function runGreenlight() {
+            const phone = document.getElementById('glPhone').value;
+            const amount = parseInt(document.getElementById('glAmount').value) || 0;
+            const merchant = merchants.find(m => m.phone === phone);
+
+            const resultCard = document.getElementById('glResultCard');
+            resultCard.style.display = 'block';
+            const result = document.getElementById('glResult');
+
+            if (!merchant) {
+                result.innerHTML = `
+            <div class="greenlight-icon">❓</div>
+            <div class="greenlight-verdict" style="color:var(--text-muted)">COMERCIANTE NO ENCONTRADO</div>
+            <div class="greenlight-desc">No hay datos registrados para este número. El comerciante debe registrarse en NexoBot primero.</div>
+        `;
+                return;
+            }
+
+            const maxCredit = merchant.monthlyAvg * 0.5;
+            const approved = merchant.score >= 60 && amount <= maxCredit;
+            const review = merchant.score >= 40 && merchant.score < 60;
+
+            result.innerHTML = `
+        <div class="greenlight-icon">${approved ? '✅' : review ? '⚠️' : '❌'}</div>
+        <div class="greenlight-verdict" style="color:${approved ? 'var(--green)' : review ? 'var(--yellow)' : 'var(--red)'}">
+            ${approved ? 'APROBADO' : review ? 'REQUIERE REVISIÓN' : 'RECHAZADO'}
+        </div>
+        <div class="greenlight-desc">
+            ${approved
+                    ? `Crédito de Gs. ${formatGs(amount)} aprobado para ${merchant.business}. Score: ${merchant.score}/100.`
+                    : review
+                        ? `${merchant.business} tiene un perfil medio (Score: ${merchant.score}). Requiere revisión manual.`
+                        : `No se recomienda otorgar Gs. ${formatGs(amount)} a ${merchant.business}. Score: ${merchant.score}/100. ${amount > maxCredit ? 'Monto excede el límite sugerido.' : 'Score insuficiente.'}`
+                }
+        </div>
+        <div class="greenlight-factors">
+            <div class="factor-row"><span>Comerciante</span><span style="font-weight:700">${merchant.business}</span></div>
+            <div class="factor-row"><span>NexoScore</span><span style="font-weight:700;color:${scoreColor(merchant.score)}">${merchant.score}/100</span></div>
+            <div class="factor-row"><span>Monto solicitado</span><span style="font-weight:700">Gs. ${formatGs(amount)}</span></div>
+            <div class="factor-row"><span>Límite máximo</span><span style="font-weight:700">Gs. ${formatGs(maxCredit)}</span></div>
+            <div class="factor-row"><span>Ingreso mensual</span><span style="font-weight:700">Gs. ${formatGs(merchant.monthlyAvg)}</span></div>
+            <div class="factor-row"><span>Tiempo de respuesta</span><span style="font-weight:700;color:var(--green)">0.3s</span></div>
+        </div>
+    `;
+        }
+
+        // ==================== HELPERS ====================
+        function scoreColor(s) {
+            if (s >= 70) return 'var(--green)';
+            if (s >= 40) return 'var(--yellow)';
+            return 'var(--red)';
+        }
+
+        function factorColor(v) {
+            if (v >= 70) return 'var(--green)';
+            if (v >= 40) return 'var(--yellow)';
+            return 'var(--red)';
+        }
+
+        function formatGs(n) {
+            if (n >= 1000000) return (n / 1000000).toFixed(1) + ' millones';
+            if (n >= 1000) return (n / 1000).toFixed(0) + ' mil';
+            return n.toString();
+        }
+    </script>
+
+</body>
+
+</html>
