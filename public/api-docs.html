@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexoBot — API Documentation</title>
+    <meta name="description"
+        content="Documentación técnica de la API de NexoBot: endpoints, autenticación, ejemplos de respuesta para GreenLight, NexoScore e Intelligence.">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --accent: #6C5CE7;
+            --green: #00B894;
+            --red: #E74C3C;
+            --yellow: #F59E0B;
+            --text: #1A1D26;
+            --text-sec: #6B7280;
+            --text-muted: #9CA3AF;
+            --bg: #FAFBFC;
+            --white: #FFFFFF;
+            --border: #E8EBF0;
+            --code-bg: #1E1E2E;
+            --code-text: #CDD6F4;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            background: var(--white);
+        }
+
+        /* NAV */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+            padding: 0 24px;
+        }
+
+        .nav-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 64px;
+        }
+
+        .nav-brand {
+            font-size: 20px;
+            font-weight: 900;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .nav-brand span {
+            color: var(--accent);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-sec);
+            text-decoration: none;
+        }
+
+        .nav-cta {
+            padding: 10px 20px;
+            background: var(--accent);
+            color: white !important;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        /* LAYOUT */
+        .page {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 100px 24px 64px;
+        }
+
+        h1 {
+            font-size: 36px;
+            font-weight: 900;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: var(--text-sec);
+            margin-bottom: 40px;
+        }
+
+        h2 {
+            font-size: 24px;
+            font-weight: 800;
+            margin-top: 48px;
+            margin-bottom: 16px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+        }
+
+        h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-top: 32px;
+            margin-bottom: 12px;
+        }
+
+        p {
+            font-size: 14px;
+            color: var(--text-sec);
+            line-height: 1.7;
+            margin-bottom: 16px;
+        }
+
+        /* ENDPOINT */
+        .endpoint {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .method-url {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .method {
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 800;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .method-get {
+            background: #DBEAFE;
+            color: #1D4ED8;
+        }
+
+        .method-post {
+            background: #D1FAE5;
+            color: #059669;
+        }
+
+        .url {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .endpoint-desc {
+            font-size: 13px;
+            color: var(--text-sec);
+        }
+
+        /* CODE BLOCK */
+        .code-block {
+            background: var(--code-bg);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 16px 0;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .code-lang {
+            font-size: 11px;
+            font-weight: 600;
+            color: #9CA3AF;
+            text-transform: uppercase;
+        }
+
+        .code-copy {
+            background: none;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #9CA3AF;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .code-copy:hover {
+            color: white;
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        pre {
+            padding: 16px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--code-text);
+        }
+
+        .json-key {
+            color: #89B4FA;
+        }
+
+        .json-str {
+            color: #A6E3A1;
+        }
+
+        .json-num {
+            color: #FAB387;
+        }
+
+        .json-bool {
+            color: #CBA6F7;
+        }
+
+        /* PARAMS TABLE */
+        .params-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 13px;
+        }
+
+        .params-table th {
+            text-align: left;
+            padding: 10px 12px;
+            background: var(--bg);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+        }
+
+        .params-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .param-name {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .param-required {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--red);
+            text-transform: uppercase;
+        }
+
+        .param-optional {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        /* BADGE */
+        .status-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .badge-200 {
+            background: #D1FAE5;
+            color: #059669;
+        }
+
+        .badge-400 {
+            background: #FEF3C7;
+            color: #D97706;
+        }
+
+        .badge-401 {
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+
+        /* SIDEBAR NAV */
+        .toc {
+            position: fixed;
+            right: 24px;
+            top: 100px;
+            width: 200px;
+        }
+
+        .toc a {
+            display: block;
+            font-size: 12px;
+            color: var(--text-muted);
+            text-decoration: none;
+            padding: 4px 0;
+            border-left: 2px solid var(--border);
+            padding-left: 12px;
+            transition: all 0.2s;
+        }
+
+        .toc a:hover {
+            color: var(--text);
+            border-color: var(--accent);
+        }
+
+        /* FOOTER */
+        footer {
+            background: var(--text);
+            color: white;
+            padding: 32px 24px;
+            text-align: center;
+        }
+
+        footer a {
+            color: #9CA3AF;
+            text-decoration: none;
+            font-size: 13px;
+            margin: 0 12px;
+        }
+
+        .footer-copy {
+            font-size: 12px;
+            color: #6B7280;
+            margin-top: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .toc {
+                display: none;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            .nav-links a:not(.nav-cta) {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <div class="nav-inner">
+            <a class="nav-brand" href="/">🤖 Nexo<span>Bot</span></a>
+            <div class="nav-links">
+                <a href="/">Inicio</a>
+                <a href="precios.html">Precios</a>
+                <a href="contacto.html" class="nav-cta">Obtener API Key</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page">
+
+        <h1>📚 API Documentation</h1>
+        <p class="subtitle">Integrá GreenLight, NexoScore e Intelligence en tu sistema en minutos.</p>
+
+        <!-- AUTH -->
+        <h2 id="auth">🔑 Autenticación</h2>
+        <p>Todas las peticiones requieren un <strong>API Key</strong> en el header <code>Authorization</code>.</p>
+
+        <div class="code-block">
+            <div class="code-header">
+                <span class="code-lang">Header</span>
+            </div>
+            <pre>Authorization: Bearer nxb_tu_api_key_aqui
+Content-Type: application/json</pre>
+        </div>
+
+        <p>Para obtener tu API Key, <a href="contacto.html" style="color:var(--accent);font-weight:600;">contactanos</a>
+            o accedé desde tu <a href="dashboard-b2b.html" style="color:var(--accent);font-weight:600;">Dashboard
+                B2B</a>.</p>
+
+        <!-- BASE URL -->
+        <h2 id="base">🌐 Base URL</h2>
+        <div class="code-block">
+            <div class="code-header"><span class="code-lang">URL</span></div>
+            <pre>https://nexobot-mvp-1.onrender.com/api/v1</pre>
+        </div>
+
+        <!-- GREENLIGHT -->
+        <h2 id="greenlight">🟢 GreenLight — Evaluación Instantánea</h2>
+        <p>Consultá si un comerciante califica para crédito. Respuesta en menos de 1 segundo.</p>
+
+        <div class="endpoint">
+            <div class="method-url">
+                <span class="method method-post">POST</span>
+                <span class="url">/greenlight/evaluate</span>
+            </div>
+            <div class="endpoint-desc">Evalúa un comerciante y devuelve aprobación/rechazo con monto sugerido.</div>
+        </div>
+
+        <h3>Parámetros</h3>
+        <table class="params-table">
+            <thead>
+                <tr>
+                    <th>Campo</th>
+                    <th>Tipo</th>
+                    <th>Requerido</th>
+                    <th>Descripción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="param-name">phone</span></td>
+                    <td>string</td>
+                    <td><span class="param-required">requerido</span></td>
+                    <td>Número de teléfono del comerciante (formato: 595XXXXXXXXX)</td>
+                </tr>
+                <tr>
+                    <td><span class="param-name">amount</span></td>
+                    <td>number</td>
+                    <td><span class="param-required">requerido</span></td>
+                    <td>Monto solicitado en guaraníes</td>
+                </tr>
+                <tr>
+                    <td><span class="param-name">currency</span></td>
+                    <td>string</td>
+                    <td><span class="param-optional">opcional</span></td>
+                    <td>Moneda (default: "PYG"). Opciones: PYG, USD, BRL</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Request</h3>
+        <div class="code-block">
+            <div class="code-header"><span class="code-lang">JSON</span></div>
+            <pre>{
+  <span class="json-key">"phone"</span>: <span class="json-str">"595991234567"</span>,
+  <span class="json-key">"amount"</span>: <span class="json-num">5000000</span>,
+  <span class="json-key">"currency"</span>: <span class="json-str">"PYG"</span>
+}</pre>
+        </div>
+
+        <h3>Response <span class="status-badge badge-200">200 OK</span></h3>
+        <div class="code-block">
+            <div class="code-header"><span class="code-lang">JSON</span></div>
+            <pre>{
+  <span class="json-key">"status"</span>: <span class="json-str">"approved"</span>,
+  <span class="json-key">"decision"</span>: <span class="json-str">"APROBADO"</span>,
+  <span class="json-key">"score"</span>: <span class="json-num">82</span>,
+  <span class="json-key">"amount_requested"</span>: <span class="json-num">5000000</span>,
+  <span class="json-key">"amount_approved"</span>: <span class="json-num">5000000</span>,
+  <span class="json-key">"max_recommended"</span>: <span class="json-num">8500000</span>,
+  <span class="json-key">"risk_level"</span>: <span class="json-str">"bajo"</span>,
+  <span class="json-key">"confidence"</span>: <span class="json-num">0.94</span>,
+  <span class="json-key">"factors"</span>: {
+    <span class="json-key">"sales_consistency"</span>: <span class="json-num">88</span>,
+    <span class="json-key">"debt_recovery"</span>: <span class="json-num">94</span>,
+    <span class="json-key">"tenure_months"</span>: <span class="json-num">14</span>
+  },
+  <span class="json-key">"merchant"</span>: {
+    <span class="json-key">"name"</span>: <span class="json-str">"María García"</span>,
+    <span class="json-key">"business"</span>: <span class="json-str">"Despensa Doña María"</span>,
+    <span class="json-key">"category"</span>: <span class="json-str">"Almacén"</span>
+  },
+  <span class="json-key">"cost"</span>: <span class="json-num">35000</span>,
+  <span class="json-key">"timestamp"</span>: <span class="json-str">"2026-02-19T14:23:00Z"</span>
+}</pre>
+        </div>
+
+        <!-- NEXOSCORE -->
+        <h2 id="nexoscore">📊 NexoScore — Perfil Crediticio</h2>
+        <p>Obtené el perfil crediticio completo de un comerciante con desglose de factores.</p>
+
+        <div class="endpoint">
+            <div class="method-url">
+                <span class="method method-get">GET</span>
+                <span class="url">/score/{phone}</span>
+            </div>
+            <div class="endpoint-desc">Devuelve el NexoScore completo con historial y factores de riesgo.</div>
+        </div>
+
+        <h3>Response <span class="status-badge badge-200">200 OK</span></h3>
+        <div class="code-block">
+            <div class="code-header"><span class="code-lang">JSON</span></div>
+            <pre>{
+  <span class="json-key">"score"</span>: <span class="json-num">82</span>,
+  <span class="json-key">"risk_level"</span>: <span class="json-str">"bajo"</span>,
+  <span class="json-key">"merchant"</span>: {
+    <span class="json-key">"name"</span>: <span class="json-str">"María García"</span>,
+    <span class="json-key">"business"</span>: <span class="json-str">"Despensa Doña María"</span>,
+    <span class="json-key">"category"</span>: <span class="json-str">"Almacén"</span>,
+    <span class="json-key">"phone"</span>: <span class="json-str">"595991234567"</span>,
+    <span class="json-key">"registered_since"</span>: <span class="json-str">"2024-12-15"</span>,
+    <span class="json-key">"months_active"</span>: <span class="json-num">14</span>
+  },
+  <span class="json-key">"financials"</span>: {
+    <span class="json-key">"daily_avg_sales"</span>: <span class="json-num">2800000</span>,
+    <span class="json-key">"monthly_avg_sales"</span>: <span class="json-num">72800000</span>,
+    <span class="json-key">"total_debt"</span>: <span class="json-num">4200000</span>,
+    <span class="json-key">"debt_to_income_ratio"</span>: <span class="json-num">0.058</span>,
+    <span class="json-key">"recovery_rate"</span>: <span class="json-num">0.94</span>
+  },
+  <span class="json-key">"factors"</span>: {
+    <span class="json-key">"sales_consistency"</span>: <span class="json-num">88</span>,
+    <span class="json-key">"debt_recovery"</span>: <span class="json-num">94</span>,
+    <span class="json-key">"tenure"</span>: <span class="json-num">84</span>,
+    <span class="json-key">"debt_ratio"</span>: <span class="json-num">92</span>,
+    <span class="json-key">"growth"</span>: <span class="json-num">76</span>
+  },
+  <span class="json-key">"recommendation"</span>: {
+    <span class="json-key">"max_credit"</span>: <span class="json-num">8500000</span>,
+    <span class="json-key">"suggested_term_days"</span>: <span class="json-num">90</span>,
+    <span class="json-key">"max_rate"</span>: <span class="json-num">2.5</span>
+  },
+  <span class="json-key">"sales_history_6m"</span>: [<span class="json-num">58000000</span>, <span class="json-num">62000000</span>, <span class="json-num">71000000</span>, <span class="json-num">68000000</span>, <span class="json-num">73000000</span>, <span class="json-num">78000000</span>],
+  <span class="json-key">"cost"</span>: <span class="json-num">65000</span>,
+  <span class="json-key">"timestamp"</span>: <span class="json-str">"2026-02-19T14:23:00Z"</span>
+}</pre>
+        </div>
+
+        <!-- ERRORS -->
+        <h2 id="errors">⚠️ Errores</h2>
+
+        <h3><span class="status-badge badge-401">401 Unauthorized</span></h3>
+        <div class="code-block">
+            <div class="code-header"><span class="code-lang">JSON</span></div>
+            <pre>{
+  <span class="json-key">"error"</span>: <span class="json-str">"invalid_api_key"</span>,
+  <span class="json-key">"message"</span>: <span class="json-str">"API Key inválida o expirada"</span>
+}</pre>
+        </div>
+
+        <h3><span class="status-badge badge-400">404 Not Found</span></h3>
+        <div class="code-block">
+            <div class="code-header"><span class="code-lang">JSON</span></div>
+            <pre>{
+  <span class="json-key">"error"</span>: <span class="json-str">"merchant_not_found"</span>,
+  <span class="json-key">"message"</span>: <span class="json-str">"No se encontró un comerciante con el teléfono indicado"</span>
+}</pre>
+        </div>
+
+        <!-- RATE LIMITS -->
+        <h2 id="limits">📏 Límites</h2>
+        <table class="params-table">
+            <thead>
+                <tr>
+                    <th>Plan</th>
+                    <th>Requests/min</th>
+                    <th>Requests/mes</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Starter</td>
+                    <td>60</td>
+                    <td>10.000</td>
+                </tr>
+                <tr>
+                    <td>Pro</td>
+                    <td>300</td>
+                    <td>100.000</td>
+                </tr>
+                <tr>
+                    <td>Enterprise</td>
+                    <td>1.000</td>
+                    <td>Ilimitado</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- SDK -->
+        <h2 id="sdk">💻 Ejemplo de integración</h2>
+
+        <h3>cURL</h3>
+        <div class="code-block">
+            <div class="code-header"><span class="code-lang">bash</span></div>
+            <pre>curl -X POST https://nexobot-mvp-1.onrender.com/api/v1/greenlight/evaluate \
+  -H "Authorization: Bearer nxb_tu_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{"phone": "595991234567", "amount": 5000000}'</pre>
+        </div>
+
+        <h3>JavaScript / Node.js</h3>
+        <div class="code-block">
+            <div class="code-header"><span class="code-lang">javascript</span></div>
+            <pre>const response = await fetch(
+  'https://nexobot-mvp-1.onrender.com/api/v1/greenlight/evaluate',
+  {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer nxb_tu_api_key',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      phone: '595991234567',
+      amount: 5000000
+    })
+  }
+);
+
+const data = await response.json();
+console.log(data.decision); // "APROBADO"
+console.log(data.score);    // 82</pre>
+        </div>
+
+        <h3>Python</h3>
+        <div class="code-block">
+            <div class="code-header"><span class="code-lang">python</span></div>
+            <pre>import requests
+
+response = requests.post(
+    'https://nexobot-mvp-1.onrender.com/api/v1/greenlight/evaluate',
+    headers={'Authorization': 'Bearer nxb_tu_api_key'},
+    json={'phone': '595991234567', 'amount': 5000000}
+)
+
+data = response.json()
+print(f"Decisión: {data['decision']}")  # APROBADO
+print(f"Score: {data['score']}")        # 82</pre>
+        </div>
+
+    </div>
+
+    <footer>
+        <div>
+            <a href="/">Inicio</a>
+            <a href="precios.html">Precios</a>
+            <a href="contacto.html">Contacto</a>
+            <a href="terminos.html">Términos</a>
+        </div>
+        <div class="footer-copy">© 2026 NexoBot — A Unicornio · Asunción, Paraguay 🇵🇾</div>
+    </footer>
+
+</body>
+
+</html>

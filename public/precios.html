@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexoBot — Precios</title>
+    <meta name="description"
+        content="Precios de los productos NexoBot para instituciones financieras: GreenLight, NexoScore e Intelligence.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --accent: #6C5CE7;
+            --accent-dark: #4834D4;
+            --green: #00B894;
+            --text: #1A1D26;
+            --text-sec: #6B7280;
+            --text-muted: #9CA3AF;
+            --bg: #FAFBFC;
+            --white: #FFFFFF;
+            --border: #E8EBF0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            background: var(--white);
+        }
+
+        /* NAV */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+            padding: 0 24px;
+        }
+
+        .nav-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 64px;
+        }
+
+        .nav-brand {
+            font-size: 20px;
+            font-weight: 900;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .nav-brand span {
+            color: var(--accent);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-sec);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text);
+        }
+
+        .nav-cta {
+            padding: 10px 20px;
+            background: var(--accent);
+            color: white !important;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* HERO */
+        .hero {
+            padding: 120px 24px 60px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            font-weight: 900;
+            margin-bottom: 12px;
+            letter-spacing: -1px;
+        }
+
+        .hero p {
+            font-size: 17px;
+            color: var(--text-sec);
+            max-width: 550px;
+            margin: 0 auto;
+        }
+
+        /* FREE BANNER */
+        .free-banner {
+            max-width: 800px;
+            margin: 0 auto 48px;
+            background: linear-gradient(135deg, #00B894 0%, #00A885 100%);
+            border-radius: 16px;
+            padding: 32px;
+            color: white;
+            text-align: center;
+        }
+
+        .free-banner h3 {
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .free-banner p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .free-banner .tag {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-top: 8px;
+        }
+
+        /* PRICING GRID */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 64px;
+        }
+
+        .price-card {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            padding: 36px 28px;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .price-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+        }
+
+        .price-card.featured {
+            border-color: var(--accent);
+        }
+
+        .price-tag {
+            position: absolute;
+            top: -12px;
+            right: 20px;
+            background: var(--accent);
+            color: white;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .price-emoji {
+            font-size: 36px;
+            margin-bottom: 16px;
+        }
+
+        .price-name {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .price-desc {
+            font-size: 13px;
+            color: var(--text-sec);
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .price-amount {
+            font-size: 32px;
+            font-weight: 900;
+            color: var(--accent);
+            margin-bottom: 4px;
+        }
+
+        .price-per {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+
+        .price-features {
+            list-style: none;
+            margin-bottom: 28px;
+        }
+
+        .price-features li {
+            font-size: 13px;
+            padding: 7px 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .price-features li:last-child {
+            border-bottom: none;
+        }
+
+        .price-features li::before {
+            content: '✓';
+            color: var(--green);
+            font-weight: 800;
+            font-size: 14px;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            text-align: center;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            border: none;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-dark);
+        }
+
+        .btn-outline {
+            background: white;
+            color: var(--text);
+            border: 2px solid var(--border);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* COMPARISON */
+        .comparison {
+            padding: 64px 0;
+        }
+
+        .comp-title {
+            font-size: 28px;
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .comp-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .comp-table th {
+            background: var(--bg);
+            padding: 14px 20px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .comp-table td {
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .comp-table tr:hover td {
+            background: #FAFBFC;
+        }
+
+        .check {
+            color: var(--green);
+            font-weight: 700;
+        }
+
+        .cross {
+            color: #D1D5DB;
+        }
+
+        /* FAQ */
+        .faq {
+            padding: 64px 0 80px;
+        }
+
+        .faq h2 {
+            font-size: 28px;
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .faq-item {
+            border-bottom: 1px solid var(--border);
+            padding: 20px 0;
+        }
+
+        .faq-q {
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .faq-a {
+            font-size: 14px;
+            color: var(--text-sec);
+            line-height: 1.7;
+            margin-top: 12px;
+            display: none;
+        }
+
+        .faq-item.open .faq-a {
+            display: block;
+        }
+
+        .faq-toggle {
+            font-size: 18px;
+            color: var(--text-muted);
+            transition: transform 0.2s;
+        }
+
+        .faq-item.open .faq-toggle {
+            transform: rotate(45deg);
+        }
+
+        /* CTA */
+        .cta {
+            padding: 64px;
+            background: var(--bg);
+            border-radius: 24px;
+            text-align: center;
+            margin-bottom: 64px;
+        }
+
+        .cta h2 {
+            font-size: 28px;
+            font-weight: 900;
+            margin-bottom: 8px;
+        }
+
+        .cta p {
+            font-size: 15px;
+            color: var(--text-sec);
+            margin-bottom: 24px;
+        }
+
+        .cta .btn {
+            display: inline-block;
+            width: auto;
+            padding: 14px 32px;
+        }
+
+        /* FOOTER */
+        footer {
+            background: var(--text);
+            color: white;
+            padding: 32px 24px;
+            text-align: center;
+        }
+
+        footer a {
+            color: #9CA3AF;
+            text-decoration: none;
+            font-size: 13px;
+            margin: 0 12px;
+        }
+
+        footer a:hover {
+            color: white;
+        }
+
+        .footer-copy {
+            font-size: 12px;
+            color: #6B7280;
+            margin-top: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h1 {
+                font-size: 28px;
+            }
+
+            .comp-table {
+                font-size: 12px;
+            }
+
+            .nav-links a:not(.nav-cta) {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <div class="nav-inner">
+            <a class="nav-brand" href="/">🤖 Nexo<span>Bot</span></a>
+            <div class="nav-links">
+                <a href="/">Inicio</a>
+                <a href="api-docs.html">API</a>
+                <a href="contacto.html" class="nav-cta">Contactar</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <h1>Precios simples, resultados grandes</h1>
+        <p>Pagá solo por lo que usás. Sin contratos mínimos, sin sorpresas.</p>
+    </section>
+
+    <div class="container">
+
+        <!-- FREE FOR MERCHANTS -->
+        <div class="free-banner">
+            <h3>🏪 ¿Sos comerciante? NexoBot es 100% gratuito</h3>
+            <p>Registrá tus ventas, controlá tus fiados y construí tu historial crediticio sin costo.</p>
+            <div class="tag">GRATIS PARA SIEMPRE</div>
+        </div>
+
+        <!-- B2B PRICING -->
+        <div style="text-align:center; margin-bottom:12px;">
+            <span
+                style="font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1.5px;">PARA
+                INSTITUCIONES FINANCIERAS</span>
+        </div>
+
+        <div class="pricing-grid">
+            <!-- GREENLIGHT -->
+            <div class="price-card">
+                <div class="price-emoji">🟢</div>
+                <div class="price-name">GreenLight</div>
+                <div class="price-desc">Aprobación o rechazo instantáneo basado en datos transaccionales reales.</div>
+                <div class="price-amount">Gs. 35.000</div>
+                <div class="price-per">por consulta</div>
+                <ul class="price-features">
+                    <li>Respuesta en menos de 1 segundo</li>
+                    <li>Resultado: Aprobado / Rechazado / Revisión</li>
+                    <li>Score resumido incluido</li>
+                    <li>Monto sugerido de crédito</li>
+                    <li>Factores de riesgo principales</li>
+                </ul>
+                <a class="btn btn-outline" href="contacto.html">Solicitar acceso</a>
+            </div>
+
+            <!-- NEXOSCORE -->
+            <div class="price-card featured">
+                <div class="price-tag">Más popular</div>
+                <div class="price-emoji">📊</div>
+                <div class="price-name">NexoScore</div>
+                <div class="price-desc">Perfil crediticio completo con score alternativo y análisis de riesgo detallado.
+                </div>
+                <div class="price-amount">Gs. 65.000</div>
+                <div class="price-per">por reporte</div>
+                <ul class="price-features">
+                    <li>Score de 0 a 100 puntos</li>
+                    <li>Historial de ventas (hasta 18 meses)</li>
+                    <li>Ratio deuda/ingreso calculado</li>
+                    <li>Tendencia de crecimiento</li>
+                    <li>Tasa de recuperación de fiados</li>
+                    <li>Límite de crédito recomendado</li>
+                </ul>
+                <a class="btn btn-primary" href="contacto.html">Solicitar acceso</a>
+            </div>
+
+            <!-- INTELLIGENCE -->
+            <div class="price-card">
+                <div class="price-emoji">🔍</div>
+                <div class="price-name">Intelligence</div>
+                <div class="price-desc">Datos agregados de mercado por zona, rubro y segmento para optimizar tu
+                    portafolio.</div>
+                <div class="price-amount">Gs. 6.500.000</div>
+                <div class="price-per">por mes (suscripción)</div>
+                <ul class="price-features">
+                    <li>Datos por zona geográfica</li>
+                    <li>Análisis por rubro comercial</li>
+                    <li>Tendencias de mercado mensuales</li>
+                    <li>Alertas de riesgo sectorial</li>
+                    <li>Reportes exportables (PDF/Excel)</li>
+                    <li>Dashboard dedicado</li>
+                </ul>
+                <a class="btn btn-outline" href="contacto.html">Solicitar acceso</a>
+            </div>
+        </div>
+
+        <!-- COMPARISON -->
+        <div class="comparison">
+            <h2 class="comp-title">NexoBot vs la competencia</h2>
+            <table class="comp-table">
+                <thead>
+                    <tr>
+                        <th>Capacidad</th>
+                        <th>NexoBot</th>
+                        <th>Bureau Tradicional</th>
+                        <th>Verificador Manual</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Comerciantes informales</td>
+                        <td class="check">✅ Sí — datos exclusivos</td>
+                        <td class="cross">❌ No los tiene</td>
+                        <td class="check">✅ Limitado</td>
+                    </tr>
+                    <tr>
+                        <td>Tiempo de respuesta</td>
+                        <td class="check">⚡ 1 segundo</td>
+                        <td class="check">Instantáneo</td>
+                        <td class="cross">3-5 días hábiles</td>
+                    </tr>
+                    <tr>
+                        <td>Costo por evaluación</td>
+                        <td class="check">Gs. 35.000 - 65.000</td>
+                        <td>Gs. 25.000 - 50.000</td>
+                        <td class="cross">Gs. 300.000 - 500.000</td>
+                    </tr>
+                    <tr>
+                        <td>Datos en tiempo real</td>
+                        <td class="check">✅ Diarios</td>
+                        <td class="cross">❌ Mensuales</td>
+                        <td class="cross">❌ Snapshot</td>
+                    </tr>
+                    <tr>
+                        <td>Cobertura informal</td>
+                        <td class="check">✅ 100%</td>
+                        <td class="cross">❌ 0%</td>
+                        <td>~10%</td>
+                    </tr>
+                    <tr>
+                        <td>API programática</td>
+                        <td class="check">✅ REST API</td>
+                        <td class="check">✅ Sí</td>
+                        <td class="cross">❌ No</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- FAQ -->
+        <div class="faq">
+            <h2>Preguntas frecuentes</h2>
+
+            <div class="faq-item">
+                <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+                    ¿Hay un mínimo de consultas mensuales?
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-a">No. Pagás solo por lo que usás. No hay mínimo mensual ni contratos de permanencia.
+                    Podés empezar con 1 consulta.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+                    ¿Cómo se factura?
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-a">Facturamos mensualmente. Recibís un detalle completo de cada consulta realizada con
+                    fecha, tipo de producto y resultado. Factura legal paraguaya incluida.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+                    ¿Qué tan confiables son los datos?
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-a">Los datos provienen directamente del comerciante vía WhatsApp. NexoBot cruza
+                    consistencia de registros, frecuencia de uso, patrones de cobro y comportamiento histórico para
+                    generar un score robusto. Comerciantes con más de 6 meses de historial tienen una confiabilidad
+                    superior al 90%.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+                    ¿Los comerciantes saben que los consultamos?
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-a">Sí. Cumplimos con regulaciones de protección de datos. El comerciante acepta los
+                    términos al registrarse y es notificado cuando una institución consulta su perfil. Esto también
+                    incentiva al comerciante a mantener sus datos actualizados.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+                    ¿Puedo probar antes de contratar?
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-a">Sí. Ofrecemos una demo gratuita con datos de ejemplo en nuestro Dashboard B2B.
+                    Contactanos y te damos acceso en menos de 24 horas.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+                    ¿En qué formato viene la respuesta de la API?
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-a">Todas las respuestas son JSON vía REST API con autenticación por API Key.
+                    Documentación completa disponible en <a href="api-docs.html"
+                        style="color:var(--accent);">api-docs.html</a>.</div>
+            </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="cta">
+            <h2>¿Listo para evaluar comerciantes invisibles?</h2>
+            <p>Agendá una demo de 15 minutos y te mostramos NexoBot en acción.</p>
+            <a class="btn btn-primary" href="contacto.html">🤝 Solicitar demo gratuita</a>
+        </div>
+
+    </div>
+
+    <footer>
+        <div>
+            <a href="/">Inicio</a>
+            <a href="api-docs.html">API</a>
+            <a href="investors.html">Inversores</a>
+            <a href="terminos.html">Términos</a>
+            <a href="privacidad.html">Privacidad</a>
+        </div>
+        <div class="footer-copy">© 2026 NexoBot — A Unicornio · Asunción, Paraguay 🇵🇾</div>
+    </footer>
+
+</body>
+
+</html>

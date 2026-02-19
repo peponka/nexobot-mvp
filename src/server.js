@@ -77,9 +77,9 @@ app.get('/health', (req, res) => {
 // Static files (login, dashboard, landing)
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
-// Root → landing page
+// Root → homepage
 app.get('/', (req, res) => {
-    res.redirect('/landing.html');
+    res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
 // WhatsApp webhook

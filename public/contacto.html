@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexoBot — Contacto</title>
+    <meta name="description"
+        content="Contactá al equipo de NexoBot. Solicitá una demo, pedí tu API Key o hacé preguntas sobre el producto.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --accent: #6C5CE7;
+            --accent-dark: #4834D4;
+            --green: #00B894;
+            --text: #1A1D26;
+            --text-sec: #6B7280;
+            --text-muted: #9CA3AF;
+            --bg: #FAFBFC;
+            --white: #FFFFFF;
+            --border: #E8EBF0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            background: var(--white);
+        }
+
+        /* NAV */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+            padding: 0 24px;
+        }
+
+        .nav-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 64px;
+        }
+
+        .nav-brand {
+            font-size: 20px;
+            font-weight: 900;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .nav-brand span {
+            color: var(--accent);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-sec);
+            text-decoration: none;
+        }
+
+        /* HERO */
+        .hero {
+            padding: 120px 24px 48px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            font-weight: 900;
+            margin-bottom: 12px;
+        }
+
+        .hero p {
+            font-size: 17px;
+            color: var(--text-sec);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        /* MAIN */
+        .main {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px 80px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 48px;
+        }
+
+        /* FORM */
+        .form-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 36px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        }
+
+        .form-title {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .form-desc {
+            font-size: 13px;
+            color: var(--text-sec);
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-sec);
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+            background: white;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            border-color: var(--accent);
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-select {
+            appearance: none;
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 8L1 3h10z' fill='%239CA3AF'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 8px;
+        }
+
+        .btn-submit:hover {
+            background: var(--accent-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(108, 92, 231, 0.3);
+        }
+
+        .form-success {
+            display: none;
+            text-align: center;
+            padding: 48px 24px;
+        }
+
+        .form-success .emoji {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .form-success h3 {
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .form-success p {
+            font-size: 14px;
+            color: var(--text-sec);
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            padding-top: 8px;
+        }
+
+        .contact-card {
+            background: var(--bg);
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 20px;
+        }
+
+        .contact-card-emoji {
+            font-size: 28px;
+            margin-bottom: 12px;
+        }
+
+        .contact-card h3 {
+            font-size: 16px;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .contact-card p {
+            font-size: 13px;
+            color: var(--text-sec);
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .contact-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--accent);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .contact-link:hover {
+            color: var(--accent-dark);
+        }
+
+        .quick-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--text);
+            margin-bottom: 12px;
+            transition: all 0.2s;
+        }
+
+        .quick-link:hover {
+            border-color: var(--accent);
+            transform: translateX(4px);
+        }
+
+        .quick-emoji {
+            font-size: 24px;
+        }
+
+        .quick-text h4 {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .quick-text p {
+            font-size: 12px;
+            color: var(--text-sec);
+            margin-top: 2px;
+        }
+
+        /* FOOTER */
+        footer {
+            background: var(--text);
+            color: white;
+            padding: 32px 24px;
+            text-align: center;
+        }
+
+        footer a {
+            color: #9CA3AF;
+            text-decoration: none;
+            font-size: 13px;
+            margin: 0 12px;
+        }
+
+        .footer-copy {
+            font-size: 12px;
+            color: #6B7280;
+            margin-top: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .main {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h1 {
+                font-size: 28px;
+            }
+
+            .nav-links a:not(:last-child) {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <div class="nav-inner">
+            <a class="nav-brand" href="/">🤖 Nexo<span>Bot</span></a>
+            <div class="nav-links">
+                <a href="/">Inicio</a>
+                <a href="precios.html">Precios</a>
+                <a href="api-docs.html">API</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <h1>Hablemos 🤝</h1>
+        <p>¿Sos banco, cooperativa o fintech? Contactanos y te mostramos cómo NexoBot puede ayudarte.</p>
+    </section>
+
+    <div class="main">
+
+        <!-- FORM -->
+        <div class="form-card">
+            <div id="formContent">
+                <div class="form-title">Solicitar demo o información</div>
+                <div class="form-desc">Completá el formulario y te respondemos en menos de 24 horas.</div>
+
+                <form id="contactForm" onsubmit="submitForm(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="nombre">Nombre</label>
+                            <input class="form-input" id="nombre" type="text" placeholder="Tu nombre" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="apellido">Apellido</label>
+                            <input class="form-input" id="apellido" type="text" placeholder="Tu apellido" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="email">Email corporativo</label>
+                        <input class="form-input" id="email" type="email" placeholder="nombre@empresa.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="telefono">Teléfono</label>
+                        <input class="form-input" id="telefono" type="tel" placeholder="0981 123 456">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="empresa">Institución / Empresa</label>
+                        <input class="form-input" id="empresa" type="text" placeholder="Nombre de tu empresa" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="tipo">Tipo de institución</label>
+                            <select class="form-select" id="tipo" required>
+                                <option value="">Seleccioná...</option>
+                                <option value="banco">Banco</option>
+                                <option value="cooperativa">Cooperativa</option>
+                                <option value="financiera">Financiera</option>
+                                <option value="fintech">Fintech</option>
+                                <option value="microfinanzas">Microfinanzas</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="interes">¿Qué te interesa?</label>
+                            <select class="form-select" id="interes" required>
+                                <option value="">Seleccioná...</option>
+                                <option value="greenlight">🟢 GreenLight</option>
+                                <option value="nexoscore">📊 NexoScore</option>
+                                <option value="intelligence">🔍 Intelligence</option>
+                                <option value="todo">Todo / Demo completa</option>
+                                <option value="api">Integración API</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="mensaje">Mensaje (opcional)</label>
+                        <textarea class="form-textarea" id="mensaje"
+                            placeholder="Contanos un poco sobre tu caso de uso..."></textarea>
+                    </div>
+
+                    <button class="btn-submit" type="submit">📩 Enviar solicitud</button>
+                </form>
+            </div>
+
+            <div class="form-success" id="formSuccess">
+                <div class="emoji">🎉</div>
+                <h3>¡Mensaje enviado!</h3>
+                <p>Te respondemos en menos de 24 horas. Si es urgente, escribinos directo por WhatsApp.</p>
+            </div>
+        </div>
+
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+
+            <div class="contact-card">
+                <div class="contact-card-emoji">📱</div>
+                <h3>WhatsApp directo</h3>
+                <p>¿Preferís hablar directamente? Escribinos al WhatsApp del equipo.</p>
+                <a class="contact-link"
+                    href="https://wa.me/595991234567?text=Hola%2C%20quiero%20info%20sobre%20NexoBot%20para%20mi%20instituci%C3%B3n"
+                    target="_blank">Chat por WhatsApp →</a>
+            </div>
+
+            <div class="contact-card">
+                <div class="contact-card-emoji">📧</div>
+                <h3>Email</h3>
+                <p>Para consultas formales o envío de documentación.</p>
+                <a class="contact-link" href="mailto:hola@nexobot.com.py">hola@nexobot.com.py</a>
+            </div>
+
+            <div class="contact-card">
+                <div class="contact-card-emoji">📍</div>
+                <h3>Ubicación</h3>
+                <p>Asunción, Paraguay 🇵🇾<br>Operamos 100% digital.</p>
+            </div>
+
+            <div style="margin-top:24px;">
+                <div
+                    style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">
+                    Acceso rápido</div>
+
+                <a class="quick-link" href="dashboard-b2b.html">
+                    <span class="quick-emoji">🏦</span>
+                    <div class="quick-text">
+                        <h4>Dashboard B2B</h4>
+                        <p>Probá el portal para instituciones</p>
+                    </div>
+                </a>
+
+                <a class="quick-link" href="mi-negocio.html">
+                    <span class="quick-emoji">🏪</span>
+                    <div class="quick-text">
+                        <h4>Mi Negocio</h4>
+                        <p>Mirá el panel del comerciante</p>
+                    </div>
+                </a>
+
+                <a class="quick-link" href="api-docs.html">
+                    <span class="quick-emoji">📚</span>
+                    <div class="quick-text">
+                        <h4>API Docs</h4>
+                        <p>Documentación técnica completa</p>
+                    </div>
+                </a>
+
+                <a class="quick-link" href="investors.html">
+                    <span class="quick-emoji">💼</span>
+                    <div class="quick-text">
+                        <h4>Inversores</h4>
+                        <p>One-pager y métricas clave</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div>
+            <a href="/">Inicio</a>
+            <a href="precios.html">Precios</a>
+            <a href="api-docs.html">API</a>
+            <a href="terminos.html">Términos</a>
+            <a href="privacidad.html">Privacidad</a>
+        </div>
+        <div class="footer-copy">© 2026 NexoBot — A Unicornio · Asunción, Paraguay 🇵🇾</div>
+    </footer>
+
+    <script>
+        function submitForm(e) {
+            e.preventDefault();
+
+            // Collect form data
+            const data = {
+                nombre: document.getElementById('nombre').value,
+                apellido: document.getElementById('apellido').value,
+                email: document.getElementById('email').value,
+                telefono: document.getElementById('telefono').value,
+                empresa: document.getElementById('empresa').value,
+                tipo: document.getElementById('tipo').value,
+                interes: document.getElementById('interes').value,
+                mensaje: document.getElementById('mensaje').value,
+                timestamp: new Date().toISOString()
+            };
+
+            console.log('📩 Formulario de contacto:', data);
+
+            // Show success message
+            document.getElementById('formContent').style.display = 'none';
+            document.getElementById('formSuccess').style.display = 'block';
+
+            // In production, this would POST to an API endpoint
+            // fetch('/api/v1/contact', { method: 'POST', body: JSON.stringify(data) });
+        }
+    </script>
+
+</body>
+
+</html>
