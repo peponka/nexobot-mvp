@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexoBot — Investment Overview</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #fff;
+            color: #1a1d21;
+            line-height: 1.6;
+        }
+
+        .page {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 48px 40px;
+        }
+
+        /* HEADER */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 40px;
+            padding-bottom: 24px;
+            border-bottom: 2px solid #6C5CE7;
+        }
+
+        .header-left h1 {
+            font-size: 32px;
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+
+        .header-left h1 span {
+            color: #6C5CE7;
+        }
+
+        .header-left .tagline {
+            font-size: 15px;
+            color: #666;
+            margin-top: 4px;
+            font-weight: 400;
+        }
+
+        .header-right {
+            text-align: right;
+            font-size: 12px;
+            color: #999;
+        }
+
+        .header-right .conf {
+            background: #f5f5f5;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #999;
+        }
+
+        /* SECTION */
+        .section {
+            margin-bottom: 32px;
+        }
+
+        .section-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #6C5CE7;
+            margin-bottom: 10px;
+        }
+
+        .section h2 {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .section p {
+            font-size: 14px;
+            color: #444;
+        }
+
+        /* PROBLEM / SOLUTION */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .col-card {
+            padding: 24px;
+            border-radius: 12px;
+        }
+
+        .col-problem {
+            background: #FFF5F5;
+            border-left: 4px solid #E74C3C;
+        }
+
+        .col-solution {
+            background: #F0FFF4;
+            border-left: 4px solid #00B894;
+        }
+
+        .col-card h3 {
+            font-size: 16px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .col-card p {
+            font-size: 13px;
+            color: #555;
+            line-height: 1.7;
+        }
+
+        .col-card ul {
+            list-style: none;
+            padding: 0;
+            margin-top: 8px;
+        }
+
+        .col-card ul li {
+            font-size: 13px;
+            color: #555;
+            padding: 3px 0;
+        }
+
+        /* MARKET */
+        .market-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        .market-stat {
+            text-align: center;
+            padding: 20px 12px;
+            background: #F8F9FA;
+            border-radius: 12px;
+        }
+
+        .market-stat .number {
+            font-size: 28px;
+            font-weight: 900;
+            color: #6C5CE7;
+        }
+
+        .market-stat .label {
+            font-size: 11px;
+            color: #888;
+            margin-top: 4px;
+            font-weight: 600;
+        }
+
+        /* HOW IT WORKS */
+        .flow {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr auto 1fr;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .flow-step {
+            background: #F8F9FA;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .flow-step .icon {
+            font-size: 28px;
+            margin-bottom: 6px;
+        }
+
+        .flow-step .title {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .flow-step .desc {
+            font-size: 11px;
+            color: #888;
+            margin-top: 2px;
+        }
+
+        .flow-arrow {
+            font-size: 20px;
+            color: #ccc;
+            text-align: center;
+        }
+
+        /* PRODUCTS */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 12px;
+        }
+
+        .product-card {
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #eee;
+        }
+
+        .product-card .emoji {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .product-card h4 {
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        .product-card p {
+            font-size: 12px;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        .product-card .price {
+            font-size: 13px;
+            font-weight: 700;
+            color: #6C5CE7;
+            margin-top: 8px;
+        }
+
+        /* BUSINESS MODEL */
+        .model-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-top: 12px;
+        }
+
+        .model-box {
+            padding: 20px;
+            background: #F8F9FA;
+            border-radius: 12px;
+        }
+
+        .model-box h4 {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .model-box p {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .model-box .highlight {
+            display: inline-block;
+            background: #6C5CE7;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-top: 6px;
+        }
+
+        /* TRACTION */
+        .traction-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 12px;
+        }
+
+        .traction-item {
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #eee;
+            text-align: center;
+        }
+
+        .traction-item .icon {
+            font-size: 24px;
+            margin-bottom: 6px;
+        }
+
+        .traction-item .stat {
+            font-size: 20px;
+            font-weight: 900;
+            color: #00B894;
+        }
+
+        .traction-item .desc {
+            font-size: 11px;
+            color: #888;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        /* COMPETITIVE */
+        .competitive-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+            font-size: 13px;
+        }
+
+        .competitive-table th {
+            background: #F8F9FA;
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        .competitive-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .competitive-table .check {
+            color: #00B894;
+            font-weight: 700;
+        }
+
+        .competitive-table .cross {
+            color: #ccc;
+        }
+
+        /* FOOTER / CTA */
+        .footer {
+            margin-top: 40px;
+            padding-top: 24px;
+            border-top: 2px solid #6C5CE7;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-left h3 {
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .footer-left p {
+            font-size: 13px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .footer-right {
+            text-align: right;
+        }
+
+        .footer-right .contact-item {
+            font-size: 13px;
+            color: #444;
+            margin-bottom: 4px;
+        }
+
+        .footer-right .link {
+            color: #6C5CE7;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        /* PRINT */
+        @media print {
+            body {
+                font-size: 12px;
+            }
+
+            .page {
+                padding: 20px;
+            }
+
+            .section {
+                margin-bottom: 20px;
+            }
+
+            .market-grid,
+            .products-grid,
+            .traction-grid {
+                gap: 8px;
+            }
+        }
+
+        @media (max-width: 700px) {
+
+            .two-col,
+            .market-grid,
+            .flow,
+            .products-grid,
+            .model-row,
+            .traction-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .flow-arrow {
+                transform: rotate(90deg);
+            }
+
+            .footer {
+                flex-direction: column;
+                gap: 16px;
+                text-align: center;
+            }
+
+            .footer-right {
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+
+        <!-- HEADER -->
+        <div class="header">
+            <div class="header-left">
+                <h1>🤖 Nexo<span>Bot</span></h1>
+                <div class="tagline">Infraestructura crediticia para la economía informal de América Latina</div>
+            </div>
+            <div class="header-right">
+                <div class="conf">Confidencial</div>
+                <div style="margin-top:6px;">Febrero 2026</div>
+                <div>Asunción, Paraguay</div>
+            </div>
+        </div>
+
+        <!-- PROBLEM / SOLUTION -->
+        <div class="section">
+            <div class="two-col">
+                <div class="col-card col-problem">
+                    <h3>❌ El problema</h3>
+                    <p>En Paraguay, más de <strong>500.000 comerciantes informales</strong> no tienen acceso a crédito
+                        porque no tienen historial financiero verificable.</p>
+                    <ul>
+                        <li>📋 No facturan, no bancan, no registran</li>
+                        <li>🏦 Las financieras no pueden evaluarlos</li>
+                        <li>💸 Verificación manual: Gs. 300K y 3-5 días</li>
+                        <li>📊 Morosidad alta por decisiones sin datos</li>
+                    </ul>
+                </div>
+                <div class="col-card col-solution">
+                    <h3>✅ La solución</h3>
+                    <p>NexoBot es un <strong>asistente de WhatsApp con IA</strong> que captura la actividad comercial
+                        diaria y genera perfiles crediticios verificables.</p>
+                    <ul>
+                        <li>📱 El comerciante registra ventas por WhatsApp</li>
+                        <li>🧠 NLP procesa lenguaje natural en guaraní/español</li>
+                        <li>📊 Genera historial transaccional verificable</li>
+                        <li>🏦 Las financieras consultan vía API en 1 segundo</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- MARKET -->
+        <div class="section">
+            <div class="section-label">Oportunidad de Mercado</div>
+            <div class="market-grid">
+                <div class="market-stat">
+                    <div class="number">500K+</div>
+                    <div class="label">Comerciantes informales<br>en Paraguay</div>
+                </div>
+                <div class="market-stat">
+                    <div class="number">70%</div>
+                    <div class="label">Economía informal<br>sobre el PIB</div>
+                </div>
+                <div class="market-stat">
+                    <div class="number">93%</div>
+                    <div class="label">Penetración móvil<br>en Paraguay</div>
+                </div>
+                <div class="market-stat">
+                    <div class="number">$2.1B</div>
+                    <div class="label">Mercado de microcrédito<br>en Paraguay</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HOW IT WORKS -->
+        <div class="section">
+            <div class="section-label">Cómo Funciona</div>
+            <div class="flow">
+                <div class="flow-step">
+                    <div class="icon">📱</div>
+                    <div class="title">Captura</div>
+                    <div class="desc">El comerciante registra ventas, cobros y fiados por WhatsApp</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">
+                    <div class="icon">🧠</div>
+                    <div class="title">Procesamiento</div>
+                    <div class="desc">NLP + IA analiza patrones, genera NexoScore crediticio</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">
+                    <div class="icon">🏦</div>
+                    <div class="title">Monetización</div>
+                    <div class="desc">Financieras consultan perfiles vía API — pagan por consulta</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PRODUCTS -->
+        <div class="section">
+            <div class="section-label">Líneas de Producto (B2B)</div>
+            <div class="products-grid">
+                <div class="product-card">
+                    <div class="emoji">🟢</div>
+                    <h4>GreenLight</h4>
+                    <p>Aprobación/rechazo instantáneo basado en datos transaccionales reales</p>
+                    <div class="price">$0.05 / consulta</div>
+                </div>
+                <div class="product-card">
+                    <div class="emoji">📊</div>
+                    <h4>NexoScore</h4>
+                    <p>Score crediticio alternativo (0-100) con desglose de factores de riesgo</p>
+                    <div class="price">$0.15 / reporte</div>
+                </div>
+                <div class="product-card">
+                    <div class="emoji">🔍</div>
+                    <h4>Intelligence</h4>
+                    <p>Análisis de mercado por zona, rubro y segmento para portafolios de crédito</p>
+                    <div class="price">$500 / mes (suscripción)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BUSINESS MODEL -->
+        <div class="section">
+            <div class="section-label">Modelo de Negocio</div>
+            <div class="model-row">
+                <div class="model-box">
+                    <h4>💰 Revenue Model</h4>
+                    <p>B2B2C — Free para el comerciante, pago por las financieras.</p>
+                    <p style="margin-top:6px;">Ingresos por consulta API + suscripciones mensuales a datos agregados.
+                    </p>
+                    <div class="highlight">Margen bruto estimado: 85%+</div>
+                </div>
+                <div class="model-box">
+                    <h4>📈 Proyección</h4>
+                    <p><strong>Año 1:</strong> 5.000 comerciantes, 3 financieras → $180K ARR</p>
+                    <p><strong>Año 2:</strong> 25.000 comerciantes, 10 financieras → $1.2M ARR</p>
+                    <p><strong>Año 3:</strong> Expansión regional (Bolivia, Norte Arg) → $4M+ ARR</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TRACTION -->
+        <div class="section">
+            <div class="section-label">Tracción Actual</div>
+            <div class="traction-grid">
+                <div class="traction-item">
+                    <div class="icon">🤖</div>
+                    <div class="stat">MVP Live</div>
+                    <div class="desc">Bot funcional en WhatsApp<br>con NLP en producción</div>
+                </div>
+                <div class="traction-item">
+                    <div class="icon">🏦</div>
+                    <div class="stat">API Ready</div>
+                    <div class="desc">3 productos B2B con<br>demo interactiva</div>
+                </div>
+                <div class="traction-item">
+                    <div class="icon">🌐</div>
+                    <div class="stat">Deployed</div>
+                    <div class="desc">Infraestructura cloud<br>Render + Supabase</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COMPETITIVE -->
+        <div class="section">
+            <div class="section-label">Ventaja Competitiva</div>
+            <table class="competitive-table">
+                <thead>
+                    <tr>
+                        <th>Capacidad</th>
+                        <th>NexoBot</th>
+                        <th>Bureau Tradicional</th>
+                        <th>Verificador Manual</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Comerciantes informales</td>
+                        <td class="check">✅ Sí</td>
+                        <td class="cross">❌ No</td>
+                        <td class="check">✅ Limitado</td>
+                    </tr>
+                    <tr>
+                        <td>Tiempo de respuesta</td>
+                        <td class="check">1 segundo</td>
+                        <td class="check">Instantáneo</td>
+                        <td class="cross">3-5 días</td>
+                    </tr>
+                    <tr>
+                        <td>Costo por evaluación</td>
+                        <td class="check">$0.05 - $0.15</td>
+                        <td>$0.50 - $2.00</td>
+                        <td class="cross">$40 - $60</td>
+                    </tr>
+                    <tr>
+                        <td>Datos en tiempo real</td>
+                        <td class="check">✅ Diarios</td>
+                        <td class="cross">❌ Mensuales</td>
+                        <td class="cross">❌ Snapshot</td>
+                    </tr>
+                    <tr>
+                        <td>Escalabilidad</td>
+                        <td class="check">✅ Ilimitada</td>
+                        <td class="check">✅ Alta</td>
+                        <td class="cross">❌ Lineal</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            <div class="footer-left">
+                <h3>🤖 NexoBot — A Unicornio</h3>
+                <p>Creando infraestructura financiera para los que no existen en el sistema.</p>
+            </div>
+            <div class="footer-right">
+                <div class="contact-item">📧 <a class="link" href="mailto:contacto@nexobot.io">contacto@nexobot.io</a>
+                </div>
+                <div class="contact-item">🌐 <a class="link"
+                        href="https://nexobot-mvp-1.onrender.com/empresas.html">nexobot.io</a></div>
+                <div class="contact-item">📍 Asunción, Paraguay</div>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>

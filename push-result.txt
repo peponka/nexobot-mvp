@@ -1,8 +1,8 @@
 ﻿git : To https://github.com/
 peponka/nexobot-mvp.git
-En línea: 1 Carácter: 78
-+ ... le visual demo with 
-credit fichas'; git push 
+En línea: 1 Carácter: 69
++ ... h: professional copy 
+for B2B demo'; git push 
 origin main 2>&1 | Out-F ...
 +                           
               
@@ -15,5 +15,5 @@ eException
     + FullyQualifiedErrorId 
     : NativeCommandError
  
-   2e3a952..67cd6d5  main 
+   67cd6d5..926878c  main 
 -> main
