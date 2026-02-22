@@ -1,0 +1,32 @@
+﻿
+ÔòöÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòù
+Ôòæ        ­ƒñû NexoBot MVP v1.0.0           Ôòæ
+ÔòæÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòæ
+Ôòæ  Env:      ­ƒƒí DEVELOPMENT                Ôòæ
+Ôòæ  Server:   http://localhost:3000          Ôòæ
+Ôòæ  Health:   http://localhost:3000/health    Ôòæ
+Ôòæ  Webhook:  http://localhost:3000/webhook   Ôòæ
+ÔòáÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòú
+Ôòæ  DB:   Ô£à Supabase connected      Ôòæ
+Ôòæ  NLP:  Ô£à OpenAI GPT-4o-mini    Ôòæ
+Ôòæ  WA:   Ô£à WhatsApp connected     Ôòæ
+Ôòæ  ­ƒöö:  Reminders cron active              Ôòæ
+Ôòæ  ­ƒôè:  Daily summary cron active          Ôòæ
+Ôòæ  ­ƒÄ»:  NexoScore cron active (2am PY)     Ôòæ
+Ôòæ  ­ƒƒó:  GreenLight API: /api/greenlight    Ôòæ
+Ôòæ  ­ƒÆ▒:  Exchange rate cron active (6h)     Ôòæ
+Ôòæ  ­ƒôê:  Score API: /api/score/:identifier  Ôòæ
+ÔòÜÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòØ
+    
+ÔÅ░ Reminder cron: next run in 12 minutes
+­ƒºá Smart alerts cron: next run in 72 minutes
+­ƒôè Summary cron: next run in 672 minutes
+­ƒôè Scoring cron: next run in 1032 minutes
+­ƒôº Email cron disabled ÔÇö RESEND_API_KEY not set
+­ƒÆ░ Billing cron active ÔÇö daily summary generation
+­ƒÆ▒ Exchange rate updated: 1 USD = 6536 PYG (exchangerate-api)
+­ƒÆ▒ Exchange rate loaded: 1 USD = 6536 PYG (exchangerate-api)
+­ƒÆ░ Generating billing for 2 partners (2026-02)...
+  ­ƒôè NexoBot Internal: 0 calls ÔåÆ $0
+  ­ƒôè GreenLight Demo: 0 calls ÔåÆ $0
+

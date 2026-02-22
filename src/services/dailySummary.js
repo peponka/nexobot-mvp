@@ -81,10 +81,14 @@ async function sendDailySummary(merchant) {
         todayStart.setDate(todayStart.getDate() - 1);
     }
 
+    // Yesterday range for comparison
+    const yesterdayStart = new Date(todayStart);
+    yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+
     // Get today's transactions
     const { data: transactions, error } = await supabase
         .from('transactions')
-        .select('type, amount, currency')
+        .select('type, amount, currency, customer_id')
         .eq('merchant_id', merchant.id)
         .gte('created_at', todayStart.toISOString());
 
@@ -93,7 +97,15 @@ async function sendDailySummary(merchant) {
         return false;
     }
 
-    // Calculate stats
+    // Get yesterday's transactions for comparison
+    const { data: yesterdayTx } = await supabase
+        .from('transactions')
+        .select('type, amount')
+        .eq('merchant_id', merchant.id)
+        .gte('created_at', yesterdayStart.toISOString())
+        .lt('created_at', todayStart.toISOString());
+
+    // Calculate today's stats
     const salesCash = transactions?.filter(t => t.type === 'SALE_CASH') || [];
     const salesCredit = transactions?.filter(t => t.type === 'SALE_CREDIT') || [];
     const payments = transactions?.filter(t => t.type === 'PAYMENT') || [];
@@ -109,56 +121,124 @@ async function sendDailySummary(merchant) {
         return false;
     }
 
+    // Calculate yesterday's stats for comparison
+    const yesterdaySales = (yesterdayTx || [])
+        .filter(t => t.type === 'SALE_CASH' || t.type === 'SALE_CREDIT')
+        .reduce((sum, t) => sum + t.amount, 0);
+
     // Get total outstanding debt
     const { data: debtors } = await supabase
         .from('merchant_customers')
-        .select('total_debt')
+        .select('name, total_debt')
         .eq('merchant_id', merchant.id)
-        .gt('total_debt', 0);
+        .gt('total_debt', 0)
+        .order('total_debt', { ascending: false });
 
     const totalDebt = (debtors || []).reduce((sum, d) => sum + d.total_debt, 0);
     const debtorsCount = (debtors || []).length;
 
     // Build summary message
     const name = merchant.name || 'Comerciante';
-    const hour = (now.getUTCHours() - 3 + 24) % 24;
 
     let message = `📊 *Resumen del día — ${formatDate(now)}*\n`;
     message += `━━━━━━━━━━━━━━━━━━\n\n`;
-    message += `Hola ${name}! Acá va tu resumen de hoy:\n\n`;
+    message += `Hola ${name}! Acá va tu resumen:\n\n`;
 
-    // Sales
-    message += `💰 *Ventas totales: ${formatPYG(totalSales)}*\n`;
+    // Sales with comparison
+    const trend = yesterdaySales > 0
+        ? (totalSales >= yesterdaySales ? '📈' : '📉')
+        : '';
+    const pctChange = yesterdaySales > 0
+        ? Math.round(((totalSales - yesterdaySales) / yesterdaySales) * 100)
+        : 0;
+    const changeText = yesterdaySales > 0
+        ? ` (${pctChange >= 0 ? '+' : ''}${pctChange}% vs ayer)`
+        : '';
+
+    message += `💰 *Ventas: ${formatPYG(totalSales)}* ${trend}${changeText}\n`;
     if (salesCash.length > 0) {
-        message += `   💵 Contado: ${formatPYG(totalSalesCash)} (${salesCash.length} venta${salesCash.length > 1 ? 's' : ''})\n`;
+        message += `   💵 Contado: ${formatPYG(totalSalesCash)} (${salesCash.length})\n`;
     }
     if (salesCredit.length > 0) {
-        message += `   📝 Fiado: ${formatPYG(totalSalesCredit)} (${salesCredit.length} venta${salesCredit.length > 1 ? 's' : ''})\n`;
+        message += `   📝 Fiado: ${formatPYG(totalSalesCredit)} (${salesCredit.length})\n`;
     }
 
     // Collections
     if (payments.length > 0) {
-        message += `\n💵 *Cobros: ${formatPYG(totalCollected)}* (${payments.length} cobro${payments.length > 1 ? 's' : ''})\n`;
+        message += `\n💵 *Cobros: ${formatPYG(totalCollected)}* (${payments.length})\n`;
+    }
+
+    // Cash vs Credit ratio
+    if (totalSales > 0) {
+        const cashPct = Math.round((totalSalesCash / totalSales) * 100);
+        message += `\n📊 Contado ${cashPct}% · Fiado ${100 - cashPct}%\n`;
     }
 
     // Total operations
-    message += `\n🧾 Operaciones del día: ${totalOperations}\n`;
+    message += `🧾 Operaciones: ${totalOperations}\n`;
 
     // Outstanding debt
     if (totalDebt > 0) {
         message += `\n━━━━━━━━━━━━━━━━━━\n`;
-        message += `📋 *Deuda total pendiente: ${formatPYG(totalDebt)}*\n`;
+        message += `📋 *Deuda pendiente: ${formatPYG(totalDebt)}*\n`;
         message += `👥 ${debtorsCount} cliente${debtorsCount > 1 ? 's' : ''} con deuda\n`;
+
+        // Show top 3 debtors
+        const topDebtors = (debtors || []).slice(0, 3);
+        if (topDebtors.length > 0) {
+            for (const d of topDebtors) {
+                message += `   • ${d.name}: ${formatPYG(d.total_debt)}\n`;
+            }
+        }
     }
+
+    // Smart tip based on data
+    message += `\n━━━━━━━━━━━━━━━━━━\n`;
+    const tip = generateSmartTip(totalSales, totalSalesCash, totalSalesCredit, totalCollected, totalDebt, debtorsCount);
+    message += `💡 *Tip:* ${tip}\n`;
 
     // Motivational close
     const emoji = totalSales >= 1000000 ? '🔥' : totalSales >= 500000 ? '💪' : '👍';
-    message += `\n${emoji} ¡Buen trabajo hoy, ${name}! Nos vemos mañana.`;
+    message += `\n${emoji} ¡Buen trabajo, ${name}!`;
 
     // Send
     await sendMessage(merchant.phone, message);
     console.log(`📊 Daily summary sent to ${merchant.name} (${merchant.phone})`);
     return true;
+}
+
+/**
+ * Generate a contextual smart tip based on merchant's daily data
+ */
+function generateSmartTip(totalSales, cash, credit, collected, debt, debtorsCount) {
+    // High fiado ratio
+    if (credit > cash && totalSales > 0) {
+        return 'Hoy fiaste más de lo que cobraste al contado. Intentá pedir al menos un 30% de entrada en los fiados.';
+    }
+
+    // High outstanding debt
+    if (debt > totalSales * 5 && totalSales > 0) {
+        return `Tenés ${formatPYG(debt)} en deudas pendientes. Respondé "deudas" para ver el detalle y mandar recordatorios.`;
+    }
+
+    // Good collection day
+    if (collected > credit && collected > 0) {
+        return '¡Cobraste más de lo que fiaste hoy! Excelente gestión de cobranza 💪';
+    }
+
+    // Many debtors
+    if (debtorsCount >= 5) {
+        return `Tenés ${debtorsCount} clientes que te deben. Respondé "recordatorio Carlos" para enviar un recordatorio automático.`;
+    }
+
+    // Default motivational
+    const tips = [
+        'Registrá todas tus ventas para tener un NexoScore más alto. Las cooperativas lo usan para darte crédito.',
+        'Podés pedir tu resumen semanal escribiendo "cómo me fue esta semana".',
+        'Tu historial de ventas en NexoBot te puede ayudar a conseguir financiamiento.',
+        'Respondé "ayuda" para conocer todo lo que puedo hacer por tu negocio.'
+    ];
+    return tips[Math.floor(Math.random() * tips.length)];
 }
 
 /**

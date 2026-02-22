@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0a0a0f">
+    <title>NexoBot</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <!-- SPLASH / LOGIN -->
+    <div id="loginScreen" class="screen active">
+        <div class="login-container">
+            <div class="login-logo">🦄</div>
+            <h1 class="login-title">NexoBot</h1>
+            <p class="login-subtitle">Tu negocio en tu bolsillo</p>
+
+            <div class="login-form">
+                <div class="input-group">
+                    <label>📱 Teléfono</label>
+                    <input type="tel" id="loginPhone" placeholder="0981 234 567" maxlength="15">
+                </div>
+                <div class="input-group">
+                    <label>🔐 PIN</label>
+                    <input type="password" id="loginPin" placeholder="••••" maxlength="6" inputmode="numeric">
+                </div>
+                <button class="btn-primary" onclick="doLogin()">Entrar</button>
+                <button class="btn-text" onclick="forgotPin()">¿Olvidaste tu PIN?</button>
+                <p class="login-hint">Usá el PIN que configuraste en WhatsApp</p>
+                <p class="login-error hidden" id="loginError">Teléfono o PIN incorrecto</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP -->
+    <div id="appShell" class="hidden">
+
+        <!-- TOP HEADER -->
+        <header class="app-header">
+            <div class="header-left">
+                <span class="header-greeting" id="headerGreeting">Buenos días</span>
+                <span class="header-name" id="headerName">Comerciante</span>
+            </div>
+            <div class="header-right">
+                <div class="header-score" id="headerScore">
+                    <span class="score-label">NexoScore</span>
+                    <span class="score-value">--</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- CONTENT (tab-based) -->
+        <main class="app-content" id="appContent">
+
+            <!-- TAB: HOME -->
+            <section class="tab-panel active" id="tabHome">
+                <!-- Quick stats -->
+                <div class="stats-row">
+                    <div class="stat-card stat-sales">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-value" id="statSales">--</div>
+                        <div class="stat-label">Ventas hoy</div>
+                    </div>
+                    <div class="stat-card stat-debts">
+                        <div class="stat-icon">📋</div>
+                        <div class="stat-value" id="statDebts">--</div>
+                        <div class="stat-label">Te deben</div>
+                    </div>
+                    <div class="stat-card stat-customers">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-value" id="statCustomers">--</div>
+                        <div class="stat-label">Clientes</div>
+                    </div>
+                </div>
+
+                <!-- Quick actions -->
+                <div class="section-title">Acciones rápidas</div>
+                <div class="actions-grid">
+                    <button class="action-btn" onclick="showQuickSale()">
+                        <span class="action-icon">🛒</span>
+                        <span>Venta</span>
+                    </button>
+                    <button class="action-btn" onclick="showQuickPayment()">
+                        <span class="action-icon">💵</span>
+                        <span>Cobro</span>
+                    </button>
+                    <button class="action-btn" onclick="switchTab('tabDebtors')">
+                        <span class="action-icon">📝</span>
+                        <span>Deudas</span>
+                    </button>
+                    <button class="action-btn" onclick="downloadExcel('sales')">
+                        <span class="action-icon">📊</span>
+                        <span>Excel</span>
+                    </button>
+                </div>
+
+                <!-- Recent transactions -->
+                <div class="section-title">Últimas operaciones</div>
+                <div class="tx-list" id="recentTxList">
+                    <div class="tx-empty">Cargando...</div>
+                </div>
+            </section>
+
+            <!-- TAB: DEBTORS -->
+            <section class="tab-panel" id="tabDebtors">
+                <div class="section-title">Deudores</div>
+                <div class="search-bar">
+                    <input type="text" id="debtorSearch" placeholder="🔍 Buscar cliente..." oninput="filterDebtors()">
+                </div>
+                <div class="debtor-list" id="debtorList">
+                    <div class="tx-empty">Cargando...</div>
+                </div>
+                <div class="debtor-total">
+                    <span>Total deuda:</span>
+                    <span class="debtor-total-value" id="totalDebtValue">--</span>
+                </div>
+            </section>
+
+            <!-- TAB: HISTORY -->
+            <section class="tab-panel" id="tabHistory">
+                <div class="section-title">Historial</div>
+                <div class="filter-row">
+                    <button class="filter-btn active" onclick="filterTx('all', this)">Todos</button>
+                    <button class="filter-btn" onclick="filterTx('SALE_CASH', this)">Contado</button>
+                    <button class="filter-btn" onclick="filterTx('SALE_CREDIT', this)">Fiado</button>
+                    <button class="filter-btn" onclick="filterTx('PAYMENT', this)">Cobros</button>
+                </div>
+                <div class="tx-list" id="historyTxList">
+                    <div class="tx-empty">Cargando...</div>
+                </div>
+            </section>
+
+            <!-- TAB: PROFILE -->
+            <section class="tab-panel" id="tabProfile">
+                <div class="profile-header">
+                    <div class="profile-avatar" id="profileAvatar">🦄</div>
+                    <h2 id="profileName">--</h2>
+                    <p id="profileBusiness">--</p>
+                </div>
+
+                <div class="profile-score-card">
+                    <div class="score-ring" id="scoreRing">
+                        <svg viewBox="0 0 120 120">
+                            <circle cx="60" cy="60" r="54" fill="none" stroke="rgba(255,255,255,0.1)"
+                                stroke-width="8" />
+                            <circle cx="60" cy="60" r="54" fill="none" stroke="#6C5CE7" stroke-width="8"
+                                stroke-dasharray="339" stroke-dashoffset="339" stroke-linecap="round" id="scoreArc"
+                                transform="rotate(-90 60 60)" />
+                        </svg>
+                        <div class="score-ring-value" id="profileScoreValue">--</div>
+                    </div>
+                    <div class="score-tier" id="profileTier">--</div>
+                    <div class="score-tier-label">Tu nivel crediticio</div>
+                </div>
+
+                <div class="profile-actions">
+                    <button class="profile-action-btn" onclick="downloadExcel('sales')">
+                        <span>📊</span> Descargar Ventas (Excel)
+                    </button>
+                    <button class="profile-action-btn" onclick="downloadExcel('debtors')">
+                        <span>📋</span> Descargar Deudores (Excel)
+                    </button>
+                    <button class="profile-action-btn" onclick="downloadPDF()">
+                        <span>📄</span> Reporte Mensual (PDF)
+                    </button>
+                    <button class="profile-action-btn danger" onclick="doLogout()">
+                        <span>🚪</span> Cerrar Sesión
+                    </button>
+                </div>
+
+                <div class="profile-info">
+                    <div class="info-row">
+                        <span class="info-label">Teléfono</span>
+                        <span class="info-value" id="profilePhone">--</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Ciudad</span>
+                        <span class="info-value" id="profileCity">--</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Tipo</span>
+                        <span class="info-value" id="profileType">--</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Desde</span>
+                        <span class="info-value" id="profileSince">--</span>
+                    </div>
+                </div>
+
+                <p class="app-version">NexoBot v1.0.0 · Paraguay 🇵🇾</p>
+            </section>
+        </main>
+
+        <!-- BOTTOM NAV -->
+        <nav class="bottom-nav">
+            <button class="nav-btn active" onclick="switchTab('tabHome')" id="navHome">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">Inicio</span>
+            </button>
+            <button class="nav-btn" onclick="switchTab('tabDebtors')" id="navDebtors">
+                <span class="nav-icon">📋</span>
+                <span class="nav-label">Deudas</span>
+            </button>
+            <button class="nav-btn" onclick="switchTab('tabHistory')" id="navHistory">
+                <span class="nav-icon">📈</span>
+                <span class="nav-label">Historial</span>
+            </button>
+            <button class="nav-btn" onclick="switchTab('tabProfile')" id="navProfile">
+                <span class="nav-icon">👤</span>
+                <span class="nav-label">Perfil</span>
+            </button>
+        </nav>
+
+        <!-- QUICK SALE MODAL -->
+        <div class="modal-overlay hidden" id="saleModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h3>🛒 Registrar Venta</h3>
+                    <button class="modal-close" onclick="closeModal('saleModal')">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group">
+                        <label>Cliente</label>
+                        <input type="text" id="saleCustomer" placeholder="Nombre del cliente">
+                    </div>
+                    <div class="input-group">
+                        <label>Producto</label>
+                        <input type="text" id="saleProduct" placeholder="Qué vendiste">
+                    </div>
+                    <div class="input-group">
+                        <label>Monto (Gs.)</label>
+                        <input type="number" id="saleAmount" placeholder="500000" inputmode="numeric">
+                    </div>
+                    <div class="toggle-row">
+                        <span>Tipo:</span>
+                        <button class="toggle-btn active" id="toggleCash"
+                            onclick="toggleSaleType('cash')">Contado</button>
+                        <button class="toggle-btn" id="toggleCredit" onclick="toggleSaleType('credit')">Fiado</button>
+                    </div>
+                    <button class="btn-primary" onclick="submitSale()">Registrar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- QUICK PAYMENT MODAL -->
+        <div class="modal-overlay hidden" id="paymentModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h3>💵 Registrar Cobro</h3>
+                    <button class="modal-close" onclick="closeModal('paymentModal')">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group">
+                        <label>Cliente</label>
+                        <input type="text" id="paymentCustomer" placeholder="Quién te pagó">
+                    </div>
+                    <div class="input-group">
+                        <label>Monto (Gs.)</label>
+                        <input type="number" id="paymentAmount" placeholder="300000" inputmode="numeric">
+                    </div>
+                    <button class="btn-primary" onclick="submitPayment()">Registrar Cobro</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TOAST -->
+        <div class="toast hidden" id="toast">
+            <span id="toastMsg">Guardado ✅</span>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

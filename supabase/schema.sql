@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS merchants (
     business_type VARCHAR(50) DEFAULT 'general',
     city VARCHAR(100),
     country VARCHAR(3) DEFAULT 'PY',
+    dashboard_pin VARCHAR(255),
     language VARCHAR(5) DEFAULT 'es',
     monthly_volume VARCHAR(20),     -- Rango de facturación mensual
     nexo_score INT DEFAULT 0,

@@ -1,23 +1,57 @@
-﻿On branch main
+On branch main
 Your branch is up to date with 'origin/main'.
 
 Changes not staged for commit:
   (use "git add <file>..." to update what will be committed)
   (use "git restore <file>..." to discard changes in working directory)
+	modified:   .env.example
+	modified:   README.md
 	modified:   git-status.txt
-	modified:   src/models/merchant.js
-	modified:   src/models/transaction.js
+	modified:   package-lock.json
+	modified:   package.json
+	modified:   src/routes/dashboard.js
+	modified:   src/server.js
+	modified:   src/services/auth.js
 	modified:   src/services/bot.js
+	modified:   src/services/dailySummary.js
+	modified:   src/services/nlp.js
 	modified:   src/services/onboarding.js
-	modified:   supabase/schema-clean.sql
 	modified:   supabase/schema.sql
+	modified:   tests/core.test.js
 
 Untracked files:
   (use "git add <file>..." to include in what will be committed)
-	server-err.txt
-	supabase/migration_add_identity_fields.sql
-	supabase/migration_add_personal_data.sql
-	test-onboarding-result.txt
-	test-result.txt
+	check-user.mjs
+	fix-pin.mjs
+	mobile-app/
+	output.txt
+	public/admin.html
+	public/pago-cancelado.html
+	public/pago-exitoso.html
+	public/portal-partners.html
+	reset-pin.mjs
+	reset.txt
+	server-err-utf8.txt
+	setup-demo-user.mjs
+	src/middleware/
+	src/routes/admin.js
+	src/routes/export.js
+	src/routes/payments.js
+	src/routes/portal.js
+	src/routes/reports.js
+	src/services/excelExport.js
+	src/services/guarani.js
+	src/services/multiBusiness.js
+	src/services/payments.js
+	src/services/receiptOcr.js
+	src/services/referrals.js
+	src/services/reports.js
+	src/services/smartAlerts.js
+	startup-error.txt
+	startup-log.txt
+	supabase/RUN-THIS-migration-all.sql
+	supabase/migration-payments.sql
+	supabase/migration-referrals-reports.sql
+	user-info.txt
 
 no changes added to commit (use "git add" and/or "git commit -a")

@@ -1,0 +1,71 @@
+﻿
+> nexobot-mvp@1.0.0 dev
+> node --watch src/server.js
+
+node.exe : node:internal/modu
+les/package_json_reader:316
+En línea: 1 Carácter: 1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
+    + CategoryInfo           
+   : NotSpecified: (node:in  
+  ternal/m...json_reader:3   
+ 16:String) [], RemoteExc    
+eption
+    + FullyQualifiedErrorId  
+   : NativeCommandError
+ 
+  throw new ERR_MODULE_NOT_FO
+UND(packageName, 
+fileURLToPath(base), null);
+        ^
+
+Error 
+[ERR_MODULE_NOT_FOUND]: 
+Cannot find package 'pdfkit' 
+imported from C:\Users\pepeq\
+OneDrive\Desktop\aunicornio\n
+exobot-mvp\src\services\repor
+ts.js
+    at 
+Object.getPackageJSONURL (nod
+e:internal/modules/package_js
+on_reader:316:9)
+    at packageResolve (node:i
+nternal/modules/esm/resolve:7
+68:81)
+    at moduleResolve (node:in
+ternal/modules/esm/resolve:85
+8:18)
+    at defaultResolve (node:i
+nternal/modules/esm/resolve:9
+90:11)
+    at #cachedDefaultResolve 
+(node:internal/modules/esm/lo
+ader:712:20)
+    at #resolveAndMaybeBlockO
+nLoaderThread (node:internal/
+modules/esm/loader:729:38)
+    at 
+ModuleLoader.resolveSync (nod
+e:internal/modules/esm/loader
+:758:52)
+    at #resolve (node:interna
+l/modules/esm/loader:694:17)
+    at ModuleLoader.getOrCrea
+teModuleJob (node:internal/mo
+dules/esm/loader:614:35)
+    at ModuleJob.syncLink (no
+de:internal/modules/esm/modul
+e_job:143:33) {
+  code: 
+'ERR_MODULE_NOT_FOUND'
+}
+
+Node.js v25.3.0
+Failed running 'src/server.js'. Waiting for file changes before restarting...

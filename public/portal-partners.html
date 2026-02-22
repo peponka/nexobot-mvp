@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Partners — NexoBot API</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #0B0D11;
+            --surface: #12151C;
+            --surface-2: #1A1E28;
+            --border: #252A36;
+            --text: #E8EAF0;
+            --text-dim: #8B92A5;
+            --accent: #6C5CE7;
+            --accent-glow: rgba(108, 92, 231, 0.2);
+            --green: #00D68F;
+            --red: #FF6B6B;
+            --orange: #FDCB6E;
+            --blue: #74B9FF;
+            --radius: 12px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* HEADER */
+        .header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        .badge {
+            background: var(--accent-glow);
+            color: var(--accent);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .partner-info {
+            text-align: right;
+            font-size: 13px;
+        }
+
+        .partner-info .name {
+            font-weight: 600;
+        }
+
+        .partner-info .plan {
+            color: var(--text-dim);
+            font-size: 11px;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--accent), #a29bfe);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        /* LAYOUT */
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 24px 32px;
+        }
+
+        /* ALERTS */
+        .alert {
+            background: linear-gradient(135deg, rgba(108, 92, 231, 0.1), rgba(162, 155, 254, 0.05));
+            border: 1px solid rgba(108, 92, 231, 0.3);
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+        }
+
+        .alert-icon {
+            font-size: 20px;
+        }
+
+        /* KPI GRID */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .kpi-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            transition: all 0.2s;
+        }
+
+        .kpi-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .kpi-label {
+            font-size: 12px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .kpi-value {
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+        .kpi-sub {
+            font-size: 12px;
+            color: var(--text-dim);
+            margin-top: 4px;
+        }
+
+        .kpi-trend {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 8px;
+            margin-top: 8px;
+        }
+
+        .kpi-trend.up {
+            background: rgba(0, 214, 143, 0.1);
+            color: var(--green);
+        }
+
+        .kpi-trend.down {
+            background: rgba(255, 107, 107, 0.1);
+            color: var(--red);
+        }
+
+        /* TABS */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 4px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--text-dim);
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .tab:hover {
+            color: var(--text);
+        }
+
+        .tab.active {
+            background: var(--accent);
+            color: white;
+            font-weight: 600;
+        }
+
+        /* PANELS */
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        /* TABLE */
+        .table-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 14px 16px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-dim);
+            background: var(--surface-2);
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 14px 16px;
+            font-size: 13px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(108, 92, 231, 0.05);
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .status-badge.success {
+            background: rgba(0, 214, 143, 0.1);
+            color: var(--green);
+        }
+
+        .status-badge.pending {
+            background: rgba(253, 203, 110, 0.1);
+            color: var(--orange);
+        }
+
+        .status-badge.error {
+            background: rgba(255, 107, 107, 0.1);
+            color: var(--red);
+        }
+
+        /* CHART */
+        .chart-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .chart-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        /* API KEY DISPLAY */
+        .api-key-box {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .api-key-box .key {
+            opacity: 0.7;
+        }
+
+        .api-key-box button {
+            background: var(--accent);
+            border: none;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* SCORE LOOKUP */
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            flex: 1;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: var(--text);
+            font-size: 14px;
+            outline: none;
+        }
+
+        .search-box input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .search-box button {
+            background: var(--accent);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .search-box button:hover {
+            background: #5a4bd6;
+        }
+
+        .score-result {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            display: none;
+        }
+
+        .score-result.visible {
+            display: block;
+        }
+
+        .score-display {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 16px;
+        }
+
+        .score-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 800;
+        }
+
+        .score-circle.tier-A {
+            background: linear-gradient(135deg, rgba(0, 214, 143, 0.2), rgba(0, 214, 143, 0.05));
+            border: 2px solid var(--green);
+            color: var(--green);
+        }
+
+        .score-circle.tier-B {
+            background: linear-gradient(135deg, rgba(116, 185, 255, 0.2), rgba(116, 185, 255, 0.05));
+            border: 2px solid var(--blue);
+            color: var(--blue);
+        }
+
+        .score-circle.tier-C {
+            background: linear-gradient(135deg, rgba(253, 203, 110, 0.2), rgba(253, 203, 110, 0.05));
+            border: 2px solid var(--orange);
+            color: var(--orange);
+        }
+
+        .score-circle.tier-D {
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.2), rgba(255, 107, 107, 0.05));
+            border: 2px solid var(--red);
+            color: var(--red);
+        }
+
+        .score-circle .tier-label {
+            font-size: 11px;
+            font-weight: 600;
+            opacity: 0.7;
+        }
+
+        .score-details {
+            flex: 1;
+        }
+
+        .score-details h3 {
+            margin-bottom: 4px;
+        }
+
+        .score-details p {
+            color: var(--text-dim);
+            font-size: 13px;
+        }
+
+        .score-bars {
+            margin-top: 12px;
+        }
+
+        .score-bar-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .score-bar-label {
+            width: 120px;
+            color: var(--text-dim);
+        }
+
+        .score-bar-track {
+            flex: 1;
+            height: 6px;
+            background: var(--surface-2);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .score-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+
+        /* BILLING */
+        .invoice-total {
+            font-size: 36px;
+            font-weight: 800;
+            margin: 8px 0;
+        }
+
+        .pay-btn {
+            background: linear-gradient(135deg, var(--accent), #a29bfe);
+            border: none;
+            color: white;
+            padding: 14px 32px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 12px;
+        }
+
+        .pay-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px var(--accent-glow);
+        }
+
+        /* EMPTY STATE */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-dim);
+        }
+
+        .empty-state .icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .empty-state h3 {
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+
+            .header {
+                padding: 12px 16px;
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .kpi-value {
+                font-size: 22px;
+            }
+
+            .score-display {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-left">
+            <div class="logo">Nexo<span>Bot</span></div>
+            <div class="badge">PORTAL PARTNERS</div>
+        </div>
+        <div class="header-right">
+            <div class="partner-info">
+                <div class="name" id="partnerName">Cooperativa San Cristóbal</div>
+                <div class="plan" id="partnerPlan">Plan Professional</div>
+            </div>
+            <div class="avatar" id="partnerAvatar">CS</div>
+        </div>
+    </header>
+
+    <!-- CONTENT -->
+    <div class="container">
+
+        <!-- API KEY -->
+        <div class="alert">
+            <span class="alert-icon">🔑</span>
+            <div>
+                <strong>Tu API Key:</strong>
+                <div class="api-key-box" style="margin-top:8px;">
+                    <span class="key" id="apiKeyDisplay">gl-demo-key</span>
+                    <button onclick="copyApiKey()">Copiar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPIs -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-label">Consultas este mes</div>
+                <div class="kpi-value" id="kpiCalls">342</div>
+                <div class="kpi-sub">de 500 incluidas en tu plan</div>
+                <div class="kpi-trend up">↑ 18% vs mes anterior</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">NexoScores consultados</div>
+                <div class="kpi-value" id="kpiScores">187</div>
+                <div class="kpi-sub">comerciantes evaluados</div>
+                <div class="kpi-trend up">↑ 24%</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">GreenLight</div>
+                <div class="kpi-value" id="kpiGreenlight">155</div>
+                <div class="kpi-sub">autorizaciones en tiempo real</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Factura del mes</div>
+                <div class="kpi-value" id="kpiBilling">$0</div>
+                <div class="kpi-sub">facturación pendiente</div>
+            </div>
+        </div>
+
+        <!-- TABS -->
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('uso')">📊 Uso de API</div>
+            <div class="tab" onclick="switchTab('scores')">🎯 Consultar Score</div>
+            <div class="tab" onclick="switchTab('historial')">📋 Historial</div>
+            <div class="tab" onclick="switchTab('facturacion')">💳 Facturación</div>
+            <div class="tab" onclick="switchTab('docs')">📖 Documentación</div>
+        </div>
+
+        <!-- PANEL: USO -->
+        <div class="panel active" id="panel-uso">
+            <div class="chart-grid">
+                <div class="chart-card">
+                    <div class="chart-title">Consultas por día (últimos 30 días)</div>
+                    <canvas id="chartDaily" height="200"></canvas>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Distribución por endpoint</div>
+                    <canvas id="chartEndpoints" height="200"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">Últimas consultas</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Endpoint</th>
+                                <th>Estado</th>
+                                <th>Tiempo</th>
+                                <th>Resultado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentCallsTable">
+                            <tr>
+                                <td>20/02/2026 07:32</td>
+                                <td>/api/score/+5959812345</td>
+                                <td><span class="status-badge success">200</span></td>
+                                <td>45ms</td>
+                                <td>Score: 720 (Tier A)</td>
+                            </tr>
+                            <tr>
+                                <td>20/02/2026 07:28</td>
+                                <td>/api/greenlight/check</td>
+                                <td><span class="status-badge success">200</span></td>
+                                <td>62ms</td>
+                                <td>APPROVED - Gs. 5M</td>
+                            </tr>
+                            <tr>
+                                <td>20/02/2026 07:15</td>
+                                <td>/api/score/+5959887654</td>
+                                <td><span class="status-badge success">200</span></td>
+                                <td>38ms</td>
+                                <td>Score: 580 (Tier B)</td>
+                            </tr>
+                            <tr>
+                                <td>20/02/2026 06:55</td>
+                                <td>/api/greenlight/check</td>
+                                <td><span class="status-badge pending">429</span></td>
+                                <td>12ms</td>
+                                <td>Rate limit exceeded</td>
+                            </tr>
+                            <tr>
+                                <td>19/02/2026 18:42</td>
+                                <td>/api/score/+5959834567</td>
+                                <td><span class="status-badge success">200</span></td>
+                                <td>51ms</td>
+                                <td>Score: 310 (Tier D)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL: SCORES -->
+        <div class="panel" id="panel-scores">
+            <div class="chart-card">
+                <div class="chart-title">Consultar NexoScore de un comerciante</div>
+                <p style="color:var(--text-dim);font-size:13px;margin-bottom:16px;">Ingresá el número de teléfono o
+                    cédula del comerciante para ver su score crediticio.</p>
+                <div class="search-box">
+                    <input type="text" id="scoreSearch" placeholder="Ej: +595981234567 o 4523871" />
+                    <button onclick="lookupScore()">Consultar</button>
+                </div>
+                <div class="score-result" id="scoreResult">
+                    <div class="score-display">
+                        <div class="score-circle tier-A" id="scoreCircle">
+                            <span id="scoreValue">720</span>
+                            <span class="tier-label" id="scoreTier">TIER A</span>
+                        </div>
+                        <div class="score-details">
+                            <h3 id="scoreName">María González</h3>
+                            <p id="scorePhone">+595981234567 · Almacén "La Esquina"</p>
+                            <p id="scoreSince" style="margin-top:4px;">Registrado hace 8 meses · 247 transacciones</p>
+                        </div>
+                    </div>
+                    <div class="score-bars" id="scoreBars">
+                        <div class="score-bar-item">
+                            <span class="score-bar-label">Volumen ventas</span>
+                            <div class="score-bar-track">
+                                <div class="score-bar-fill" style="width:85%;background:var(--green);"></div>
+                            </div>
+                            <span>85</span>
+                        </div>
+                        <div class="score-bar-item">
+                            <span class="score-bar-label">Frecuencia</span>
+                            <div class="score-bar-track">
+                                <div class="score-bar-fill" style="width:90%;background:var(--green);"></div>
+                            </div>
+                            <span>90</span>
+                        </div>
+                        <div class="score-bar-item">
+                            <span class="score-bar-label">Cobro eficiencia</span>
+                            <div class="score-bar-track">
+                                <div class="score-bar-fill" style="width:70%;background:var(--blue);"></div>
+                            </div>
+                            <span>70</span>
+                        </div>
+                        <div class="score-bar-item">
+                            <span class="score-bar-label">Antigüedad</span>
+                            <div class="score-bar-track">
+                                <div class="score-bar-fill" style="width:65%;background:var(--blue);"></div>
+                            </div>
+                            <span>65</span>
+                        </div>
+                        <div class="score-bar-item">
+                            <span class="score-bar-label">Riesgo cartera</span>
+                            <div class="score-bar-track">
+                                <div class="score-bar-fill" style="width:40%;background:var(--orange);"></div>
+                            </div>
+                            <span>40</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL: HISTORIAL -->
+        <div class="panel" id="panel-historial">
+            <div class="chart-card">
+                <div class="chart-title">Historial de consultas GreenLight</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Comerciante</th>
+                                <th>Score</th>
+                                <th>Tier</th>
+                                <th>Riesgo</th>
+                                <th>Decisión</th>
+                            </tr>
+                        </thead>
+                        <tbody id="greenlightTable">
+                            <tr>
+                                <td>20/02 07:28</td>
+                                <td>María González</td>
+                                <td>720</td>
+                                <td><span class="status-badge success">A</span></td>
+                                <td>Muy bajo</td>
+                                <td>✅ Aprobado - Gs. 5M</td>
+                            </tr>
+                            <tr>
+                                <td>19/02 15:12</td>
+                                <td>Carlos Benítez</td>
+                                <td>580</td>
+                                <td><span class="status-badge success">B</span></td>
+                                <td>Bajo</td>
+                                <td>✅ Aprobado - Gs. 2M</td>
+                            </tr>
+                            <tr>
+                                <td>19/02 11:45</td>
+                                <td>Pedro Ramírez</td>
+                                <td>420</td>
+                                <td><span class="status-badge pending">C</span></td>
+                                <td>Medio</td>
+                                <td>⚠️ Revisión manual</td>
+                            </tr>
+                            <tr>
+                                <td>18/02 09:30</td>
+                                <td>Ana Villalba</td>
+                                <td>310</td>
+                                <td><span class="status-badge error">D</span></td>
+                                <td>Alto</td>
+                                <td>❌ Rechazado</td>
+                            </tr>
+                            <tr>
+                                <td>18/02 08:15</td>
+                                <td>José Fernández</td>
+                                <td>650</td>
+                                <td><span class="status-badge success">A</span></td>
+                                <td>Bajo</td>
+                                <td>✅ Aprobado - Gs. 3M</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL: FACTURACION -->
+        <div class="panel" id="panel-facturacion">
+            <div class="chart-grid">
+                <div class="chart-card">
+                    <div class="chart-title">Factura actual — Febrero 2026</div>
+                    <div class="kpi-label">Total a pagar</div>
+                    <div class="invoice-total" id="invoiceTotal">$0.00</div>
+                    <div style="color:var(--text-dim);font-size:13px;margin-bottom:16px;">
+                        <span id="invoiceDetail">342 consultas · 500 incluidas · 0 facturables</span>
+                    </div>
+                    <button class="pay-btn" onclick="payInvoice()" id="payBtn" style="display:none;">
+                        💳 Pagar con tarjeta
+                    </button>
+                    <p style="color:var(--green);font-size:14px;font-weight:600;" id="paidMsg">
+                        ✅ Estás al día — no hay saldo pendiente
+                    </p>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Historial de pagos</div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Período</th>
+                                    <th>Consultas</th>
+                                    <th>Monto</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="paymentHistory">
+                                <tr>
+                                    <td>Enero 2026</td>
+                                    <td>289</td>
+                                    <td>$0.00</td>
+                                    <td><span class="status-badge success">Plan incluido</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Diciembre 2025</td>
+                                    <td>156</td>
+                                    <td>$0.00</td>
+                                    <td><span class="status-badge success">Plan incluido</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL: DOCS -->
+        <div class="panel" id="panel-docs">
+            <div class="chart-card">
+                <div class="chart-title">Integración rápida</div>
+                <p style="color:var(--text-dim);font-size:14px;line-height:1.6;margin-bottom:20px;">
+                    Integrá NexoBot en tu sistema en minutos. Usá tu API key para consultar scores y autorizaciones
+                    crediticias.
+                </p>
+
+                <h4 style="margin:16px 0 8px;">1. Consultar NexoScore</h4>
+                <div class="api-key-box" style="font-size:12px;white-space:pre;overflow-x:auto;">curl -X GET
+                    "https://nexobot-mvp-1.onrender.com/api/score/+595981234567" \
+                    -H "x-api-key: TU_API_KEY"</div>
+
+                <h4 style="margin:16px 0 8px;">2. GreenLight (autorización crediticia)</h4>
+                <div class="api-key-box" style="font-size:12px;white-space:pre;overflow-x:auto;">curl -X POST
+                    "https://nexobot-mvp-1.onrender.com/api/greenlight/check" \
+                    -H "x-api-key: TU_API_KEY" \
+                    -H "Content-Type: application/json" \
+                    -d '{"phone": "+595981234567", "amount": 5000000}'</div>
+
+                <h4 style="margin:16px 0 8px;">3. Ver tu consumo</h4>
+                <div class="api-key-box" style="font-size:12px;white-space:pre;overflow-x:auto;">curl -X GET
+                    "https://nexobot-mvp-1.onrender.com/api/billing/usage" \
+                    -H "x-api-key: TU_API_KEY"</div>
+
+                <p style="color:var(--text-dim);font-size:13px;margin-top:20px;">
+                    📖 Documentación completa: <a href="/api-docs.html"
+                        style="color:var(--accent);">nexobot-mvp-1.onrender.com/api-docs.html</a>
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <script>
+        // =============================================
+        // TAB SWITCHING
+        // =============================================
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(`panel-${tabName}`).classList.add('active');
+        }
+
+        // =============================================
+        // COPY API KEY
+        // =============================================
+        function copyApiKey() {
+            const key = document.getElementById('apiKeyDisplay').textContent;
+            navigator.clipboard.writeText(key);
+            event.target.textContent = '✓ Copiado';
+            setTimeout(() => event.target.textContent = 'Copiar', 2000);
+        }
+
+        // =============================================
+        // SCORE LOOKUP (demo)
+        // =============================================
+        function lookupScore() {
+            const input = document.getElementById('scoreSearch').value.trim();
+            if (!input) return;
+
+            // Simulated score data
+            const score = Math.floor(Math.random() * 400) + 400;
+            const tier = score >= 700 ? 'A' : score >= 550 ? 'B' : score >= 400 ? 'C' : 'D';
+            const tierClass = `tier-${tier}`;
+            const names = ['María González', 'Carlos Benítez', 'Pedro Ramírez', 'Ana Villalba', 'José Fernández'];
+            const businesses = ['Almacén "La Esquina"', 'Despensa Don Carlos', 'Ferretería El Progreso', 'Kiosco Ana', 'MiniMarket JF'];
+            const idx = Math.floor(Math.random() * names.length);
+
+            const circle = document.getElementById('scoreCircle');
+            circle.className = `score-circle ${tierClass}`;
+            document.getElementById('scoreValue').textContent = score;
+            document.getElementById('scoreTier').textContent = `TIER ${tier}`;
+            document.getElementById('scoreName').textContent = names[idx];
+            document.getElementById('scorePhone').textContent = `${input} · ${businesses[idx]}`;
+            document.getElementById('scoreSince').textContent = `Registrado hace ${Math.floor(Math.random() * 12) + 1} meses · ${Math.floor(Math.random() * 300) + 50} transacciones`;
+
+            document.getElementById('scoreResult').classList.add('visible');
+        }
+
+        // =============================================
+        // PAY INVOICE
+        // =============================================
+        async function payInvoice() {
+            const apiKey = document.getElementById('apiKeyDisplay').textContent;
+            try {
+                const res = await fetch('/api/payments/checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ apiKey })
+                });
+                const data = await res.json();
+                if (data.url) window.location.href = data.url;
+                else alert(data.error || 'Error al crear sesión de pago');
+            } catch (e) {
+                alert('Error de conexión');
+            }
+        }
+
+        // =============================================
+        // CHARTS
+        // =============================================
+        function initCharts() {
+            // Daily usage chart
+            const days = [];
+            const values = [];
+            for (let i = 29; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                days.push(`${d.getDate()}/${d.getMonth() + 1}`);
+                values.push(Math.floor(Math.random() * 20) + 5);
+            }
+
+            new Chart(document.getElementById('chartDaily'), {
+                type: 'bar',
+                data: {
+                    labels: days,
+                    datasets: [{
+                        label: 'Consultas',
+                        data: values,
+                        backgroundColor: 'rgba(108,92,231,0.6)',
+                        borderRadius: 4,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: '#8B92A5', maxTicksLimit: 10 } },
+                        y: { grid: { color: '#252A36' }, ticks: { color: '#8B92A5' } }
+                    }
+                }
+            });
+
+            // Endpoints distribution
+            new Chart(document.getElementById('chartEndpoints'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['NexoScore', 'GreenLight', 'Billing'],
+                    datasets: [{
+                        data: [187, 155, 12],
+                        backgroundColor: ['#6C5CE7', '#00D68F', '#74B9FF'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    cutout: '65%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#E8EAF0', padding: 16, font: { size: 12 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // =============================================
+        // INIT
+        // =============================================
+        document.addEventListener('DOMContentLoaded', () => {
+            initCharts();
+
+            // Enter key for score search
+            document.getElementById('scoreSearch').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') lookupScore();
+            });
+        });
+    </script>
+
+</body>
+
+</html>

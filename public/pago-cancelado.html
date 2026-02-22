@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pago Cancelado — NexoBot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0F1117;
+            color: #F1F2F6;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card {
+            background: #1A1D26;
+            border: 1px solid #2D3039;
+            border-radius: 20px;
+            padding: 48px;
+            max-width: 480px;
+            text-align: center;
+        }
+
+        .icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+
+        p {
+            color: #9CA3AF;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 28px;
+            background: #6C5CE7;
+            color: white;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+            margin: 6px;
+        }
+
+        .btn:hover {
+            background: #5a4bd6;
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #6C5CE7;
+            color: #6C5CE7;
+        }
+
+        .btn-outline:hover {
+            background: rgba(108, 92, 231, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <div class="icon">⚠️</div>
+        <h1>Pago cancelado</h1>
+        <p>El pago no fue completado. No se realizó ningún cargo a tu tarjeta. Podés intentar de nuevo cuando quieras.
+        </p>
+        <a href="/precios.html" class="btn btn-outline">Ver planes</a>
+        <a href="/contacto.html" class="btn">Contactar soporte</a>
+    </div>
+</body>
+
+</html>

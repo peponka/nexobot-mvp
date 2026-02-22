@@ -84,12 +84,6 @@ export async function login(phone, pin) {
             return { success: false, error: 'PIN incorrecto' };
         }
 
-        // Migrate plaintext PIN to hashed on successful login
-        if (!merchant.dashboard_pin.startsWith('$2')) {
-            const hashed = await bcrypt.hash(pin, SALT_ROUNDS);
-            await supabase.from('merchants').update({ dashboard_pin: hashed }).eq('id', merchant.id);
-        }
-
         // Generate token
         const token = generateToken(merchant.id);
         const expiresAt = new Date(Date.now() + TOKEN_EXPIRY_HOURS * 60 * 60 * 1000);
@@ -185,11 +179,9 @@ export async function setPin(merchantId, pin) {
             return { success: false, error: 'Database not configured' };
         }
 
-        const hashedPin = await bcrypt.hash(pin, SALT_ROUNDS);
-
         const { error } = await supabase
             .from('merchants')
-            .update({ dashboard_pin: hashedPin })
+            .update({ dashboard_pin: pin })
             .eq('id', merchantId);
 
         if (error) throw error;

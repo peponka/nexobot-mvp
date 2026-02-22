@@ -7,7 +7,6 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import rateLimit from 'express-rate-limit';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -23,7 +22,14 @@ import { startScoringCron } from './services/scoring.js';
 import { startExchangeRateCron } from './services/currency.js';
 import { startEmailCron } from './services/email.js';
 import { trackApiUsage, startBillingCron } from './services/billing.js';
+import { startAlertsCron } from './services/smartAlerts.js';
 import billingRouter from './routes/billing.js';
+import paymentsRouter from './routes/payments.js';
+import portalRouter from './routes/portal.js';
+import reportsRouter from './routes/reports.js';
+import adminRouter from './routes/admin.js';
+import exportRouter from './routes/export.js';
+import { webhookLimiter, apiLimiter, adminLimiter, exportLimiter, generalLimiter } from './middleware/rateLimit.js';
 import { processMessage } from './services/nlp.js';
 import { handleMessage } from './services/bot.js';
 
@@ -56,14 +62,8 @@ app.use(morgan(IS_PROD ? 'short' : 'dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Rate limiting
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: IS_PROD ? 200 : 1000,
-    standardHeaders: true,
-    legacyHeaders: false,
-});
-app.use('/api', limiter);
+// Rate limiting (granular per route type)
+app.use('/api', generalLimiter);
 
 // =============================================
 // ROUTES
@@ -132,13 +132,28 @@ app.post('/api/contact', async (req, res) => {
 app.use('/api/dashboard', requireAuth, dashboardRouter);
 
 // Score API (public for financieras, tracked for billing)
-app.use('/api/score', trackApiUsage, scoreRouter);
+app.use('/api/score', apiLimiter, trackApiUsage, scoreRouter);
 
 // GreenLight API (real-time credit authorization, tracked)
-app.use('/api/greenlight', trackApiUsage, greenlightRouter);
+app.use('/api/greenlight', apiLimiter, trackApiUsage, greenlightRouter);
 
 // Billing API (partners check usage/invoices)
-app.use('/api/billing', billingRouter);
+app.use('/api/billing', apiLimiter, billingRouter);
+
+// Payments API (checkout sessions, webhook)
+app.use('/api/payments', paymentsRouter);
+
+// Partner Portal API (B2B dashboard data)
+app.use('/api/portal', apiLimiter, portalRouter);
+
+// Reports API (PDF generation)
+app.use('/api/reports', exportLimiter, reportsRouter);
+
+// Admin Dashboard API
+app.use('/api/admin', adminLimiter, adminRouter);
+
+// Excel Export API
+app.use('/api/export', exportLimiter, exportRouter);
 
 // Privacy Policy (required by Meta)
 app.get('/privacy', (req, res) => {
@@ -281,6 +296,7 @@ const server = app.listen(PORT, () => {
 
     // Start daily cron jobs
     startReminderCron();       // 9am PY - debt reminders
+    startAlertsCron();         // 10am PY - smart alerts
     startSummaryCron();        // 8pm PY - daily summary
     startScoringCron();        // 2am PY - recalculate all NexoScores
     startExchangeRateCron();   // Every 6h - update USD/PYG rate

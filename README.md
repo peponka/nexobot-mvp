@@ -1,143 +1,315 @@
-# 🤖 NexoBot MVP — Backend
+# 🦄 NexoBot — WhatsApp Financial Assistant for Paraguay's Informal Economy
 
-El cerebro del bot de WhatsApp de **NexoFinanzas**.  
-Gestión financiera para comercio informal en LATAM, directamente desde WhatsApp.
+<p align="center">
+  <img src="https://img.shields.io/badge/version-1.0.0-6C5CE7?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/node-18+-339933?style=for-the-badge&logo=node.js" alt="Node">
+  <img src="https://img.shields.io/badge/WhatsApp-Bot-25D366?style=for-the-badge&logo=whatsapp" alt="WhatsApp">
+  <img src="https://img.shields.io/badge/Supabase-DB-3ECF8E?style=for-the-badge&logo=supabase" alt="Supabase">
+  <img src="https://img.shields.io/badge/tests-98%20passing-00D68F?style=for-the-badge" alt="Tests">
+</p>
 
-## Stack
+**NexoBot** is a WhatsApp-based financial assistant that helps small merchants in Paraguay manage their businesses with simple text and voice messages. It provides sales tracking, debt management, credit scoring, and automated insights — all without requiring literacy in traditional financial tools.
 
-| Layer | Technology |
-|-------|-----------|
-| **Runtime** | Node.js 20+ / Express |
-| **Database** | Supabase (PostgreSQL) |
-| **NLP** | OpenAI GPT-4o-mini + Regex fast-parser |
-| **OCR** | GPT-4 Vision (cédulas, facturas) |
-| **Channel** | Meta WhatsApp Business API |
-| **Deploy** | Render (Web Service) |
+> 🇵🇾 Built for Paraguay's informal economy where 70% of commerce runs on trust and paper notebooks.
 
-## Features (v1.0.0)
+---
 
-- 💬 **NLP bilingüe** — Español + Jopará (guaraní), regex-first con fallback OpenAI
-- 📊 **NexoScore** — Credit scoring automático (cron 2am PY)
-- 🟢 **GreenLight API** — Consulta de riesgo para financieras (`/api/greenlight`)
-- 💱 **Multi-currency** — Conversión PYG ↔ USD en tiempo real
-- 📸 **OCR** — Lectura de cédulas y facturas via GPT-4 Vision
-- 🔔 **Reminders** — Cobro automático con escalado de tono (cron 9am PY)
-- 📈 **Daily Summary** — Resumen diario por WhatsApp (cron 8pm PY)
-- 👤 **Onboarding** — Registro completo con datos personales
-- 🖥️ **Dashboard** — Panel web para comerciantes
+## 🚀 Features
 
-## Estructura
+### 📱 Core Bot (WhatsApp)
+| Feature | Description |
+|---|---|
+| **Sales Tracking** | `"Vendí 500 mil a Carlos"` — register cash and credit sales |
+| **Debt Management** | `"Cuánto me deben?"` — view all debtors with amounts |
+| **Payments** | `"Cobré 300 de Pedro"` — record payments against debts |
+| **Inventory** | `"Me llegó mercadería"` — track stock levels |
+| **Reminders** | `"Recordále a Carlos"` — automated escalating debt reminders |
+| **Smart Alerts** | Daily cash flow insights and collection opportunities at 10AM |
+| **Daily Summary** | Automated business digest at 8PM |
+
+### 🧠 Intelligence
+| Feature | Description |
+|---|---|
+| **NexoScore** | Proprietary credit score (0-1000) based on merchant behavior |
+| **OCR** | Scan cédulas (ID) and invoices/receipts with GPT-4 Vision |
+| **NLP** | Natural language processing with regex fast-parser + OpenAI fallback |
+| **Guaraní Support** | Understands Guaraní and Jopará (mixed language) |
+| **Predictions** | Weekly sales predictions based on historical data |
+
+### 💰 B2B Platform (API)
+| Feature | Description |
+|---|---|
+| **GreenLight API** | Real-time credit authorization for financial institutions |
+| **Score API** | Query NexoScore for any merchant by phone |
+| **Partner Portal** | B2B dashboard with usage analytics and billing |
+| **Billing** | Usage-based billing with tiered pricing |
+| **Payments** | Stripe + Bancard integration for partner payments |
+
+### 📊 Reporting & Export
+| Feature | Description |
+|---|---|
+| **PDF Reports** | Professional monthly reports with KPIs and charts |
+| **Excel Export** | Download sales and debtors as `.xlsx` with formatting |
+| **Admin Dashboard** | Real-time metrics, health monitoring, live activity feed |
+
+### 🔐 Security
+| Feature | Description |
+|---|---|
+| **Rate Limiting** | Granular per-route limits (webhook, API, admin, export) |
+| **PIN Auth** | 4-6 digit PIN for dashboard access |
+| **API Keys** | Partner authentication for B2B endpoints |
+| **Row Level Security** | Supabase RLS policies on all tables |
+| **Helmet** | HTTP security headers |
+
+---
+
+## 📁 Project Structure
 
 ```
 nexobot-mvp/
 ├── src/
-│   ├── server.js              # Express server (production-ready)
+│   ├── server.js              # Express server (entry point)
 │   ├── config/
 │   │   └── supabase.js        # Supabase client
-│   ├── services/
-│   │   ├── nlp.js             # NLP: regex + OpenAI
-│   │   ├── bot.js             # Bot logic / command handler
-│   │   ├── whatsapp.js        # WhatsApp API client
-│   │   ├── scoring.js         # NexoScore calculation
-│   │   ├── currency.js        # Multi-currency service
-│   │   ├── ocr.js             # OCR (cédula + facturas)
-│   │   ├── reminders.js       # Debt reminder cron
-│   │   ├── dailySummary.js    # Daily summary cron
-│   │   └── onboarding.js      # Onboarding flow
-│   ├── models/
-│   │   ├── merchant.js        # Merchant CRUD
-│   │   ├── customer.js        # Customer CRUD
-│   │   └── transaction.js     # Transaction CRUD
-│   └── routes/
-│       ├── webhook.js         # WhatsApp webhook
-│       ├── dashboard.js       # Dashboard API
-│       ├── score.js           # Score API (external)
-│       └── greenlight.js      # GreenLight API
+│   ├── middleware/
+│   │   └── rateLimit.js       # Rate limiting (in-memory)
+│   ├── routes/
+│   │   ├── webhook.js         # WhatsApp webhook (verify + receive)
+│   │   ├── dashboard.js       # Merchant dashboard API
+│   │   ├── score.js           # NexoScore API (B2B)
+│   │   ├── greenlight.js      # Credit authorization API (B2B)
+│   │   ├── billing.js         # Usage billing API
+│   │   ├── payments.js        # Stripe/Bancard payments
+│   │   ├── portal.js          # Partner portal API
+│   │   ├── reports.js         # PDF report generation
+│   │   ├── export.js          # Excel export
+│   │   ├── admin.js           # Admin dashboard API
+│   │   └── auth.js            # Authentication
+│   └── services/
+│       ├── bot.js             # Core message handler + intent routing
+│       ├── nlp.js             # NLP engine (regex + OpenAI)
+│       ├── whatsapp.js        # WhatsApp Cloud API client
+│       ├── onboarding.js      # 8-step merchant onboarding
+│       ├── ocr.js             # GPT-4V OCR for cédula/invoices
+│       ├── receiptOcr.js      # Invoice photo handler
+│       ├── scoring.js         # NexoScore calculation
+│       ├── reminders.js       # Automated debt reminders
+│       ├── dailySummary.js    # 8PM daily digest
+│       ├── smartAlerts.js     # 10AM business insights
+│       ├── reports.js         # PDF report generator
+│       ├── excelExport.js     # Excel file generator
+│       ├── referrals.js       # Referral program
+│       ├── multiBusiness.js   # Multi-business management
+│       ├── currency.js        # Multi-currency (PYG/USD)
+│       ├── billing.js         # Usage metering
+│       ├── guarani.js         # Guaraní language support
+│       └── auth.js            # PIN authentication
 ├── public/
-│   ├── dashboard.html         # Merchant dashboard
-│   └── nexocartera.html       # Portfolio view
+│   ├── index.html             # Merchant dashboard
+│   ├── admin.html             # Admin command center
+│   └── portal-partners.html   # B2B partner portal
 ├── supabase/
-│   ├── schema.sql             # Full database schema
-│   └── migration-*.sql        # Migration scripts
-├── render.yaml                # Render deploy config
-├── .env.example               # Environment template
+│   └── RUN-THIS-migration-all.sql  # Complete DB schema
+├── tests/
+│   └── core.test.js           # 98 automated tests
 ├── package.json
-└── README.md
+├── render.yaml                # Render deployment config
+└── .env.example
 ```
 
-## Quick Start (Local)
+---
 
+## ⚡ Quick Start
+
+### Prerequisites
+- Node.js 18+
+- Supabase account (free tier works)
+- WhatsApp Business API access
+- OpenAI API key (for OCR)
+
+### 1. Clone & Install
 ```bash
-# 1. Clone and install
-git clone https://github.com/peponka/nexobot-mvp.git
+git clone https://github.com/your-org/nexobot-mvp.git
 cd nexobot-mvp
 npm install
+```
 
-# 2. Configure environment
+### 2. Environment Variables
+```bash
 cp .env.example .env
-# Edit .env with your API keys
+```
 
-# 3. Run database schema
-# Go to Supabase SQL Editor → paste supabase/schema.sql → Run
+Required variables:
+```env
+# Server
+PORT=3000
+NODE_ENV=development
 
-# 4. Start dev server
+# Supabase
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_KEY=your-anon-key
+
+# WhatsApp Business API
+WHATSAPP_TOKEN=your-meta-token
+WHATSAPP_PHONE_ID=your-phone-id
+VERIFY_TOKEN=your-verify-token
+
+# OpenAI (for OCR + NLP fallback)
+OPENAI_API_KEY=sk-your-key
+
+# Admin
+ADMIN_KEY=change-this-in-production
+
+# Optional
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+```
+
+### 3. Database Setup
+Run the migration in Supabase SQL Editor:
+```sql
+-- Copy contents of supabase/RUN-THIS-migration-all.sql
+```
+
+### 4. Run
+```bash
+# Development
 npm run dev
+
+# Production
+npm start
 ```
 
-## Deploy to Render
-
-### Option A: One-Click (from render.yaml)
-
-1. Push this repo to GitHub
-2. Go to [Render Dashboard](https://dashboard.render.com)
-3. **New → Blueprint** → connect your GitHub repo
-4. Render reads `render.yaml` and creates the service
-5. Add your environment variables in the Render dashboard
-
-### Option B: Manual Setup
-
-1. **New → Web Service** in Render
-2. Connect your GitHub repo (`peponka/nexobot-mvp`)
-3. Configure:
-   - **Build Command:** `npm install`
-   - **Start Command:** `npm start`
-   - **Health Check Path:** `/health`
-4. Add environment variables:
-
-| Variable | Description |
-|----------|-------------|
-| `NODE_ENV` | `production` |
-| `PORT` | `3000` |
-| `SUPABASE_URL` | Your Supabase project URL |
-| `SUPABASE_KEY` | Your Supabase anon key |
-| `OPENAI_API_KEY` | OpenAI API key |
-| `WHATSAPP_TOKEN` | Meta WhatsApp token |
-| `WHATSAPP_VERIFY_TOKEN` | Webhook verify token |
-| `WHATSAPP_PHONE_NUMBER_ID` | WhatsApp phone number ID |
-| `NEXO_API_KEY` | API key for NexoScore consumers |
-| `GREENLIGHT_API_KEY` | API key for GreenLight consumers |
-
-### Configure WhatsApp Webhook
-
-After deploying, update your Meta webhook URL:
-```
-https://your-app.onrender.com/webhook
+### 5. Run Tests
+```bash
+node tests/core.test.js
 ```
 
-## API Endpoints
+---
 
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| `GET` | `/health` | — | Health check (Render) |
-| `GET` | `/` | — | Service info |
-| `GET/POST` | `/webhook` | Meta | WhatsApp webhook |
-| `GET` | `/api/dashboard/merchants` | — | List merchants |
-| `GET` | `/api/dashboard/:phone` | — | Merchant dashboard data |
-| `GET` | `/api/score/:identifier` | `NEXO_API_KEY` | Get NexoScore |
-| `GET` | `/api/greenlight/consult/:id` | `GREENLIGHT_API_KEY` | Risk consultation |
-| `POST` | `/api/greenlight/batch-consult` | `GREENLIGHT_API_KEY` | Batch risk query |
-| `POST` | `/api/simulate` | — | Test NLP (dev only) |
+## 🌐 Deployment (Render)
 
-## License
+The project includes `render.yaml` for one-click deployment:
 
-MIT © NexoFinanzas
+1. Connect your GitHub repo to Render
+2. Set environment variables in Render dashboard
+3. Deploy — the service auto-starts on port 3000
+
+**Live URL:** `https://nexobot-mvp-1.onrender.com`
+
+---
+
+## 📡 API Reference
+
+### WhatsApp Webhook
+```
+GET  /webhook              # Meta verification
+POST /webhook              # Receive messages
+```
+
+### NexoScore API (B2B)
+```
+GET  /api/score/:phone     # Get merchant score
+     Headers: x-api-key: your-key
+     Response: { phone, score, tier, business_name, ... }
+```
+
+### GreenLight API (B2B)
+```
+POST /api/greenlight/authorize
+     Headers: x-api-key: your-key
+     Body: { phone, amount, currency }
+     Response: { authorized: true, decision, score, limit, ... }
+```
+
+### Export
+```
+GET  /api/export/:id/sales?month=0&year=2026    # Sales Excel
+GET  /api/export/:id/debtors                     # Debtors Excel
+GET  /api/reports/:id?month=0&year=2026          # PDF Report
+```
+
+### Admin
+```
+GET  /api/admin/metrics     # KPIs
+GET  /api/admin/merchants   # Merchant list
+GET  /api/admin/activity    # Charts + live feed
+GET  /api/admin/intents     # Intent distribution
+GET  /api/admin/health      # System health
+     Headers: x-admin-key: your-key
+```
+
+---
+
+## 🧪 Tests
+
+98 automated tests covering:
+
+| Area | Tests |
+|---|---|
+| NLP Intent Detection | 47 |
+| Amount Parsing | 7 |
+| PIN Validation | 8 |
+| Currency Formatting | 7 |
+| Billing Tiers | 7 |
+| Referral Codes | 4 |
+| Onboarding UI | 3 |
+| Cédula Formatting | 3 |
+| Guaraní Detection | 4 |
+| Score Tiers | 8 |
+
+```bash
+$ node tests/core.test.js
+
+✅ Passed: 98
+❌ Failed: 0
+📊 Total:  98
+```
+
+---
+
+## 🏗 Architecture
+
+```
+┌─────────────┐    ┌──────────────┐    ┌───────────────┐
+│  WhatsApp   │───▶│  NexoBot     │───▶│   Supabase    │
+│  Cloud API  │◀───│  (Express)   │◀───│   (Postgres)  │
+└─────────────┘    └──────┬───────┘    └───────────────┘
+                          │
+                    ┌─────┴─────┐
+                    ▼           ▼
+              ┌──────────┐ ┌──────────┐
+              │  OpenAI  │ │  Stripe  │
+              │ GPT-4V   │ │ Payments │
+              └──────────┘ └──────────┘
+```
+
+**Message Flow:**
+1. WhatsApp sends webhook → Express server
+2. NLP engine classifies intent (regex first, GPT fallback)
+3. Bot handler routes to appropriate service
+4. Service queries/updates Supabase
+5. Response sent back via WhatsApp Cloud API
+
+---
+
+## 🇵🇾 Paraguayan Context
+
+NexoBot is specifically designed for Paraguay:
+- **Language:** Spanish + Guaraní/Jopará
+- **Currency:** Guaraníes (₲) with USD support
+- **Amounts:** Understands "500 mil", "2 palos", "200K"
+- **Identity:** Cédula Paraguaya (OCR recognition)
+- **Business types:** Almacén, despensa, kiosco, etc.
+
+---
+
+## 📄 License
+
+Proprietary — © 2026 NexoFinanzas. All rights reserved.
+
+---
+
+<p align="center">
+  Built with 🦄 in Asunción, Paraguay
+</p>

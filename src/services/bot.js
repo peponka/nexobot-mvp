@@ -11,6 +11,11 @@ import { sendManualReminder } from './reminders.js';
 import { needsOnboarding, handleOnboarding } from './onboarding.js';
 import { formatAmount, formatDualCurrency, usdToPyg, getExchangeRate } from './currency.js';
 import { setPin } from './auth.js';
+import { t, getGreeting } from './guarani.js';
+import { handleReferralIntent } from './referrals.js';
+import { getReportMessage } from './reports.js';
+import { handleReceiptPhoto } from './receiptOcr.js';
+import { handleMultiBusinessIntent } from './multiBusiness.js';
 
 /**
  * Format currency (Guaraníes)
@@ -40,11 +45,14 @@ function formatCompact(amount) {
  * @returns {string} Bot response text
  */
 export async function handleMessage(phone, contactName, rawMessage, parsed, imageData = null) {
+    // Detect language for this message
+    const lang = parsed.language || 'es';
+
     // Get or create merchant
     const merchant = await Merchant.findOrCreate(phone, contactName);
 
     if (!merchant) {
-        return '❌ Error interno. Intentá de nuevo en un momento.';
+        return t(lang, 'error_internal');
     }
 
     // Check if merchant needs onboarding (new user)
@@ -53,46 +61,66 @@ export async function handleMessage(phone, contactName, rawMessage, parsed, imag
         if (onboardingResponse) return onboardingResponse;
     }
 
+    // If image received (not during onboarding), try receipt OCR
+    if (imageData && imageData.mediaId) {
+        return await handleReceiptPhoto(merchant, imageData);
+    }
+
     const { intent, entities } = parsed;
 
     try {
         switch (intent) {
             case 'SALE_CREDIT':
-                return await handleSaleCredit(merchant, entities, rawMessage);
+                return await handleSaleCredit(merchant, entities, rawMessage, lang);
 
             case 'SALE_CASH':
-                return await handleSaleCash(merchant, entities, rawMessage);
+                return await handleSaleCash(merchant, entities, rawMessage, lang);
 
             case 'PAYMENT':
-                return await handlePayment(merchant, entities, rawMessage);
+                return await handlePayment(merchant, entities, rawMessage, lang);
 
             case 'DEBT_QUERY':
-                return await handleDebtQuery(merchant);
+                return await handleDebtQuery(merchant, lang);
 
             case 'SALES_QUERY':
-                return await handleSalesQuery(merchant);
+                return await handleSalesQuery(merchant, lang);
 
             case 'INVENTORY_IN':
-                return await handleInventoryIn(merchant, entities, rawMessage);
+                return await handleInventoryIn(merchant, entities, rawMessage, lang);
 
             case 'REMINDER':
-                return await handleReminder(merchant, entities);
+                return await handleReminder(merchant, entities, lang);
 
             case 'SET_PIN':
-                return await handleSetPin(merchant, entities);
+                return await handleSetPin(merchant, entities, lang);
+
+            case 'FORGOT_PIN':
+                return handleForgotPin(merchant, lang);
+
+            case 'REFERRAL':
+                return await handleReferralIntent(merchant, entities.subIntent, entities);
+
+            case 'REPORT':
+                return await handleReportIntent(merchant);
+
+            case 'MULTI_BUSINESS':
+                return await handleMultiBusinessIntent(merchant, phone, entities.subIntent, entities);
+
+            case 'EXPORT':
+                return handleExportIntent(merchant, entities.exportType);
 
             case 'GREETING':
-                return handleGreeting(merchant);
+                return handleBotGreeting(merchant, lang);
 
             case 'HELP':
-                return handleHelp();
+                return handleHelp(lang);
 
             default:
-                return handleUnknown();
+                return handleUnknown(lang);
         }
     } catch (error) {
         console.error(`Bot error for ${phone}:`, error);
-        return '❌ Hubo un error procesando tu mensaje. Intentá de nuevo.';
+        return t(lang, 'error_generic');
     }
 }
 
@@ -100,15 +128,15 @@ export async function handleMessage(phone, contactName, rawMessage, parsed, imag
 // INTENT HANDLERS
 // =============================================
 
-async function handleSaleCredit(merchant, entities, rawMessage) {
+async function handleSaleCredit(merchant, entities, rawMessage, lang = 'es') {
     const { amount, customer_name, product, quantity, unit_price, currency } = entities;
 
     if (!amount) {
-        return '🤔 Entendí que querés registrar una venta fiado, pero no encontré el monto. ¿Podés decirme el monto? Ej: "Vendí 500 mil a Carlos, fiado"';
+        return t(lang, 'sale_no_amount');
     }
 
     if (!customer_name) {
-        return `🤔 Entendí venta fiado de ${formatPYG(amount)}, pero ¿a quién? Decime el nombre. Ej: "Vendí ${formatCompact(amount)} a Juan, fiado"`;
+        return t(lang, 'sale_credit_no_name');
     }
 
     // Find or create customer
@@ -140,8 +168,8 @@ async function handleSaleCredit(merchant, entities, rawMessage) {
     });
 
     // Build response
-    let response = `✅ *Venta fiado registrada*\n\n`;
-    response += `👤 Cliente: ${customer_name}\n`;
+    let response = `${t(lang, 'sale_credit_registered')}\n\n`;
+    response += `${t(lang, 'customer_label')}: ${customer_name}\n`;
 
     if (currency === 'USD') {
         const fmtDual = await formatDualCurrency(amount, 'USD');
@@ -165,11 +193,11 @@ async function handleSaleCredit(merchant, entities, rawMessage) {
     return response;
 }
 
-async function handleSaleCash(merchant, entities, rawMessage) {
+async function handleSaleCash(merchant, entities, rawMessage, lang = 'es') {
     const { amount, product, quantity, unit_price, customer_name, currency } = entities;
 
     if (!amount) {
-        return '🤔 Entendí que querés registrar una venta, pero no encontré el monto. Ej: "Vendí 300 mil al contado"';
+        return t(lang, 'sale_no_amount');
     }
 
     await Transaction.create({
@@ -188,7 +216,7 @@ async function handleSaleCash(merchant, entities, rawMessage) {
         total_sales: (merchant.total_sales || 0) + amount
     });
 
-    let response = `✅ *Venta al contado registrada*\n\n`;
+    let response = `${t(lang, 'sale_cash_registered')}\n\n`;
 
     if (currency === 'USD') {
         const fmtDual = await formatDualCurrency(amount, 'USD');
@@ -205,7 +233,7 @@ async function handleSaleCash(merchant, entities, rawMessage) {
     return response;
 }
 
-async function handlePayment(merchant, entities, rawMessage) {
+async function handlePayment(merchant, entities, rawMessage, lang = 'es') {
     const { amount, customer_name, currency } = entities;
 
     if (!amount) {
@@ -260,7 +288,7 @@ async function handlePayment(merchant, entities, rawMessage) {
     return response;
 }
 
-async function handleDebtQuery(merchant) {
+async function handleDebtQuery(merchant, lang = 'es') {
     const debtors = await Customer.getDebtors(merchant.id);
 
     if (debtors.length === 0) {
@@ -285,7 +313,7 @@ async function handleDebtQuery(merchant) {
     return response;
 }
 
-async function handleSalesQuery(merchant) {
+async function handleSalesQuery(merchant, lang = 'es') {
     const weekly = await Transaction.getWeeklySummary(merchant.id);
     const daily = await Transaction.getDailySummary(merchant.id);
 
@@ -328,7 +356,7 @@ async function handleSalesQuery(merchant) {
     return response;
 }
 
-async function handleInventoryIn(merchant, entities, rawMessage) {
+async function handleInventoryIn(merchant, entities, rawMessage, lang = 'es') {
     const { product, quantity, amount } = entities;
 
     if (!product && !quantity) {
@@ -353,7 +381,7 @@ async function handleInventoryIn(merchant, entities, rawMessage) {
     return response;
 }
 
-async function handleReminder(merchant, entities) {
+async function handleReminder(merchant, entities, lang = 'es') {
     const { customer_name } = entities;
 
     if (!customer_name) {
@@ -371,72 +399,80 @@ async function handleReminder(merchant, entities) {
     return '❌ No pude enviar el recordatorio. Intentá más tarde.';
 }
 
-function handleGreeting(merchant) {
+function handleBotGreeting(merchant, lang = 'es') {
     const name = merchant.name || 'amigo';
-    const hour = new Date().getUTCHours() - 3; // Paraguay is UTC-3
-    const saludo = hour < 12 ? 'Buen día' : hour < 18 ? 'Buenas tardes' : 'Buenas noches';
-    return `${saludo} ${name}! 👋\n\nSoy *NexoBot* 🤖, tu asistente comercial.\n\n` +
-        `Puedo ayudarte a:\n` +
-        `📝 Registrar ventas (fiado y contado)\n` +
-        `💰 Registrar cobros\n` +
-        `📊 Ver quién te debe\n` +
-        `📈 Resumen de ventas\n` +
-        `📦 Controlar inventario\n\n` +
-        `Hablame tranquilo, como si fuera tu socio. Ej:\n` +
-        `_"Vendí 500 mil a Don Carlos, fiado"_\n` +
-        `_"Cobré 200 mil de María"_\n` +
-        `_"¿Cuánto me deben?"_`;
+    const saludo = getGreeting(lang);
+    return `${saludo} ${t(lang, 'greeting_intro', name)}`;
 }
 
-function handleHelp() {
-    return `📖 *Guía de NexoBot* 🇵🇾\n` +
-        `━━━━━━━━━━━━━━━━━━\n\n` +
-        `📝 *Venta fiado:*\n` +
-        `_"Vendí 500 mil a Carlos, fiado"_\n` +
-        `_"Le fié 200 mil a María"_\n` +
-        `_"Le dejé mercadería a Don Pedro, a cuenta"_\n\n` +
-        `💵 *Venta contado:*\n` +
-        `_"Vendí 300 mil al contado"_\n` +
-        `_"Venta de 1 palo en efectivo"_\n\n` +
-        `💰 *Registrar cobro:*\n` +
-        `_"Cobré 200 mil de María"_\n` +
-        `_"Carlos me pagó 500 mil"_\n` +
-        `_"Me trajo 100 mil la Doña Rosa"_\n\n` +
-        `📋 *Consultar deudas:*\n` +
-        `_"¿Cuánto me deben?"_\n` +
-        `_"¿Quién me debe más?"_\n` +
-        `_"Deudores"_\n\n` +
-        `📊 *Resumen:*\n` +
-        `_"¿Cuánto vendí esta semana?"_\n` +
-        `_"¿Cómo me fue hoy?"_\n\n` +
-        `📦 *Inventario:*\n` +
-        `_"Me llegaron 30 cajas de cerveza"_\n\n` +
-        `💡 Podés escribir como quieras, ¡entiendo todo! 🇵🇾`;
+function handleHelp(lang = 'es') {
+    return t(lang, 'help_title');
 }
 
-function handleUnknown() {
-    return `🤔 No te entendí bien, disculpá.\n\n` +
-        `Probá con algo así:\n` +
-        `📝 _"Vendí 500 mil a Carlos, fiado"_\n` +
-        `💰 _"Cobré 200 mil de María"_\n` +
-        `📋 _"¿Cuánto me deben?"_\n` +
-        `📊 _"¿Cómo me fue esta semana?"_\n\n` +
-        `Escribí *ayuda* para ver todo lo que puedo hacer 💪`;
+function handleUnknown(lang = 'es') {
+    return t(lang, 'unknown');
 }
 
-async function handleSetPin(merchant, entities) {
+async function handleSetPin(merchant, entities, lang = 'es') {
     const { pin } = entities;
     const result = await setPin(merchant.id, pin);
 
     if (result.success) {
-        return `🔐 *PIN configurado correctamente*\n\n` +
-            `Tu PIN del dashboard es: *${pin}*\n` +
-            `Guardalo en un lugar seguro.\n\n` +
-            `📊 Accedé a tu dashboard en:\nhttps://nexobot-mvp-1.onrender.com\n\n` +
-            `Usá tu número de teléfono + este PIN para ingresar.`;
+        return t(lang, 'pin_set', pin);
     }
 
     return `❌ ${result.error || 'Error configurando el PIN'}`;
+}
+
+function handleForgotPin(merchant, lang = 'es') {
+    return `🔐 *Recuperación de PIN*\n\n` +
+        `No te preocupes. Para crear un nuevo PIN y volver a entrar a la App Móvil, simplemente enviame un mensaje que diga:\n\n` +
+        `👉 *"PIN 1234"* (pero cambiá el 1234 por el número secreto que quieras usar, de 4 a 6 dígitos).\n\n` +
+        `Tu PIN se actualizará automáticamente y podrás volver a entrar. 😉`;
+}
+
+async function handleReportIntent(merchant) {
+    const now = new Date();
+    const month = now.getMonth();
+    const year = now.getFullYear();
+    const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+
+    const downloadUrl = `https://nexobot-mvp-1.onrender.com/api/reports/${merchant.id}?month=${month}&year=${year}`;
+
+    return `📄 *Reporte de ${months[month]} ${year}*\n\n` +
+        `Tu reporte PDF está listo para descargar:\n\n` +
+        `🔗 ${downloadUrl}\n\n` +
+        `Incluye:\n` +
+        `• Resumen de ventas (contado y fiado)\n` +
+        `• Lista de deudores\n` +
+        `• Clientes principales\n` +
+        `• Tu NexoScore\n\n` +
+        `_Hacé click en el link para descargarlo_`;
+}
+
+function handleExportIntent(merchant, exportType = 'sales') {
+    const baseUrl = `https://nexobot-mvp-1.onrender.com/api/export/${merchant.id}`;
+
+    if (exportType === 'debtors') {
+        return `📊 *Excel de Deudores* listo!\n\n` +
+            `🔗 ${baseUrl}/debtors\n\n` +
+            `Incluye:\n` +
+            `• Lista completa de deudores\n` +
+            `• Monto de cada deuda\n` +
+            `• Nivel de riesgo\n` +
+            `• Fecha de última transacción\n\n` +
+            `_Hacé click para descargar el .xlsx_`;
+    }
+
+    const now = new Date();
+    return `📊 *Excel de Ventas* listo!\n\n` +
+        `🔗 ${baseUrl}/sales?month=${now.getMonth()}&year=${now.getFullYear()}\n\n` +
+        `Incluye:\n` +
+        `• Todas las operaciones del mes\n` +
+        `• Totales por tipo (contado, fiado, cobros)\n` +
+        `• Filtros y formato profesional\n\n` +
+        `_Hacé click para descargar el .xlsx_`;
 }
 
 export default { handleMessage };

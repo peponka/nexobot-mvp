@@ -1,0 +1,9 @@
+Setting up user with phone: +595981234567
+Auth setPin error: {
+  code: '22001',
+  details: null,
+  hint: null,
+  message: 'value too long for type character varying(6)'
+}
+Result: { success: false, error: 'Error guardando PIN' }
+Ready! User: +595981234567 | PIN: 1234

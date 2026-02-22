@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pago Exitoso — NexoBot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0F1117;
+            color: #F1F2F6;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card {
+            background: #1A1D26;
+            border: 1px solid #2D3039;
+            border-radius: 20px;
+            padding: 48px;
+            max-width: 480px;
+            text-align: center;
+        }
+
+        .icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            animation: pop 0.6s ease;
+        }
+
+        @keyframes pop {
+            0% {
+                transform: scale(0);
+            }
+
+            60% {
+                transform: scale(1.2);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+
+        p {
+            color: #9CA3AF;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 28px;
+            background: #6C5CE7;
+            color: white;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: #5a4bd6;
+            transform: translateY(-1px);
+        }
+
+        .session-id {
+            font-size: 11px;
+            color: #4B5563;
+            margin-top: 16px;
+            word-break: break-all;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <div class="icon">✅</div>
+        <h1>¡Pago recibido!</h1>
+        <p>Tu pago fue procesado correctamente. La factura quedará reflejada en tu dashboard de billing en unos minutos.
+        </p>
+        <a href="/api-docs.html" class="btn">Volver a la documentación</a>
+        <div class="session-id" id="sessionInfo"></div>
+    </div>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const sessionId = params.get('session_id');
+        if (sessionId) {
+            document.getElementById('sessionInfo').textContent = `Ref: ${sessionId}`;
+        }
+    </script>
+</body>
+
+</html>

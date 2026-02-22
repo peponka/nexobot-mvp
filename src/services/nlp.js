@@ -74,15 +74,22 @@ function fastParser(message) {
         return result;
     }
 
+    // 0.5 FORGOT PIN
+    if (/olvid[eé]\s*(mi)?\s*pin|reset\s*pin|recuperar\s*pin|no\s*se\s*mi\s*pin/i.test(lower)) {
+        result.intent = 'FORGOT_PIN';
+        result.confidence = 0.99;
+        return result;
+    }
+
     // 1. GREETINGS (short messages, check first)
-    if (/^(hola|buenas?|buen[oa]?s?\s*(d[ií]as?|tardes?|noches?)?|qu[eé]\s*tal|hey|hi|ola|epa|que\s*hay|alo|aló|mba[''´]?[eé]ichapa|nde\s*haku|mba[''´]?eichapa\s*nde|iporã|ipo|terere|holi|holaa*|buena|wenas|saludos|bienvenido)/i.test(lower) && lower.length < 40) {
+    if (/^(hola|buenas?|buen[oa]?s?\s*(d[ií]as?|tardes?|noches?)?|qu[eé]\s*tal|hey|hi|ola|epa|que\s*hay|alo|aló|mba[''´]?[eé]ichapa|nde\s*haku|mba[''´]?eichapa\s*nde|iporã|ipo|terere|holi|holaa*|buena|wenas|saludos|bienvenido|mba[''´]?[eé]iko|ndeko|nde\s*py[''´]a\s*guasu)/i.test(lower) && lower.length < 40) {
         result.intent = 'GREETING';
         result.confidence = 0.95;
         return result;
     }
 
     // 2. HELP
-    if (/^(ayuda|help|menu|menú|comandos|opciones|que\s*(podes|pod[eé]s|puedo|puedes)\s*hacer|c[oó]mo\s*(funciona|te\s*uso|uso)|instrucciones|info|que\s*sos|para\s*qu[eé]\s*serv[ií]s|que\s*haces|funciones)/i.test(lower)) {
+    if (/^(ayuda|help|menu|menú|comandos|opciones|que\s*(podes|pod[eé]s|puedo|puedes)\s*hacer|c[oó]mo\s*(funciona|te\s*uso|uso)|instrucciones|info|que\s*sos|para\s*qu[eé]\s*serv[ií]s|que\s*haces|funciones|pytyvõ|epytyvõ\s*che|mba[''´]?[eé]pa\s*ejapo)/i.test(lower)) {
         result.intent = 'HELP';
         result.confidence = 0.95;
         return result;
@@ -97,7 +104,7 @@ function fastParser(message) {
     }
 
     // 4. DEBT QUERY (before sales to avoid conflicts)
-    if (/cu[áa]nto\s*me\s*deben|qui[eé]n(es)?\s*me\s*debe|deudas?|pendientes?|saldos?|deudores?|morosos?|qui[eé]n\s*me\s*debe\s*m[aá]s|lista\s*de\s*deud|me\s*deben|los\s*que\s*me\s*deben|gente\s*que\s*me\s*debe|cu[aá]nto\s*deben|clientes?\s*que\s*deben|cobrar|por\s*cobrar|cuentas?\s*pendientes?|fiados?\s*pendientes?|mo[oõ]pa\s*oje[''´]?debe/i.test(lower)) {
+    if (/cu[áa]nto\s*me\s*deben|qui[eé]n(es)?\s*me\s*debe|deudas?|pendientes?|saldos?|deudores?|morosos?|qui[eé]n\s*me\s*debe\s*m[aá]s|lista\s*de\s*deud|me\s*deben|los\s*que\s*me\s*deben|gente\s*que\s*me\s*debe|cu[aá]nto\s*deben|clientes?\s*que\s*deben|cobrar|por\s*cobrar|cuentas?\s*pendientes?|fiados?\s*pendientes?|mo[oõ]pa\s*oje[''´]?debe|mbovy\s*oje[''´]?debe\s*ch[eé]ve|m[aá]vapa\s*oje[''´]?debe|mbovy\s*ojedebe/i.test(lower)) {
         result.intent = 'DEBT_QUERY';
         result.confidence = 0.9;
         extractEntities(lower, original, result);
@@ -105,14 +112,14 @@ function fastParser(message) {
     }
 
     // 4. SALES QUERY (before sale registration)
-    if (/cu[áa]nto\s*vend[ií]|resumen|mis\s*ventas|ventas?\s*de\s*(hoy|esta\s*semana|este\s*mes|ayer)|total\s*de\s*ventas|cu[áa]nto\s*hice|c[oó]mo\s*(me\s*fue|estoy|voy|va|ando)|estad[ií]sticas?|reporte|balance|como\s*va\s*el\s*negocio|como\s*anda\s*el\s*negocio|mba[''´]?[eé]pa\s*avend[eé]|cuanto\s*gane|cuanto\s*gan[eé]|ganancia|utilidad/i.test(lower)) {
+    if (/cu[áa]nto\s*vend[ií]|resumen|mis\s*ventas|ventas?\s*de\s*(hoy|esta\s*semana|este\s*mes|ayer)|total\s*de\s*ventas|cu[áa]nto\s*hice|c[oó]mo\s*(me\s*fue|estoy|voy|va|ando)|estad[ií]sticas?|reporte|balance|como\s*va\s*el\s*negocio|como\s*anda\s*el\s*negocio|mba[''´]?[eé]pa\s*avend[eé]|cuanto\s*gane|cuanto\s*gan[eé]|ganancia|utilidad|mbovy\s*avendé|mba[''´]?[eé]ichapa\s*che\s*negocio/i.test(lower)) {
         result.intent = 'SALES_QUERY';
         result.confidence = 0.9;
         return result;
     }
 
     // 5. PAYMENT / COLLECTION
-    if (/cobr[eéé]|me\s*pag[oó]|recib[ií]\s*pago|me\s*trajo|ya\s*pag[oó]|me\s*cancel[oó]|entr[oó]\s*plata|me\s*deposit[oó]|pag[oó]\s*su\s*deuda|sald[oó]\s*su\s*cuenta|abon[oó]|pago\s*parcial|pag[oó]\s*algo|me\s*dio|me\s*dej[oó]\s*plata|ohepaga|ohepyty|cancel[oó]\s*su|liqui?d[oó]/i.test(lower) ||
+    if (/cobr[eéé]|me\s*pag[oó]|recib[ií]\s*pago|me\s*trajo|ya\s*pag[oó]|me\s*cancel[oó]|entr[oó]\s*plata|me\s*deposit[oó]|pag[oó]\s*su\s*deuda|sald[oó]\s*su\s*cuenta|abon[oó]|pago\s*parcial|pag[oó]\s*algo|me\s*dio|me\s*dej[oó]\s*plata|ohepaga|ohepyty|cancel[oó]\s*su|liqui?d[oó]|acobr[aé]/i.test(lower) ||
         /^[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+\s+(?:me\s+)?pag[oó]/i.test(original)) {
         result.intent = 'PAYMENT';
         result.confidence = 0.85;
@@ -121,7 +128,7 @@ function fastParser(message) {
     }
 
     // 6. SALE CREDIT (fiado)
-    if (/fiad[oa]|fi[eé]|a\s*cr[eé]dito|le\s*(di|dej[eé]|fi[eé]|llev[oó])\s*a|a\s*cuenta|le\s*anot[eé]|anot[aá]le|carg[aá]le|me\s*qued[oó]\s*debiendo|le\s*entregu[eé]|se\s*llev[oó]\s*fiado|dej[oó]\s*a\s*deber|qued[oó]\s*debiendo|va\s*a\s*pagar\s*despu[eé]s|despu[eé]s\s*me\s*paga|le\s*abr[ií]\s*cuenta|oñeme[''´]?[eê]/i.test(lower)) {
+    if (/fiad[oa]|fi[eé]|a\s*cr[eé]dito|le\s*(di|dej[eé]|fi[eé]|llev[oó])\s*a|a\s*cuenta|le\s*anot[eé]|anot[aá]le|carg[aá]le|me\s*qued[oó]\s*debiendo|le\s*entregu[eé]|se\s*llev[oó]\s*fiado|dej[oó]\s*a\s*deber|qued[oó]\s*debiendo|va\s*a\s*pagar\s*despu[eé]s|despu[eé]s\s*me\s*paga|le\s*abr[ií]\s*cuenta|oñeme[''´]?[eê]|afi[eé]/i.test(lower)) {
         result.intent = 'SALE_CREDIT';
         result.confidence = 0.9;
         extractEntities(lower, original, result);
@@ -137,7 +144,7 @@ function fastParser(message) {
     }
 
     // 8. General SALE (need to determine credit vs cash)
-    if (/vend[ií]|vendido|venta\s|le\s*vend[ií]|hice\s*una\s*venta|cerr[eé]\s*una\s*venta|sal[ií][oó]?\s*una\s*venta|compr[oó]|me\s*compr[oó]|le\s*despa(ch|ché)|se\s*llev[oó]/i.test(lower)) {
+    if (/vend[ií]|vendido|venta\s|le\s*vend[ií]|hice\s*una\s*venta|cerr[eé]\s*una\s*venta|sal[ií][oó]?\s*una\s*venta|compr[oó]|me\s*compr[oó]|le\s*despa(ch|ché)|se\s*llev[oó]|avendé|avend[eé]/i.test(lower)) {
         // Determine if credit or cash based on context
         if (/fiad[oa]|fi[eé]|cr[eé]dito|le\s*di|le\s*dej[eé]|a\s*cuenta|despu[eé]s\s*paga|me\s*va\s*a\s*pagar/i.test(lower)) {
             result.intent = 'SALE_CREDIT';
@@ -154,14 +161,75 @@ function fastParser(message) {
     }
 
     // 9. INVENTORY
-    if (/lleg[aoóa]r?on|me\s*lleg[oó]|recibi|mercader[ií]a|stock|inventario|tengo\s+\d+|me\s*trajeron|descarg[ueé]|entr[oó]\s*mercader|reponer|repuse|repos?ici[oó]n/i.test(lower)) {
+    if (/lleg[aoóa]r?on|me\s*lleg[oó]|recibi|mercader[ií]a|stock|inventario|tengo\s+\d+|me\s*trajeron|descarg[ueé]|entr[oó]\s*mercader|reponer|repuse|repos?ici[oó]n|oguah[eẽ]/i.test(lower)) {
         result.intent = 'INVENTORY_IN';
         result.confidence = 0.8;
         extractEntities(lower, original, result);
         return result;
     }
 
-    // 10. THANK YOU (treat as informal greeting/ack)
+    // 10. REFERRAL
+    if (/mi\s*c[oó]digo|c[oó]digo\s*de\s*referido|referir|refer[ií]|programa\s*de\s*referidos|compartir\s*c[oó]digo/i.test(lower)) {
+        result.intent = 'REFERRAL';
+        result.entities.subIntent = 'GET_CODE';
+        result.confidence = 0.9;
+        return result;
+    }
+    if (/invitar\s*a\s*|invitale\s*a|enviar\s*invitaci[oó]n/i.test(lower)) {
+        result.intent = 'REFERRAL';
+        result.entities.subIntent = 'SEND_INVITE';
+        // Extract phone number
+        const phoneMatch = lower.match(/(\+?\d[\d\s-]{7,})/);
+        if (phoneMatch) result.entities.phone = phoneMatch[1].replace(/[\s-]/g, '');
+        result.confidence = 0.9;
+        return result;
+    }
+
+    // 11. REPORT (PDF)
+    if (/mi\s*reporte|reporte\s*(mensual|pdf|del\s*mes)|descargar\s*reporte|generar\s*reporte|baj[aá]r?\s*reporte|link\s*reporte/i.test(lower)) {
+        result.intent = 'REPORT';
+        result.confidence = 0.9;
+        return result;
+    }
+
+    // 12. MULTI-BUSINESS
+    if (/mis\s*negocios|mis\s*comercios|mis\s*tiendas|listar\s*negocios/i.test(lower)) {
+        result.intent = 'MULTI_BUSINESS';
+        result.entities.subIntent = 'LIST';
+        result.confidence = 0.9;
+        return result;
+    }
+    const switchMatch = lower.match(/cambiar\s*a\s+(.+)/i);
+    if (switchMatch) {
+        result.intent = 'MULTI_BUSINESS';
+        result.entities.subIntent = 'SWITCH';
+        result.entities.businessName = switchMatch[1].trim();
+        result.confidence = 0.9;
+        return result;
+    }
+    const addBizMatch = lower.match(/agregar\s*negocio\s+(.+)/i);
+    if (addBizMatch) {
+        result.intent = 'MULTI_BUSINESS';
+        result.entities.subIntent = 'ADD';
+        result.entities.businessName = addBizMatch[1].trim();
+        result.confidence = 0.9;
+        return result;
+    }
+
+    // 13. EXPORT (Excel)
+    if (/exportar|descargar\s*(excel|ventas|deudas|datos)|bajar\s*(excel|ventas|datos)|mi\s*excel|excel\s*de\s*(ventas|deudores|deudas)/i.test(lower)) {
+        result.intent = 'EXPORT';
+        // Determine what to export
+        if (/deud|fiado|pendiente/i.test(lower)) {
+            result.entities.exportType = 'debtors';
+        } else {
+            result.entities.exportType = 'sales';
+        }
+        result.confidence = 0.9;
+        return result;
+    }
+
+    // 14. THANK YOU (treat as informal greeting/ack)
     if (/^(gracias|gracia|dale|ok|oki|bueno|perfecto|genial|excelente|listo|joya|barbaro|10|diez|crack|sos\s*crack|gra[cs]|ty|thanks?|piola|masa|de\s*una|sale|vamo|vamos)/i.test(lower) && lower.length < 30) {
         result.intent = 'GREETING';
         result.confidence = 0.8;
@@ -508,8 +576,13 @@ async function openaiParser(message) {
 // =============================================
 
 function detectLanguage(text) {
-    if (/mba[''´]?[eé]|nde|mo[oõ]pa|ohé|oje[''´]?|oñeme|ohepaga|iporã|guarani/.test(text)) return 'gn';
+    // Pure guaraní indicators
+    const gnWords = /mba[''´]?[eé]|nde\s|mo[oõ]pa|ohé|oje[''´]?|oñeme|ohepaga|iporã|guarani|avendé|acobra|mbovy|oguahẽ|aikotevẽ|aikuaa|ndaikatú|ehai|che\s|péva|haguã|oĩ|ndéve|chéve|ñande|opavave|pytyvõ|ko['']?ãga|ko\s?ára|reipota|upépe|péicha|ha['']?e|mávapa|ndaipóri|jey/;
+    if (gnWords.test(text)) return 'gn';
+
+    // Jopará (guaraní + spanish mixed)
     if (/luego|nde|pio|pa\b|ko\b/.test(text) && /\b(de|el|la|en)\b/.test(text)) return 'jopara';
+
     return 'es';
 }
 

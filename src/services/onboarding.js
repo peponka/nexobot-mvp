@@ -96,8 +96,13 @@ export async function handleOnboarding(merchant, message, imageData = null) {
         case STEPS.WELCOME:
             state.step = STEPS.FULL_NAME;
             return `🦄 *¡Bienvenido a NexoFinanzas!* 🇵🇾\n\n` +
-                `Soy *NexoBot*, tu asistente comercial por WhatsApp.\n\n` +
-                `Vamos a crear tu cuenta en 1 minuto. Necesito algunos datos para que tu perfil quede completo y seguro.\n\n` +
+                `Soy *NexoBot*, tu asistente que te ayuda a:\n` +
+                `✅ Registrar ventas al contado y fiado\n` +
+                `✅ Controlar quién te debe y cuánto\n` +
+                `✅ Enviar recordatorios de cobro automáticos\n` +
+                `✅ Recibir un resumen diario de tu negocio\n\n` +
+                `Vamos a crear tu cuenta en *1 minuto* (8 pasos rápidos).\n\n` +
+                `${progressBar(1)} Paso 1 de 8\n\n` +
                 `👤 *¿Cuál es tu nombre completo?*\n` +
                 `_(Ej: "Juan Carlos Pérez González")_\n\n` +
                 `_Escribí "saltar" si querés configurar después_`;
@@ -113,6 +118,7 @@ export async function handleOnboarding(merchant, message, imageData = null) {
             state.data.full_name = capitalize(message.trim());
             state.step = STEPS.CEDULA;
             return `👍 *${state.data.full_name}* — ¡un gusto!\n\n` +
+                `${progressBar(2)} Paso 2 de 8\n\n` +
                 `🪪 *¿Cuál es tu número de cédula?*\n` +
                 `_(Solo los números, sin puntos. Ej: 4523871)_\n\n` +
                 `📸 *O mejor:* mandame una *foto de tu cédula* y extraigo los datos automáticamente.`;
@@ -135,6 +141,7 @@ export async function handleOnboarding(merchant, message, imageData = null) {
             state.data.cedula_display = formatCedula(cedulaDigits);
             state.step = STEPS.EMAIL;
             return `✅ Cédula: *${state.data.cedula_display}*\n\n` +
+                `${progressBar(3)} Paso 3 de 8\n\n` +
                 `📧 *¿Cuál es tu email?*\n` +
                 `_(Ej: juan@gmail.com)_\n\n` +
                 `_Escribí "saltar" si no tenés o querés ponerlo después_`;
@@ -145,6 +152,7 @@ export async function handleOnboarding(merchant, message, imageData = null) {
                 state.data.email = null;
                 state.step = STEPS.ADDRESS;
                 return `👍 Sin problema, podés agregarlo después.\n\n` +
+                    `${progressBar(4)} Paso 4 de 8\n\n` +
                     `🏠 *¿Cuál es tu dirección?*\n` +
                     `_(Calle, número, barrio. Ej: "Av. Mariscal López 1234, Barrio Jara")_`;
             }
@@ -160,6 +168,7 @@ export async function handleOnboarding(merchant, message, imageData = null) {
             state.data.email = emailClean;
             state.step = STEPS.ADDRESS;
             return `✅ Email: *${state.data.email}*\n\n` +
+                `${progressBar(4)} Paso 4 de 8\n\n` +
                 `🏠 *¿Cuál es tu dirección?*\n` +
                 `_(Calle, número, barrio. Ej: "Av. Mariscal López 1234, Barrio Jara")_`;
 
@@ -172,6 +181,7 @@ export async function handleOnboarding(merchant, message, imageData = null) {
             state.data.address = message.trim();
             state.step = STEPS.CITY;
             return `✅ Dirección registrada.\n\n` +
+                `${progressBar(5)} Paso 5 de 8\n\n` +
                 `📍 *¿En qué ciudad estás?*\n` +
                 `_(Ej: Asunción, Ciudad del Este, Encarnación, Luque...)_`;
 
@@ -179,6 +189,7 @@ export async function handleOnboarding(merchant, message, imageData = null) {
             state.data.city = capitalize(message.trim());
             state.step = STEPS.BUSINESS_TYPE;
             return `📍 *${state.data.city}* — perfecto!\n\n` +
+                `${progressBar(6)} Paso 6 de 8\n\n` +
                 `🏪 *¿Qué tipo de negocio tenés?*\n\n` +
                 `Respondé con el número:\n` +
                 `1️⃣ Almacén / Supermercado\n` +
@@ -211,6 +222,7 @@ export async function handleOnboarding(merchant, message, imageData = null) {
 
             state.step = STEPS.BUSINESS_NAME;
             return `✅ Tipo: *${capitalize(state.data.business_type)}*\n\n` +
+                `${progressBar(7)} Paso 7 de 8\n\n` +
                 `🏷️ *¿Cómo se llama tu negocio?*\n` +
                 `_(Ej: "Despensa Don Carlos", "Distribuidora López")_`;
 
@@ -218,6 +230,7 @@ export async function handleOnboarding(merchant, message, imageData = null) {
             state.data.business_name = message.trim();
             state.step = STEPS.VOLUME;
             return `👍 *${state.data.business_name}* — ¡buenísimo!\n\n` +
+                `${progressBar(8)} Último paso!\n\n` +
                 `💰 *¿Cuánto vendés aproximadamente por mes?*\n\n` +
                 `Respondé con el número:\n` +
                 `1️⃣ Menos de 5 millones Gs.\n` +
@@ -242,7 +255,7 @@ export async function handleOnboarding(merchant, message, imageData = null) {
             await saveOnboardingData(merchant.id, state.data);
             onboardingState.delete(phone);
 
-            return `🎉 *¡Registro completo!*\n\n` +
+            return `🎉 *¡Registro completo!* ${progressBar(8)}\n\n` +
                 `📋 Tu perfil NexoFinanzas:\n` +
                 `━━━━━━━━━━━━━━━━━━\n` +
                 `👤 ${state.data.full_name}\n` +
@@ -252,11 +265,19 @@ export async function handleOnboarding(merchant, message, imageData = null) {
                 `📍 ${state.data.city}\n` +
                 `🏪 ${state.data.business_name} (${capitalize(state.data.business_type)})\n` +
                 `━━━━━━━━━━━━━━━━━━\n\n` +
-                `✅ Tu cuenta está verificada y segura.\n\n` +
-                `Ya podés empezar a usar NexoBot. Probá:\n\n` +
-                `📝 _"Vendí 500 mil a Carlos, fiado"_\n` +
-                `💰 _"Cobré 200 mil de María"_\n` +
-                `📋 _"¿Cuánto me deben?"_\n\n` +
+                `✅ Tu cuenta está verificada.\n\n` +
+                `🎓 *Tutorial rápido — probá ahora:*\n\n` +
+                `1️⃣ Registrá tu primera venta:\n` +
+                `   _Escribí:_ *"Vendí 500 mil a Carlos"*\n\n` +
+                `2️⃣ Registrá una venta fiada:\n` +
+                `   _Escribí:_ *"Vendí 200 mil a María, fiado"*\n\n` +
+                `3️⃣ Registrá un cobro:\n` +
+                `   _Escribí:_ *"Cobré 100 mil de María"*\n\n` +
+                `4️⃣ Consultá quién te debe:\n` +
+                `   _Escribí:_ *"¿Cuánto me deben?"*\n\n` +
+                `5️⃣ Pedí tu resumen del día:\n` +
+                `   _Escribí:_ *"Resumen"*\n\n` +
+                `Además, a las *8pm* te mando un resumen automático 📊\n\n` +
                 `Escribí *ayuda* para ver todo lo que puedo hacer 💪🇵🇾`;
 
         default:
@@ -312,6 +333,16 @@ function capitalize(str) {
     return str.split(' ')
         .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
         .join(' ');
+}
+
+/**
+ * Visual progress bar for onboarding steps
+ */
+function progressBar(step) {
+    const total = 8;
+    const filled = '🟢'.repeat(step);
+    const empty = '⚪'.repeat(total - step);
+    return `${filled}${empty}`;
 }
 
 /**
