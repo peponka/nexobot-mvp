@@ -2,7 +2,7 @@
 // NexoBot Mobile App — Logic
 // =============================================
 
-const API = 'http://localhost:3000';
+const API = 'https://nexobot-mvp-1.onrender.com';
 let merchant = null;
 let allTransactions = [];
 let allDebtors = [];
