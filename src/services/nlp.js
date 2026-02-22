@@ -66,11 +66,14 @@ function fastParser(message) {
     // ─── INTENT DETECTION ─── (order matters!)
 
     // 0. SET PIN (dashboard access)
-    const pinMatch = lower.match(/^pin\s+(\d{4,6})$/);
+    const pinMatch = lower.match(/^pin\s+(\d{4,6})(?:\s+(?:ci|c[eé]dula|c\.i\.?)\s*([\d\.]+))?$/);
     if (pinMatch) {
         result.intent = 'SET_PIN';
         result.confidence = 0.99;
         result.entities.pin = pinMatch[1];
+        if (pinMatch[2]) {
+            result.entities.cedula = pinMatch[2].replace(/[^0-9]/g, '');
+        }
         return result;
     }
 

@@ -414,21 +414,41 @@ function handleUnknown(lang = 'es') {
 }
 
 async function handleSetPin(merchant, entities, lang = 'es') {
-    const { pin } = entities;
+    const { pin, cedula } = entities;
+
+    // Check if the merchant already has a PIN to prevent unauthorized takeovers
+    if (merchant.dashboard_pin) {
+        if (!cedula) {
+            return `🔒 *Alerta de Seguridad*\n\n` +
+                `Ya tenés un PIN configurado. Si querés cambiarlo, necesito verificar tu identidad.\n\n` +
+                `👉 Enviá: *PIN ${pin} CI <TuNúmeroDeCédula>*\n` +
+                `_(Ej: PIN 1234 CI 4523871)_`;
+        }
+
+        // Verify cedula matches the database
+        const dbCedula = merchant.cedula ? merchant.cedula.replace(/[^0-9]/g, '') : null;
+        if (dbCedula && cedula !== dbCedula) {
+            return `❌ *Error de Seguridad*\nLa cédula ingresada no coincide con la registrada en tu cuenta. PIN no actualizado.`;
+        } else if (!dbCedula) {
+            // Edge case: they never set a cedula during onboarding
+            return `❌ No tenés una cédula registrada para verificar el cambio. Contactá a soporte.`;
+        }
+    }
+
     const result = await setPin(merchant.id, pin);
 
     if (result.success) {
-        return t(lang, 'pin_set', pin);
+        return `✅ ¡Tu nuevo PIN es *${pin}*!\n\nPor seguridad, hemos cerrado sesión en todos los demás dispositivos móviles. Tu información está a salvo.`;
     }
 
     return `❌ ${result.error || 'Error configurando el PIN'}`;
 }
 
 function handleForgotPin(merchant, lang = 'es') {
-    return `🔐 *Recuperación de PIN*\n\n` +
-        `No te preocupes. Para crear un nuevo PIN y volver a entrar a la App Móvil, simplemente enviame un mensaje que diga:\n\n` +
-        `👉 *"PIN 1234"* (pero cambiá el 1234 por el número secreto que quieras usar, de 4 a 6 dígitos).\n\n` +
-        `Tu PIN se actualizará automáticamente y podrás volver a entrar. 😉`;
+    return `🔐 *Recuperación Segura de PIN*\n\n` +
+        `Para crear un nuevo PIN y volver a entrar a la App sin que nadie más pueda ver tus datos, verificamos tu identidad.\n\n` +
+        `👉 Enviame un mensaje que diga:\n*PIN 1234 CI <TuCédula>*\n\n` +
+        `_(Cambiá 1234 por tu nuevo número, y agregá tu número de cédula)._ 😉`;
 }
 
 async function handleReportIntent(merchant) {

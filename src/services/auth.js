@@ -181,7 +181,11 @@ export async function setPin(merchantId, pin) {
 
         const { error } = await supabase
             .from('merchants')
-            .update({ dashboard_pin: pin })
+            .update({
+                dashboard_pin: pin,
+                dashboard_token: null,          // Log out existing open sessions in mobile app
+                token_expires_at: null
+            })
             .eq('id', merchantId);
 
         if (error) throw error;
