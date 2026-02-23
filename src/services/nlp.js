@@ -107,7 +107,7 @@ function fastParser(message) {
     }
 
     // 4. DEBT QUERY (before sales to avoid conflicts)
-    if (/cu[áa]nto\s*me\s*deben|qui[eé]n(es)?\s*me\s*debe|deudas?|pendientes?|saldos?|deudores?|morosos?|qui[eé]n\s*me\s*debe\s*m[aá]s|lista\s*de\s*deud|me\s*deben|los\s*que\s*me\s*deben|gente\s*que\s*me\s*debe|cu[aá]nto\s*deben|clientes?\s*que\s*deben|cobrar|por\s*cobrar|cuentas?\s*pendientes?|fiados?\s*pendientes?|mo[oõ]pa\s*oje[''´]?debe|mbovy\s*oje[''´]?debe\s*ch[eé]ve|m[aá]vapa\s*oje[''´]?debe|mbovy\s*ojedebe/i.test(lower)) {
+    if (/cu[áa]nto\s*me\s*deben|qui[eé]n(es)?\s*me\s*debe|deudas?|pendientes?|saldos?|deudores?|morosos?|qui[eé]n\s*me\s*debe\s*m[aá]s|lista\s*de\s*deud(?:ores|as)|me\s*deben|los\s*que\s*me\s*deben|gente\s*que\s*me\s*debe|cu[aá]nto\s*deben|clientes?\s*que\s*deben|cobrar|por\s*cobrar|cuentas?\s*pendientes?|fiados?\s*pendientes?|mo[oõ]pa\s*oje[''´]?debe|mbovy\s*oje[''´]?debe\s*ch[eé]ve|m[aá]vapa\s*oje[''´]?debe|mbovy\s*ojedebe|quien\s*falta\s*pagar|falta\s*cobrar|quien\s*no\s*pago/i.test(lower)) {
         result.intent = 'DEBT_QUERY';
         result.confidence = 0.9;
         extractEntities(lower, original, result);
@@ -122,7 +122,7 @@ function fastParser(message) {
     }
 
     // 5. PAYMENT / COLLECTION
-    if (/cobr[eéé]|me\s*pag[oó]|recib[ií]\s*pago|me\s*trajo|ya\s*pag[oó]|me\s*cancel[oó]|entr[oó]\s*plata|me\s*deposit[oó]|pag[oó]\s*su\s*deuda|sald[oó]\s*su\s*cuenta|abon[oó]|pago\s*parcial|pag[oó]\s*algo|me\s*dio|me\s*dej[oó]\s*plata|ohepaga|ohepyty|cancel[oó]\s*su|liqui?d[oó]|acobr[aé]/i.test(lower) ||
+    if (/cobr[eéé]|me\s*pag[oó]|recib[ií]\s*pago|me\s*trajo|ya\s*pag[oó]|me\s*cancel[oó]|entr[oó]\s*plata|me\s*deposit[oó]|pag[oó]\s*su\s*deuda|sald[oó]\s*su\s*cuenta|abon[oó]|pago\s*parcial|pag[oó]\s*algo|me\s*dio|me\s*dej[oó]\s*plata|ohepaga|ohepyty|cancel[oó]\s*su|liqui?d[oó]|acobr[aé]|vino\s*a\s*pagar|acerc[oó]\s*plata|me\s*transfiri[oó]|transferencia\s*de|giro\s*de/i.test(lower) ||
         /^[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+\s+(?:me\s+)?pag[oó]/i.test(original)) {
         result.intent = 'PAYMENT';
         result.confidence = 0.85;
@@ -131,7 +131,7 @@ function fastParser(message) {
     }
 
     // 6. SALE CREDIT (fiado)
-    if (/fiad[oa]|fi[eé]|a\s*cr[eé]dito|le\s*(di|dej[eé]|fi[eé]|llev[oó])\s*a|a\s*cuenta|le\s*anot[eé]|anot[aá]le|carg[aá]le|me\s*qued[oó]\s*debiendo|le\s*entregu[eé]|se\s*llev[oó]\s*fiado|dej[oó]\s*a\s*deber|qued[oó]\s*debiendo|va\s*a\s*pagar\s*despu[eé]s|despu[eé]s\s*me\s*paga|le\s*abr[ií]\s*cuenta|oñeme[''´]?[eê]|afi[eé]/i.test(lower)) {
+    if (/fiad[oa]|fi[eé]|a\s*cr[eé]dito|le\s*(di|dej[eé]|fi[eé]|llev[oó])\s*a|a\s*cuenta|le\s*anot[eé]|anot[aá]le|carg[aá]le|me\s*qued[oó]\s*debiendo|le\s*entregu[eé]|se\s*llev[oó]\s*fiado|dej[oó]\s*a\s*deber|qued[oó]\s*debiendo|va\s*a\s*pagar\s*despu[eé]s|despu[eé]s\s*me\s*paga|le\s*abr[ií]\s*cuenta|oñeme[''´]?[eê]|afi[eé]|anot[aá]\s*en\s*su\s*cuenta|para\s*fin\s*de\s*mes|llev[oó]\s*para\s*pagar/i.test(lower)) {
         result.intent = 'SALE_CREDIT';
         result.confidence = 0.9;
         extractEntities(lower, original, result);
@@ -139,7 +139,7 @@ function fastParser(message) {
     }
 
     // 7. SALE CASH
-    if (/al\s*contado|en\s*efectivo|cash|pag[oó]\s*al\s*toque|pag[oó]\s*en\s*el\s*momento|cobr[eé]\s*al\s*momento|ya\s*me\s*pag[oó]/i.test(lower)) {
+    if (/al\s*contado|en\s*efectivo|cash|pag[oó]\s*al\s*toque|pag[oó]\s*en\s*el\s*momento|cobr[eé]\s*al\s*momento|ya\s*me\s*pag[oó]|pago\s*t[uú]k[aá]t[aeé]|taka\s*taka|tiki\s*taka|efectivo|vendi\s*al\s*contado|venta\s*contado/i.test(lower)) {
         result.intent = 'SALE_CASH';
         result.confidence = 0.85;
         extractEntities(lower, original, result);
@@ -433,29 +433,42 @@ function extractEntities(lower, original, result) {
     // ─── PRODUCT EXTRACTION ───
     const products = [
         // Bebidas
-        'cerveza', 'birra', 'pilsen', 'brahma', 'bavaria',
-        'gaseosa', 'coca', 'coca cola', 'pepsi', 'fanta', 'sprite', 'guaraná',
-        'agua', 'agua mineral', 'jugo', 'pulp',
-        'terere', 'tereré',
-        'vino', 'caña', 'whisky', 'ron',
-        // Yerba y derivados
-        'yerba', 'mate', 'pajarito', 'kurupi',
-        // Alimentos básicos
-        'pan', 'leche', 'arroz', 'aceite', 'azúcar', 'azucar', 'sal', 'harina',
-        'fideos', 'galletitas', 'galletas', 'mandioca', 'poroto', 'frejol',
-        // Carnes y lácteos
-        'carne', 'pollo', 'huevos', 'huevo', 'queso', 'manteca', 'jamón', 'jamon',
-        // Limpieza
-        'jabón', 'jabon', 'detergente', 'lavandina', 'papel higiénico',
+        'cerveza', 'birra', 'pilsen', 'brahma', 'bavaria', 'munich', 'corona', 'heineken', 'ourogot', 'skol',
+        'gaseosa', 'coca', 'coca cola', 'coca-cola', 'pepsi', 'fanta', 'sprite', 'guaraná', 'guarana', 'nik', 'pulp',
+        'agua', 'agua mineral', 'jugo', 'ades', 'frugos', 'tampico',
+        'terere', 'tereré', 'mate', 'cocido',
+        'vino', 'uvita', 'sante', 'santa helena', 'caña', 'caña blanca', 'tres leones', 'aristocrata',
+        'whisky', 'ron', 'vodka', 'tres plumas',
+        // Yerba
+        'yerba', 'pajarito', 'kurupi', 'selecta', 'campesino', 'indio',
+        // Alimentos básicos y Despensa
+        'pan', 'galleta', 'coquito', 'rosquita', 'palito',
+        'leche', 'trébol', 'lactolanda', 'los colonos', 'arroz', 'fideo', 'fideos',
+        'aceite', 'mirasol', 'natura', 'soja', 'azúcar', 'azucar', 'sal', 'sal fina', 'sal gruesa',
+        'harina', 'almidón', 'almidon', 'mandioca', 'batata', 'cebolla', 'tomate', 'locote', 'papa', 'zanahoria',
+        'poroto', 'frejol', 'lenteja', 'arveja',
+        'galletitas', 'galletas', 'chocolinas', 'oreo', 'merengada', 'alfajor', 'caramelo', 'chicle',
+        // Carnes, Lácteos y Fiambres
+        'carne', 'vaca', 'cerdo', 'chancho', 'pollo', 'pescado', 'chorizo', 'pancho', 'morcilla', 'hamburguesa',
+        'huevos', 'huevo', 'plancha de huevos', 'maple',
+        'queso', 'queso paraguay', 'queso sándwich', 'muzzarella', 'manteca', 'margarina',
+        'jamón', 'jamon', 'fiambre', 'mortadela', 'pate', 'paté',
+        // Limpieza e Higiene
+        'jabón', 'jabon', 'jabon de olor', 'jabon en polvo', 'omo', 'skip', 'ariel',
+        'detergente', 'activa', 'lavandina', 'desodorante de ambiente', 'espiral', 'raid',
+        'papel higiénico', 'rollo de cocina', 'servilleta',
+        'shampoo', 'acondicionador', 'crema dental', 'kolynos', 'colgate', 'cepillo', 'desodorante', 'rexona', 'axe',
         // Tabaco
-        'cigarrillos', 'cigarro', 'pucho',
-        // Snacks
-        'chipa', 'chipá', 'empanada', 'sopa paraguaya', 'mbeju', 'mbejú',
-        // Otros
+        'cigarrillos', 'cigarro', 'pucho', 'kent', 'marlboro', 'palermo', 'eight', 'hudson', 'box', 'atado',
+        // Snacks locales
+        'chipa', 'chipá', 'chipa guazu', 'sopa paraguaya', 'empanada', 'croqueta', 'mbeju', 'mbejú', 'milanesa', 'sandwich',
+        // Otros Comercios
         'gas', 'garrafa', 'hielo', 'carbón', 'carbon', 'leña',
-        'celular', 'tarjeta', 'crédito celular', 'saldo',
-        'bolsa', 'bolsas',
-        'cemento', 'ladrillo', 'clavo', 'hierro'
+        'celular', 'tarjeta', 'crédito celular', 'saldo', 'carga de saldo', 'tigo', 'personal', 'claro',
+        'bolsa', 'bolsas', 'hielo',
+        // Ferretería
+        'cemento', 'cal', 'vallemi', 'yguazu', 'ladrillo', 'clavo', 'hierro', 'varilla', 'arena', 'piedra', 'pintura',
+        'foco', 'cable', 'enchufe', 'cinta', 'pegamento', 'pvc'
     ];
 
     for (const p of products) {
