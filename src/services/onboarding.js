@@ -265,20 +265,12 @@ export async function handleOnboarding(merchant, message, imageData = null) {
                 `📍 ${state.data.city}\n` +
                 `🏪 ${state.data.business_name} (${capitalize(state.data.business_type)})\n` +
                 `━━━━━━━━━━━━━━━━━━\n\n` +
-                `✅ Tu cuenta está verificada.\n\n` +
-                `🎓 *Tutorial rápido — probá ahora:*\n\n` +
-                `1️⃣ Registrá tu primera venta:\n` +
-                `   _Escribí:_ *"Vendí 500 mil a Carlos"*\n\n` +
-                `2️⃣ Registrá una venta fiada:\n` +
-                `   _Escribí:_ *"Vendí 200 mil a María, fiado"*\n\n` +
-                `3️⃣ Registrá un cobro:\n` +
-                `   _Escribí:_ *"Cobré 100 mil de María"*\n\n` +
-                `4️⃣ Consultá quién te debe:\n` +
-                `   _Escribí:_ *"¿Cuánto me deben?"*\n\n` +
-                `5️⃣ Pedí tu resumen del día:\n` +
-                `   _Escribí:_ *"Resumen"*\n\n` +
-                `Además, a las *8pm* te mando un resumen automático 📊\n\n` +
-                `Escribí *ayuda* para ver todo lo que puedo hacer 💪🇵🇾`;
+                `✅ *Tu cuenta comercial está verificada.*\n\n` +
+                `🎁 *Tu Regalo de Bienvenida:*\n` +
+                `Preparamos un *Manual de Uso Rápido* para que aprendas todos los trucos y atajos ninja del Asistente:\n` +
+                `👉 *Descargalo aquí:* https://nexofinanzas.com/manual-comerciantes.pdf\n\n` +
+                `🎓 *Probá tu primer comando ahora mismo:*\n` +
+                `Escribime: *"Vendí 500 mil a Carlos"* y empecemos a hacer plata. 💪`;
 
         default:
             // Reset
