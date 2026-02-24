@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual de Uso Rápido - NexoBot</title>
+    <meta name="description" content="Aprende a usar NexoBot como un profesional. Guía paso a paso para comerciantes.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --accent: #6C5CE7;
+            --accent-dark: #4834D4;
+            --green: #00B894;
+            --text: #1A1D26;
+            --text-sec: #4B5563;
+            --bg: #FAFBFC;
+            --white: #FFFFFF;
+            --border: #E8EBF0;
+            --yellow-light: #FEF3C7;
+            --yellow-dark: #D97706;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            background: var(--bg);
+            line-height: 1.6;
+        }
+
+        /* NAV */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+            padding: 0 24px;
+        }
+
+        .nav-inner {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 64px;
+        }
+
+        .nav-brand {
+            font-size: 20px;
+            font-weight: 900;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .nav-brand span {
+            color: var(--accent);
+        }
+
+        /* HEADER */
+        .hero {
+            padding: 120px 24px 60px;
+            text-align: center;
+            background: white;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .hero h1 {
+            font-size: 36px;
+            font-weight: 900;
+            margin-bottom: 16px;
+            letter-spacing: -1px;
+        }
+
+        .hero p {
+            font-size: 18px;
+            color: var(--text-sec);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* CONTENT */
+        .content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 24px 80px;
+        }
+
+        .step-card {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+        }
+
+        .step-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .step-badge {
+            background: #EEF2FF;
+            color: var(--accent);
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 900;
+        }
+
+        .step-card h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 24px 0 12px;
+        }
+
+        .step-card p {
+            margin-bottom: 16px;
+            font-size: 15px;
+            color: var(--text-sec);
+        }
+
+        ul {
+            list-style: none;
+            margin-bottom: 16px;
+        }
+
+        ul li {
+            position: relative;
+            padding-left: 24px;
+            margin-bottom: 12px;
+            font-size: 15px;
+            color: var(--text-sec);
+        }
+
+        ul li::before {
+            content: '👉';
+            position: absolute;
+            left: 0;
+            top: 0;
+            font-size: 14px;
+        }
+
+        .tip-box {
+            background: var(--yellow-light);
+            border-left: 4px solid var(--yellow-dark);
+            padding: 16px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 24px 0;
+            font-size: 14px;
+            color: #92400E;
+        }
+
+        .tip-box strong {
+            color: var(--yellow-dark);
+        }
+
+        .btn-download {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: var(--accent);
+            color: white;
+            text-decoration: none;
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 15px;
+            transition: all 0.2s;
+            margin-top: 20px;
+        }
+
+        .btn-download:hover {
+            background: var(--accent-dark);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 600px) {
+            .hero h1 {
+                font-size: 28px;
+            }
+
+            .step-card {
+                padding: 24px;
+            }
+
+            .step-title {
+                font-size: 20px;
+            }
+        }
+
+        /* Print Styles for PDF Generation */
+        @media print {
+
+            nav,
+            .btn-download {
+                display: none !important;
+            }
+
+            .hero {
+                padding: 20px 0;
+                border: none;
+            }
+
+            .content {
+                padding: 0;
+            }
+
+            .step-card {
+                box-shadow: none;
+                border: 1px solid #ddd;
+                margin-bottom: 16px;
+                break-inside: avoid;
+            }
+
+            body {
+                background: white;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <div class="nav-inner">
+            <a class="nav-brand" href="/">🤖 Nexo<span>Bot</span></a>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <h1>🦄 Manual de Uso Rápido</h1>
+        <p>Tu guía paso a paso para dominar tu Asistente Virtual en WhatsApp y tu App Móvil, sin tocar un solo
+            bolígrafo.</p>
+        <a href="javascript:window.print()" class="btn-download">🖨️ Guardar como PDF</a>
+    </header>
+
+    <main class="content">
+
+        <!-- PASO 1 -->
+        <div class="step-card">
+            <div class="step-title">
+                <div class="step-badge">1</div>
+                Tu Primer Día (El Registro Inicial)
+            </div>
+            <p>Todo comienza en WhatsApp. Es como hablar con un empleado de confianza al que le acabás de dar empleo.
+            </p>
+            <ul>
+                <li><strong>Guardá el número</strong> de teléfono de NexoBot en tus contactos.</li>
+                <li>Escribile un mensaje que diga <strong>"Hola"</strong>.</li>
+                <li>El bot se presentará y te hará <strong>8 preguntas súper rápidas</strong> (Tu nombre, Cédula,
+                    Dirección, Nombre de tu negocio). Esto es una única vez para crear la base de datos segura de tu
+                    local.</li>
+                <li>Al terminar el paso 8, tu cuenta quedará ✅ Verificada para siempre.</li>
+            </ul>
+
+            <div class="tip-box">
+                <strong>🚀 Atajo Ninja:</strong> ¡Podés enviarle directamente la foto de tu Cédula en vez de escribir
+                tus datos, y la Inteligencia Artificial nuestra leerá tu nombre y número sola!
+            </div>
+        </div>
+
+        <!-- PASO 2 -->
+        <div class="step-card">
+            <div class="step-title">
+                <div class="step-badge">2</div>
+                Registrando Ventas (Solo Chateando)
+            </div>
+            <p>Durante tu día a día, mientras atendés rápido a la gente, agarrá tu celular y mandale un texto o un
+                <strong>AUDIO de voz</strong> a NexoBot diciendo lo que pasó.</p>
+
+            <h3>💸 Para Ventas al Contado (Ingresos del día):</h3>
+            <ul>
+                <li><em>"Vendí 150 mil al contado"</em></li>
+                <li><em>"Cobré 30 mil de cerveza tiki taka"</em></li>
+                <li><em>"Vendí 60 mil en efectivo"</em></li>
+            </ul>
+
+            <h3>📝 Para dar Fiado (Crédito a Clientes):</h3>
+            <ul>
+                <li><em>"Le fié 200 mil a Don Carlos"</em></li>
+                <li><em>"Anotale 50 mil a la cuenta de Doña Marta"</em></li>
+            </ul>
+            <p>👉 <strong>Magia:</strong> NexoBot le crea automáticamente una libreta a nombre de "Doña Marta", le suma
+                esos 50 mil como deuda y lo guarda en tu nube segura.</p>
+        </div>
+
+        <!-- PASO 3 -->
+        <div class="step-card">
+            <div class="step-title">
+                <div class="step-badge">3</div>
+                Cobranzas y Deudores
+            </div>
+            <p>¿Te olvidaste a quién le diste mercaderías a principio de mes?</p>
+
+            <h3>🔍 Consultar Libreta:</h3>
+            <ul>
+                <li>Escribile al bot: <em>"¿Quiénes me deben?"</em> o <em>"Lista de deudas"</em>.</li>
+                <li>El bot te responderá al instante con una lista ordenada de todos los clientes morosos con semáforos
+                    de riesgo (🟢🟡🔴).</li>
+            </ul>
+
+            <h3>💰 Cuando el cliente al fin viene a pagarte:</h3>
+            <ul>
+                <li><em>"Doña Marta me depositó 50 mil"</em></li>
+                <li><em>"Carlos vino a pagar su cuenta entera"</em></li>
+            </ul>
+            <p>👉 <strong>Magia:</strong> El bot resta ese dinero de la mochila de deuda de la persona y lo suma a tus
+                ingresos de caja reales del día.</p>
+        </div>
+
+        <!-- PASO 4 -->
+        <div class="step-card">
+            <div class="step-title">
+                <div class="step-badge">4</div>
+                Cierre del Día (Tu Caja)
+            </div>
+            <p>A cualquier hora que quieras saber si el negocio está rindiendo, preguntale al bot:</p>
+            <ul>
+                <li><em>"¿Cómo me fue hoy?"</em></li>
+                <li><em>"Resumen"</em></li>
+            </ul>
+            <p>El bot te va a devolver tu ticket final: cuánto dinero hiciste al contado, cuánto diste fiado y si el
+                saldo es positivo.</p>
+            <div class="tip-box">
+                <strong>📅 Robot Automático:</strong> De todas formas, para que no te preocupes, el bot te enviará un
+                cierre de caja automático a tu WhatsApp todos los días a las 8:00 PM.
+            </div>
+        </div>
+
+        <!-- PASO 5 -->
+        <div class="step-card">
+            <div class="step-title">
+                <div class="step-badge">5</div>
+                La App Móvil (Tu Panel Administrativo)
+            </div>
+            <p>Viste que a las empresas gigantes les gustan los gráficos y reportes... vos también los tenes. Para ver
+                tus finanzas más detalladas o descargar exceles, usá la App.</p>
+
+            <ul>
+                <li><strong>Creá tu llave:</strong> Enviándole a WhatsApp el texto <em>"PIN 1234"</em> (cambiando 1234
+                    por tu clave de 4 números preferida).</li>
+                <li><strong>Abrí la App Móvil:</strong> Desde tu celular o computadora ingresando al enlace oficial.
+                </li>
+                <li><strong>Iniciá Sesión:</strong> Poné tu número de celular y tu PIN secreto.</li>
+            </ul>
+
+            <h3>Adentro encontrarás:</h3>
+            <ul>
+                <li><strong>Dashboard:</strong> Gráficos circulares con las ventas y total del dinero que tenés en la
+                    calle.</li>
+                <li><strong>Deudores:</strong> Fichas de clientes y la capacidad de descargar tu libro a PDF o Excel.
+                </li>
+                <li><strong>Botones Táctiles:</strong> Podés apretar los botones azules de <code>+ Venta</code> y
+                    <code>+ Cobro</code> para registrar cosas desde el menú si no querés chatear.</li>
+            </ul>
+
+            <div class="tip-box" style="background: #FEE2E2; border-color: #DC2626; color: #991B1B;">
+                <strong>🚨 Protocolo de Emergencia:</strong> Si alguna vez te roban el celular o se te olvida tu PIN de
+                la App, enviale a NexoBot <em>"Olvidé mi PIN"</em>. Esto activará la seguridad máxima pidiéndote tu
+                Cédula para recuperar tu cuenta y expulsará a los intrusos.
+            </div>
+        </div>
+
+    </main>
+</body>
+
+</html>
