@@ -268,7 +268,7 @@ export async function handleOnboarding(merchant, message, imageData = null) {
                 `✅ *Tu cuenta comercial está verificada.*\n\n` +
                 `🎁 *Tu Regalo de Bienvenida:*\n` +
                 `Preparamos un *Manual de Uso Rápido* para que aprendas todos los trucos y atajos ninja del Asistente:\n` +
-                `👉 *Descargalo aquí:* https://nexofinanzas.com/manual-comerciantes.pdf\n\n` +
+                `👉 *Descargalo aquí:* https://nexobot-mvp-1.onrender.com/manual-comerciantes.html\n\n` +
                 `🎓 *Probá tu primer comando ahora mismo:*\n` +
                 `Escribime: *"Vendí 500 mil a Carlos"* y empecemos a hacer plata. 💪`;
 
