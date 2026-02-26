@@ -25,7 +25,7 @@ export async function generateAudioFromText(text) {
             const elevenlabsClient = new ElevenLabsClient({ apiKey: process.env.ELEVENLABS_API_KEY });
 
             const audioStream = await elevenlabsClient.generate({
-                voice: "JBFqnCBsd6RMkjVDRZzb", // Replace with preferred voice ID
+                voice: process.env.ELEVENLABS_VOICE_ID || "JBFqnCBsd6RMkjVDRZzb", // Replace with preferred voice ID
                 text: text,
                 model_id: "eleven_multilingual_v2",
                 output_format: "ogg_opus" // WhatsApp native format
