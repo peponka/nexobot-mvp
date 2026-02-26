@@ -4,8 +4,6 @@
 // Handles sending messages via Meta WhatsApp Business API
 
 const WHATSAPP_API_URL = 'https://graph.facebook.com/v22.0';
-import FormData from 'form-data';
-import { Blob } from 'buffer';
 
 /**
  * Send a text message via WhatsApp
@@ -80,18 +78,18 @@ export async function sendAudioMessage(to, audioBuffer, mimeType = 'audio/ogg') 
         // 1. Upload media to WhatsApp
         const formData = new FormData();
         formData.append('messaging_product', 'whatsapp');
-        // Native fetch FormData interop trick: pass it as a buffer array with filename
-        formData.append('file', audioBuffer, { filename: 'audio.ogg', contentType: mimeType });
+
+        // Use global Blob for Node 18+ to attach binary data to global FormData
+        const blob = new Blob([audioBuffer], { type: mimeType });
+        formData.append('file', blob, 'audio.ogg');
 
         const uploadRes = await fetch(`${WHATSAPP_API_URL}/${phoneNumberId}/media`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`
             },
-            // `form-data` package Seamlessly integrates with fetch using the correct content-type boundaries
-            body: formData,
-            // Required for form-data package in node fetch 
-            duplex: 'half'
+            body: formData
+            // The global fetch automatically generates the multipart boundary
         });
 
         const uploadData = await uploadRes.json();
