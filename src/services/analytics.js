@@ -75,7 +75,7 @@ export async function getMonthlyOverview(merchantId) {
         const dailyMap = {};
         transactions.forEach(tx => {
             const day = tx.created_at.substring(0, 10);
-            if (!dailyMap[day]) dailyMap[day] = { date: day, sales: 0, collected: 0, credit: 0, count: 0 };
+            if (!dailyMap[day]) dailyMap[day] = { date: day, sales: 0, collected: 0, credit: 0, expenses: 0, count: 0 };
 
             if (tx.type === 'SALE_CASH') {
                 dailyMap[day].sales += tx.amount;
@@ -84,6 +84,8 @@ export async function getMonthlyOverview(merchantId) {
                 dailyMap[day].credit += tx.amount;
             } else if (tx.type === 'PAYMENT') {
                 dailyMap[day].collected += tx.amount;
+            } else if (tx.type === 'EXPENSE') {
+                dailyMap[day].expenses += tx.amount;
             }
             dailyMap[day].count++;
         });
@@ -92,6 +94,7 @@ export async function getMonthlyOverview(merchantId) {
         const totalRevenue = dailyBreakdown.reduce((s, d) => s + d.sales, 0);
         const totalCollected = dailyBreakdown.reduce((s, d) => s + d.collected, 0);
         const totalCredit = dailyBreakdown.reduce((s, d) => s + d.credit, 0);
+        const totalExpenses = dailyBreakdown.reduce((s, d) => s + d.expenses, 0);
         const activeDays = dailyBreakdown.length;
 
         const bestDay = dailyBreakdown.reduce((best, d) => d.sales > (best?.sales || 0) ? d : best, null);
@@ -101,6 +104,7 @@ export async function getMonthlyOverview(merchantId) {
             totalRevenue,
             totalCollected,
             totalCredit,
+            totalExpenses,
             txCount: transactions.length,
             avgDaily: Math.round(totalRevenue / Math.max(activeDays, 1)),
             activeDays,
@@ -198,7 +202,7 @@ export async function getCustomerInsights(merchantId) {
             .from('merchant_customers')
             .select('*')
             .eq('merchant_id', merchantId)
-            .order('total_purchased', { ascending: false });
+            .order('total_debt', { ascending: false });
 
         if (!customers?.length) return [];
 
@@ -207,20 +211,22 @@ export async function getCustomerInsights(merchantId) {
                 ? Math.max(1, Math.floor((Date.now() - new Date(c.created_at).getTime()) / 86400000))
                 : 1;
 
+            const totalPurchased = (c.total_debt || 0) + (c.total_paid || 0);
+
             return {
                 id: c.id,
                 name: c.name,
-                totalPurchased: c.total_purchased || 0,
+                totalPurchased: totalPurchased,
                 totalPaid: c.total_paid || 0,
                 totalDebt: c.total_debt || 0,
                 totalTransactions: c.total_transactions || 0,
                 riskLevel: c.risk_level || 'low',
-                avgPerTransaction: c.total_transactions > 0 ? Math.round(c.total_purchased / c.total_transactions) : 0,
-                monthlyValue: Math.round((c.total_purchased || 0) / Math.max(daysSinceFirst / 30, 1)),
+                avgPerTransaction: c.total_transactions > 0 ? Math.round(totalPurchased / c.total_transactions) : 0,
+                monthlyValue: Math.round(totalPurchased / Math.max(daysSinceFirst / 30, 1)),
                 daysSinceFirst,
                 lastActivity: c.last_transaction_at
             };
-        });
+        }).sort((a, b) => b.totalPurchased - a.totalPurchased);
     } catch (err) {
         console.error('Customer insights error:', err);
         return [];

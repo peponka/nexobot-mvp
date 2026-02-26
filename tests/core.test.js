@@ -103,6 +103,22 @@ function detectIntent(message) {
     if (addBizMatch)
         return { intent: 'MULTI_BUSINESS', entities: { subIntent: 'ADD', businessName: addBizMatch[1].trim() } };
 
+    // EXPENSE
+    if (/gast[eéé]|compr[eé]|pagu[eé]\s*por|egreso|gast[oó]|saqu[eé]\s*plata/i.test(lower))
+        return { intent: 'EXPENSE', entities: {} };
+
+    // UNDO
+    if (/deshacer|me\s*equivoqu[eé]|anular|cancelar\s*(el|la)?\s*[uú]ltim|borrar\s*(el|la)?\s*[uú]ltim/i.test(lower))
+        return { intent: 'UNDO', entities: {} };
+
+    // INVENTORY UPDATE
+    if (/(actualizar\s*precio|precio\s*ahora\s*es|cambiar\s*precio)\b/i.test(lower))
+        return { intent: 'INVENTORY_UPDATE', entities: {} };
+
+    // INVENTORY QUERY
+    if (/(a\s*cu[aá]nto|precio\s*de|cu[aá]nto\s*est[aá]|cu[aá]nto\s*cuesta)/i.test(lower))
+        return { intent: 'INVENTORY_QUERY', entities: {} };
+
     // THANK YOU
     if (/^(gracias|dale|ok|perfecto|genial|listo|joya|barbaro)/i.test(lower) && lower.length < 30)
         return { intent: 'GREETING', entities: {} };
@@ -148,6 +164,18 @@ test('fiados pendientes → DEBT_QUERY', () => eq(detectIntent('fiados pendiente
 test('cómo me fue esta semana → SALES_QUERY', () => eq(detectIntent('cómo me fue esta semana').intent, 'SALES_QUERY'));
 test('resumen → SALES_QUERY', () => eq(detectIntent('resumen').intent, 'SALES_QUERY'));
 test('cuánto vendí → SALES_QUERY', () => eq(detectIntent('cuánto vendí').intent, 'SALES_QUERY'));
+
+// Expenses
+test('gasté 50 mil en pasaje → EXPENSE', () => eq(detectIntent('gasté 50 mil en pasaje').intent, 'EXPENSE'));
+test('pagué por la luz 150 mil → EXPENSE', () => eq(detectIntent('pagué por la luz 150 mil').intent, 'EXPENSE'));
+
+// Undo
+test('me equivoqué → UNDO', () => eq(detectIntent('me equivoqué').intent, 'UNDO'));
+test('deshacer el último → UNDO', () => eq(detectIntent('deshacer el último').intent, 'UNDO'));
+
+// Inventory Queries & Updates
+test('a cuánto tengo la coca → INVENTORY_QUERY', () => eq(detectIntent('a cuánto tengo la coca').intent, 'INVENTORY_QUERY'));
+test('actualizar precio de yerba a 15 mil → INVENTORY_UPDATE', () => eq(detectIntent('actualizar precio de yerba a 15 mil').intent, 'INVENTORY_UPDATE'));
 
 // Reminders
 test('recordále a Carlos → REMINDER', () => eq(detectIntent('recordále a Carlos').intent, 'REMINDER'));

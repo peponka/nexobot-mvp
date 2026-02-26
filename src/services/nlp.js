@@ -103,6 +103,7 @@ function fastParser(message) {
         result.intent = 'REMINDER';
         result.confidence = 0.9;
         extractEntities(lower, original, result);
+        if (!result.entities.customer_name) result.confidence = 0.6; // Let OpenAI find the name
         return result;
     }
 
@@ -127,6 +128,7 @@ function fastParser(message) {
         result.intent = 'PAYMENT';
         result.confidence = 0.85;
         extractEntities(lower, original, result);
+        if (!result.entities.customer_name) result.confidence = 0.6; // Let OpenAI find the name
         return result;
     }
 
@@ -135,6 +137,7 @@ function fastParser(message) {
         result.intent = 'SALE_CREDIT';
         result.confidence = 0.9;
         extractEntities(lower, original, result);
+        if (!result.entities.customer_name) result.confidence = 0.6; // Let OpenAI find the name
         return result;
     }
 
@@ -160,6 +163,7 @@ function fastParser(message) {
         }
         result.confidence = Math.max(result.confidence, 0.85);
         extractEntities(lower, original, result);
+        if (result.intent === 'SALE_CREDIT' && !result.entities.customer_name) result.confidence = 0.6;
         return result;
     }
 
@@ -232,7 +236,38 @@ function fastParser(message) {
         return result;
     }
 
-    // 14. THANK YOU (treat as informal greeting/ack)
+    // 14. EXPENSE
+    if (/gast[eéé]|compr[eé]|pagu[eé]\s*por|egreso|gast[oó]|saqu[eé]\s*plata/i.test(lower)) {
+        result.intent = 'EXPENSE';
+        result.confidence = 0.85;
+        extractEntities(lower, original, result);
+        return result;
+    }
+
+    // 15. UNDO
+    if (/deshacer|me\s*equivoqu[eé]|anular|cancelar\s*(el|la)?\s*[uú]ltim|borrar\s*(el|la)?\s*[uú]ltim/i.test(lower)) {
+        result.intent = 'UNDO';
+        result.confidence = 0.95;
+        return result;
+    }
+
+    // 16. INVENTORY UPDATE
+    if (/(actualizar\s*precio|precio\s*ahora\s*es|cambiar\s*precio)\b/i.test(lower)) {
+        result.intent = 'INVENTORY_UPDATE';
+        result.confidence = 0.85;
+        extractEntities(lower, original, result);
+        return result;
+    }
+
+    // 17. INVENTORY QUERY
+    if (/(a\s*cu[aá]nto|precio\s*de|cu[aá]nto\s*est[aá]|cu[aá]nto\s*cuesta)/i.test(lower)) {
+        result.intent = 'INVENTORY_QUERY';
+        result.confidence = 0.85;
+        extractEntities(lower, original, result);
+        return result;
+    }
+
+    // 18. THANK YOU (treat as informal greeting/ack)
     if (/^(gracias|gracia|dale|ok|oki|bueno|perfecto|genial|excelente|listo|joya|barbaro|10|diez|crack|sos\s*crack|gra[cs]|ty|thanks?|piola|masa|de\s*una|sale|vamo|vamos)/i.test(lower) && lower.length < 30) {
         result.intent = 'GREETING';
         result.confidence = 0.8;
@@ -386,39 +421,39 @@ function extractEntities(lower, original, result) {
     let customerName = null;
 
     // Pattern: "a Don/Doña Carlos", "de Don/Doña María"
-    let nameMatch = original.match(/(?:a|de)\s+(?:[Dd]on|[Dd]o[ñn]a)\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)?)/);
+    let nameMatch = original.match(/(?:a|de|A|De|DE)\s+(?:[Dd]on|[Dd]o[ñn]a|DON|DO[ÑN]A)\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)?)/);
     if (nameMatch && !skipWords.has(nameMatch[1].toLowerCase().split(' ')[0])) {
         customerName = nameMatch[1];
     }
 
     // Pattern: "a Carlos", "de María"
     if (!customerName) {
-        nameMatch = original.match(/\b(?:a|de)\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)/);
-        if (nameMatch && !skipWords.has(nameMatch[1].toLowerCase())) {
+        nameMatch = original.match(/\b(?:a|A|de|De|DE)\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)?)/);
+        if (nameMatch && !skipWords.has(nameMatch[1].toLowerCase().split(' ')[0])) {
             customerName = nameMatch[1];
         }
     }
 
     // Pattern: "María pagó", "Carlos abonó" — name at start before verb
-    if (!customerName && /^[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+\s+(?:me\s+)?(?:pag[oó]|abon[oó]|cancel[oó]|trajo|deposit[oó])/i.test(original)) {
+    if (!customerName && /^[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+\s+(?:me\s+)?(?:pag[oó]|abon[oó]|cancel[oó]|trajo|deposit[oó]|PAG|ABON|CANCEL|TRAJ|DEPOSIT)/.test(original)) {
         nameMatch = original.match(/^([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)/);
-        if (nameMatch && !skipWords.has(nameMatch[1].toLowerCase())) {
+        if (nameMatch && !skipWords.has(nameMatch[1].toLowerCase().split(' ')[0])) {
             customerName = nameMatch[1];
         }
     }
 
     // Pattern: "cobré X de María"
     if (!customerName) {
-        nameMatch = original.match(/\d+\s*(?:mil|mill[oó]n|k)?\s+de\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)/i);
-        if (nameMatch && !skipWords.has(nameMatch[1].toLowerCase())) {
+        nameMatch = original.match(/\d+\s*(?:mil|millones|millón|Millones|Millón|k|K|MIL|Mil)?\s+(?:de|De|DE)\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)?)/);
+        if (nameMatch && !skipWords.has(nameMatch[1].toLowerCase().split(' ')[0])) {
             customerName = nameMatch[1];
         }
     }
 
     // Pattern: "para Carlos", "cliente Carlos"  
     if (!customerName) {
-        nameMatch = original.match(/(?:para|cliente)\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)/i);
-        if (nameMatch && !skipWords.has(nameMatch[1].toLowerCase())) {
+        nameMatch = original.match(/(?:para|Para|PARA|cliente|Cliente|CLIENTE)\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)?)/);
+        if (nameMatch && !skipWords.has(nameMatch[1].toLowerCase().split(' ')[0])) {
             customerName = nameMatch[1];
         }
     }
@@ -532,6 +567,10 @@ DEBES responder SOLO con JSON válido, sin texto adicional.
 - DEBT_QUERY: Consulta de deudas
 - SALES_QUERY: Consulta de ventas / resumen
 - INVENTORY_IN: Llegada de mercadería
+- INVENTORY_QUERY: Consulta de precio/stock de un producto
+- INVENTORY_UPDATE: Actualización de precio de un producto
+- EXPENSE: Gasto o egreso del negocio
+- UNDO: Deshacer o anular la última transacción
 - GREETING: Saludo
 - HELP: Pedido de ayuda
 - UNKNOWN: No se entiende
@@ -559,6 +598,10 @@ DEBES responder SOLO con JSON válido, sin texto adicional.
 - "cuánto me deben", "deudas", "pendiente", "morosos" → DEBT_QUERY
 - "cuánto vendí", "ventas", "resumen", "cómo me fue" → SALES_QUERY
 - "me llegó", "llegaron", "recibí mercadería", "stock" → INVENTORY_IN
+- "gasté", "compré", "pagué de luz", "egreso" → EXPENSE
+- "me equivoqué", "deshacer", "cancelar último" → UNDO
+- "a cuánto tengo", "precio de", "cuánto está" → INVENTORY_QUERY
+- "actualizar precio", "cambiar precio", "precio ahora es" → INVENTORY_UPDATE
 - Moneda: siempre PYG (guaraníes) salvo que diga "dólares" o "USD"
 - "500 mil" = 500000, "1 millón" = 1000000, "1 palo" = 1000000, "medio millón" = 500000
 - "500k" = 500000, "200 lucas" = 200000

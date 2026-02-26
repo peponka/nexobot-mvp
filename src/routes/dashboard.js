@@ -24,12 +24,20 @@ router.get('/summary', async (req, res) => {
 
         const { data: salesTodayData } = await supabase
             .from('transactions')
-            .select('amount')
+            .select('amount, type')
             .eq('merchant_id', merchantId)
-            .in('type', ['SALE_CASH', 'SALE_CREDIT'])
+            .in('type', ['SALE_CASH', 'SALE_CREDIT', 'EXPENSE'])
             .gte('created_at', todayAtZero.toISOString());
 
-        const salesToday = (salesTodayData || []).reduce((acc, tx) => acc + tx.amount, 0);
+        let salesToday = 0;
+        let expensesToday = 0;
+        (salesTodayData || []).forEach(tx => {
+            if (tx.type === 'EXPENSE') {
+                expensesToday += tx.amount;
+            } else {
+                salesToday += tx.amount;
+            }
+        });
 
         // Get customers/debt
         const { data: customersData } = await supabase
@@ -42,6 +50,7 @@ router.get('/summary', async (req, res) => {
 
         res.json({
             salesToday,
+            expensesToday,
             totalDebt,
             customerCount
         });
@@ -273,9 +282,11 @@ router.get('/:phone', async (req, res) => {
         // Calculate stats
         const weeklySales = (weeklyTx || []).filter(t => ['SALE_CASH', 'SALE_CREDIT'].includes(t.type));
         const weeklyPayments = (weeklyTx || []).filter(t => t.type === 'PAYMENT');
+        const weeklyExpenses = (weeklyTx || []).filter(t => t.type === 'EXPENSE');
 
         const totalWeeklySales = weeklySales.reduce((s, t) => s + t.amount, 0);
         const totalWeeklyCollected = weeklyPayments.reduce((s, t) => s + t.amount, 0);
+        const totalWeeklyExpenses = weeklyExpenses.reduce((s, t) => s + t.amount, 0);
 
         // Daily breakdown for chart (last 7 days)
         const dailySales = {};
@@ -284,7 +295,7 @@ router.get('/:phone', async (req, res) => {
             const d = new Date();
             d.setDate(d.getDate() - i);
             const key = d.toISOString().split('T')[0];
-            dailySales[key] = { date: key, dayName: days[d.getDay()], sales: 0, payments: 0, count: 0 };
+            dailySales[key] = { date: key, dayName: days[d.getDay()], sales: 0, payments: 0, expenses: 0, count: 0 };
         }
 
         (weeklyTx || []).forEach(tx => {
@@ -295,6 +306,8 @@ router.get('/:phone', async (req, res) => {
                     dailySales[key].count++;
                 } else if (tx.type === 'PAYMENT') {
                     dailySales[key].payments += tx.amount;
+                } else if (tx.type === 'EXPENSE') {
+                    dailySales[key].expenses += tx.amount;
                 }
             }
         });
@@ -308,6 +321,7 @@ router.get('/:phone', async (req, res) => {
             stats: {
                 totalWeeklySales,
                 totalWeeklyCollected,
+                totalWeeklyExpenses,
                 weeklyTxCount: weeklySales.length,
                 avgTicket: weeklySales.length > 0 ? Math.round(totalWeeklySales / weeklySales.length) : 0,
                 totalDebt,

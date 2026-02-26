@@ -7,6 +7,7 @@
 import * as Merchant from '../models/merchant.js';
 import * as Customer from '../models/customer.js';
 import * as Transaction from '../models/transaction.js';
+import * as Inventory from '../models/inventory.js';
 import { sendManualReminder } from './reminders.js';
 import { needsOnboarding, handleOnboarding } from './onboarding.js';
 import { formatAmount, formatDualCurrency, usdToPyg, getExchangeRate } from './currency.js';
@@ -87,6 +88,18 @@ export async function handleMessage(phone, contactName, rawMessage, parsed, imag
 
             case 'INVENTORY_IN':
                 return await handleInventoryIn(merchant, entities, rawMessage, lang);
+
+            case 'EXPENSE':
+                return await handleExpense(merchant, entities, rawMessage, lang);
+
+            case 'UNDO':
+                return await handleUndo(merchant, lang);
+
+            case 'INVENTORY_QUERY':
+                return await handleInventoryQuery(merchant, entities, lang);
+
+            case 'INVENTORY_UPDATE':
+                return await handleInventoryUpdate(merchant, entities, lang);
 
             case 'REMINDER':
                 return await handleReminder(merchant, entities, lang);
@@ -493,6 +506,74 @@ function handleExportIntent(merchant, exportType = 'sales') {
         `• Totales por tipo (contado, fiado, cobros)\n` +
         `• Filtros y formato profesional\n\n` +
         `_Hacé click para descargar el .xlsx_`;
+}
+
+async function handleExpense(merchant, entities, rawMessage, lang = 'es') {
+    const { amount, product, currency } = entities;
+    if (!amount) return '🤔 ¿Cuánto gastaste? Ej: "Gasté 50 mil en pasaje"';
+
+    await Transaction.create({
+        merchant_id: merchant.id,
+        type: 'EXPENSE',
+        amount,
+        currency: currency || 'PYG',
+        product: product || 'gasto general',
+        raw_message: rawMessage,
+        parsed_intent: 'EXPENSE'
+    });
+
+    let response = `💸 *Gasto registrado*\n\n`;
+    if (currency === 'USD') {
+        const fmtDual = await formatDualCurrency(amount, 'USD');
+        response += `💰 Monto: ${fmtDual}\n`;
+    } else {
+        response += `💰 Monto: ${formatPYG(amount)}\n`;
+    }
+    if (product) response += `📝 Detalle: ${product}\n`;
+
+    return response;
+}
+
+async function handleUndo(merchant, lang = 'es') {
+    const lastTx = await Transaction.undoLast(merchant.id);
+    if (!lastTx) {
+        return '❌ No encontré ninguna transacción reciente para anular.';
+    }
+
+    // Revert debt if needed
+    if (lastTx.customer_id) {
+        if (lastTx.type === 'SALE_CREDIT' || lastTx.type === 'PAYMENT') {
+            await Customer.updateDebt(lastTx.customer_id, -lastTx.amount, lastTx.type);
+        }
+    }
+
+    return `↩️ *Transacción anulada con éxito.* Se borró: ${lastTx.type} por ${formatPYG(lastTx.amount)}.`;
+}
+
+async function handleInventoryQuery(merchant, entities, lang = 'es') {
+    const { product } = entities;
+    if (!product) return '🤔 ¿De qué producto querés saber el precio? Ej: "A cuánto tengo la coca cola"';
+
+    const item = await Inventory.getItem(merchant.id, product);
+    if (!item) {
+        return `❌ No encontré el producto "${product}" en tu inventario. Podés agregarlo diciendo: "Me llegaron 10 ${product}" o "Actualizar precio de ${product} a 10 mil"`;
+    }
+
+    let response = `📦 *${item.product}*\n\n`;
+    response += `💰 Precio actual: ${formatPYG(item.avg_price || 0)}\n`;
+    response += `📊 Stock actual: ${item.stock || 0} ${item.unit || 'unid'}\n`;
+    return response;
+}
+
+async function handleInventoryUpdate(merchant, entities, lang = 'es') {
+    const { product, amount } = entities;
+    if (!product) return '🤔 ¿Qué producto querés actualizar?';
+    if (!amount) return `🤔 Faltó el nuevo precio. Ej: "Actualizar precio de ${product} a 15000"`;
+
+    const updated = await Inventory.updateItem(merchant.id, product, null, amount);
+    if (!updated) return '❌ Hubo un error al actualizar el producto.';
+
+    return `✅ Precio de *${product}* actualizado a ${formatPYG(amount)}.`;
 }
 
 export default { handleMessage };

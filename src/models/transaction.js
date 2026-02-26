@@ -29,6 +29,38 @@ export async function create(data) {
 }
 
 /**
+ * Undo the last transaction
+ */
+export async function undoLast(merchantId) {
+    if (!supabase) {
+        return undoLastMemory(merchantId);
+    }
+
+    const { data: lastTx } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('merchant_id', merchantId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+    if (!lastTx) return null;
+
+    // Delete it 
+    const { error } = await supabase
+        .from('transactions')
+        .delete()
+        .eq('id', lastTx.id);
+
+    if (error) {
+        console.error('DB Error undoing transaction:', error);
+        return null;
+    }
+
+    return lastTx;
+}
+
+/**
  * Get weekly sales summary for a merchant
  */
 export async function getWeeklySummary(merchantId) {
@@ -114,20 +146,24 @@ export async function getDailySummary(merchantId) {
     const salesCashList = txs.filter(t => t.type === 'SALE_CASH');
     const salesCreditList = txs.filter(t => t.type === 'SALE_CREDIT');
     const paymentsList = txs.filter(t => t.type === 'PAYMENT');
+    const expensesList = txs.filter(t => t.type === 'EXPENSE');
 
     const salesCash = salesCashList.reduce((sum, t) => sum + t.amount, 0);
     const salesCredit = salesCreditList.reduce((sum, t) => sum + t.amount, 0);
     const totalCollected = paymentsList.reduce((sum, t) => sum + t.amount, 0);
+    const totalExpenses = expensesList.reduce((sum, t) => sum + t.amount, 0);
 
     return {
         totalSales: salesCash + salesCredit,
         salesCash,
         salesCredit,
         totalCollected,
+        totalExpenses,
         countSalesCash: salesCashList.length,
         countSalesCredit: salesCreditList.length,
         countSales: salesCashList.length + salesCreditList.length,
         countPayments: paymentsList.length,
+        countExpenses: expensesList.length,
         totalOps: txs.length
     };
 }
@@ -183,22 +219,39 @@ function getDailySummaryMemory(merchantId) {
     const salesCashList = txs.filter(t => t.type === 'SALE_CASH');
     const salesCreditList = txs.filter(t => t.type === 'SALE_CREDIT');
     const paymentsList = txs.filter(t => t.type === 'PAYMENT');
+    const expensesList = txs.filter(t => t.type === 'EXPENSE');
 
     const salesCash = salesCashList.reduce((sum, t) => sum + t.amount, 0);
     const salesCredit = salesCreditList.reduce((sum, t) => sum + t.amount, 0);
     const totalCollected = paymentsList.reduce((sum, t) => sum + t.amount, 0);
+    const totalExpenses = expensesList.reduce((sum, t) => sum + t.amount, 0);
 
     return {
         totalSales: salesCash + salesCredit,
         salesCash,
         salesCredit,
         totalCollected,
+        totalExpenses,
         countSalesCash: salesCashList.length,
         countSalesCredit: salesCreditList.length,
         countSales: salesCashList.length + salesCreditList.length,
         countPayments: paymentsList.length,
+        countExpenses: expensesList.length,
         totalOps: txs.length
     };
 }
 
-export default { create, getWeeklySummary, getDailySummary, getRecent };
+function undoLastMemory(merchantId) {
+    let lastIndex = -1;
+    for (let i = memoryStore.length - 1; i >= 0; i--) {
+        if (memoryStore[i].merchant_id === merchantId) {
+            lastIndex = i;
+            break;
+        }
+    }
+    if (lastIndex === -1) return null;
+    const [lastTx] = memoryStore.splice(lastIndex, 1);
+    return lastTx;
+}
+
+export default { create, getWeeklySummary, getDailySummary, getRecent, undoLast };

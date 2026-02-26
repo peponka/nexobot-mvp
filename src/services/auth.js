@@ -59,12 +59,18 @@ export async function login(phone, pin) {
             return { success: false, error: 'Database not configured' };
         }
 
-        // Find merchant by phone
-        const { data: merchant, error } = await supabase
+        // Find merchant by phone (support both with and without +)
+        const possiblePhones = [
+            cleanPhone,
+            cleanPhone.startsWith('+') ? cleanPhone.substring(1) : `+${cleanPhone}`
+        ];
+
+        const { data: merchants, error } = await supabase
             .from('merchants')
             .select('*')
-            .eq('phone', cleanPhone)
-            .single();
+            .in('phone', possiblePhones);
+
+        const merchant = merchants && merchants.length > 0 ? merchants[0] : null;
 
         if (error || !merchant) {
             return { success: false, error: 'Comerciante no encontrado' };

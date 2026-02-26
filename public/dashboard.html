@@ -185,6 +185,7 @@
             font-weight: 700;
             background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent
         }
 
@@ -279,6 +280,7 @@
         .welcome h1 span {
             background: linear-gradient(135deg, var(--accent-light), var(--blue));
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent
         }
 
@@ -514,6 +516,7 @@
             font-weight: 900;
             background: linear-gradient(135deg, var(--accent-light), var(--green));
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent
         }
 
@@ -1032,7 +1035,7 @@
             return `hace ${Math.floor(s / 86400)}d`;
         }
         function txTypeLabel(type) {
-            return { 'SALE_CASH': ['💵 Contado', 'sale'], 'SALE_CREDIT': ['📋 Fiado', 'credit'], 'PAYMENT': ['✅ Cobro', 'payment'], 'INVENTORY_IN': ['📦 Inventario', 'inventory'] }[type] || [type, 'sale'];
+            return { 'SALE_CASH': ['💵 Contado', 'sale'], 'SALE_CREDIT': ['📋 Fiado', 'credit'], 'PAYMENT': ['✅ Cobro', 'payment'], 'INVENTORY_IN': ['📦 Inventario', 'inventory'], 'EXPENSE': ['💸 Gasto', 'expense'] }[type] || [type, 'sale'];
         }
 
         async function loadMerchants() {
@@ -1117,10 +1120,10 @@
                         <div class="stat-change ${stats.totalWeeklyCollected > 0 ? 'up' : 'neutral'}">${stats.totalWeeklySales > 0 ? Math.round(stats.totalWeeklyCollected / stats.totalWeeklySales * 100) : 0}% tasa de cobro</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-header"><div class="stat-icon red">📋</div></div>
-                        <div class="stat-value">${formatPYG(stats.totalDebt)}</div>
-                        <div class="stat-label">Deuda pendiente total</div>
-                        <div class="stat-change ${stats.debtorsCount > 0 ? 'down' : 'up'}">${stats.debtorsCount} deudor${stats.debtorsCount !== 1 ? 'es' : ''}</div>
+                        <div class="stat-header"><div class="stat-icon red">💸</div></div>
+                        <div class="stat-value">${formatPYG(stats.totalWeeklyExpenses || 0)}</div>
+                        <div class="stat-label">Gastos de la semana</div>
+                        <div class="stat-change down">Egresos registrados</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-header"><div class="stat-icon blue">👥</div></div>
@@ -1225,9 +1228,9 @@
                             <span class="panel-badge green">WhatsApp</span>
                         </div>
                         ${recentTransactions.slice(0, 8).map(tx => {
-                        const icons = { 'SALE_CASH': '💵', 'SALE_CREDIT': '📋', 'PAYMENT': '✅', 'INVENTORY_IN': '📦' };
-                        const colors = { 'SALE_CASH': 'var(--blue-bg)', 'SALE_CREDIT': 'var(--orange-bg)', 'PAYMENT': 'var(--green-bg)', 'INVENTORY_IN': 'var(--accent-glow)' };
-                        const msgs = { 'SALE_CASH': `Venta contado de <strong>${formatPYG(tx.amount)}</strong>`, 'SALE_CREDIT': `Fiado de <strong>${formatPYG(tx.amount)}</strong> a <strong>${tx.merchant_customers?.name || 'cliente'}</strong>`, 'PAYMENT': `Cobro de <strong>${formatPYG(tx.amount)}</strong> de <strong>${tx.merchant_customers?.name || 'cliente'}</strong>`, 'INVENTORY_IN': `Inventario: ${tx.product || 'mercadería'}` };
+                        const icons = { 'SALE_CASH': '💵', 'SALE_CREDIT': '📋', 'PAYMENT': '✅', 'INVENTORY_IN': '📦', 'EXPENSE': '💸' };
+                        const colors = { 'SALE_CASH': 'var(--blue-bg)', 'SALE_CREDIT': 'var(--orange-bg)', 'PAYMENT': 'var(--green-bg)', 'INVENTORY_IN': 'var(--accent-glow)', 'EXPENSE': 'var(--red-bg)' };
+                        const msgs = { 'SALE_CASH': `Venta contado de <strong>${formatPYG(tx.amount)}</strong>`, 'SALE_CREDIT': `Fiado de <strong>${formatPYG(tx.amount)}</strong> a <strong>${tx.merchant_customers?.name || 'cliente'}</strong>`, 'PAYMENT': `Cobro de <strong>${formatPYG(tx.amount)}</strong> de <strong>${tx.merchant_customers?.name || 'cliente'}</strong>`, 'INVENTORY_IN': `Inventario: ${tx.product || 'mercadería'}`, 'EXPENSE': `Gasto de <strong>${formatPYG(tx.amount)}</strong> (${tx.product || 'general'})` };
                         return `<div class="activity-item"><div class="activity-icon" style="background:${colors[tx.type] || 'var(--accent-glow)'}">${icons[tx.type] || '📌'}</div><div><div class="activity-text">${msgs[tx.type] || tx.type}</div><div class="activity-time">${timeAgo(tx.created_at)}</div></div></div>`;
                     }).join('') || '<div class="empty-state" style="padding:24px"><p>Sin actividad reciente</p></div>'}
                     </div>
@@ -1247,7 +1250,8 @@
                     labels: dailyData.map(d => d.dayName),
                     datasets: [
                         { label: 'Ventas', data: dailyData.map(d => d.sales), backgroundColor: 'rgba(108,92,231,0.5)', borderColor: '#6C5CE7', borderWidth: 1, borderRadius: 8, borderSkipped: false },
-                        { label: 'Cobros', data: dailyData.map(d => d.payments), backgroundColor: 'rgba(0,210,160,0.5)', borderColor: '#00D2A0', borderWidth: 1, borderRadius: 8, borderSkipped: false }
+                        { label: 'Cobros', data: dailyData.map(d => d.payments), backgroundColor: 'rgba(0,210,160,0.5)', borderColor: '#00D2A0', borderWidth: 1, borderRadius: 8, borderSkipped: false },
+                        { label: 'Gastos', data: dailyData.map(d => d.expenses), backgroundColor: 'rgba(255,107,107,0.5)', borderColor: '#FF6B6B', borderWidth: 1, borderRadius: 8, borderSkipped: false }
                     ]
                 },
                 options: {
