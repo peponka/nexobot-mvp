@@ -2,14 +2,12 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import OpenAI from 'openai';
-import { ElevenLabsClient } from 'elevenlabs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-// Fallback to ElevenLabs if the user provides the key
-const elevenlabs = process.env.ELEVENLABS_API_KEY ? new ElevenLabsClient({ apiKey: process.env.ELEVENLABS_API_KEY }) : null;
+// We'll lazy-load elevenlabs below if the key is present.
 
 /**
  * Generates audio from text using OpenAI TTS (or ElevenLabs if configured) and returns the audio buffer.
@@ -19,11 +17,14 @@ const elevenlabs = process.env.ELEVENLABS_API_KEY ? new ElevenLabsClient({ apiKe
 export async function generateAudioFromText(text) {
     console.log(`🔊 Generating audio for text: "${text.substring(0, 50)}..."`);
 
-    // Si tenemos clave de ElevenLabs, usamos ElevenLabs
-    if (elevenlabs) {
-        console.log(`🎙️ Using ElevenLabs TTS`);
+    // Si tenemos clave de ElevenLabs, intentamos usar ElevenLabs
+    if (process.env.ELEVENLABS_API_KEY) {
+        console.log(`🎙️ Unlocked ElevenLabs API Key, attempting ElevenLabs TTS`);
         try {
-            const audioStream = await elevenlabs.generate({
+            const { ElevenLabsClient } = await import('elevenlabs');
+            const elevenlabsClient = new ElevenLabsClient({ apiKey: process.env.ELEVENLABS_API_KEY });
+
+            const audioStream = await elevenlabsClient.generate({
                 voice: "JBFqnCBsd6RMkjVDRZzb", // Replace with preferred voice ID
                 text: text,
                 model_id: "eleven_multilingual_v2",
@@ -36,7 +37,7 @@ export async function generateAudioFromText(text) {
             }
             return Buffer.concat(chunks);
         } catch (error) {
-            console.error('❌ ElevenLabs TTS Error:', error);
+            console.error('❌ ElevenLabs TTS Error or missing module:', error.message);
             // Fallthrough to OpenAI
         }
     }
