@@ -8,6 +8,7 @@ import { processMessage } from '../services/nlp.js';
 import { handleMessage } from '../services/bot.js';
 import { sendMessage, markAsRead, extractMessageFromWebhook } from '../services/whatsapp.js';
 import { expectsImage } from '../services/onboarding.js';
+import { transcribeAudio } from '../services/audio.js';
 
 const router = Router();
 
@@ -75,8 +76,26 @@ router.post('/', async (req, res) => {
             return;
         }
 
-        if (messageData.type !== 'text') {
-            return; // Ignore other message types (audio, video, etc.)
+        if (messageData.type === 'audio') {
+            await markAsRead(messageData.messageId);
+            try {
+                // Send "typing..." or acknowledgement optionally
+                const transcriptionText = await transcribeAudio(messageData.audio.id);
+                console.log(`\n🎧 Audio from ${messageData.from} transcribed to: "${transcriptionText}"`);
+
+                if (!transcriptionText || transcriptionText.trim() === '') {
+                    await sendMessage(messageData.from, "🎙️ No pude escuchar lo que dijiste. ¿Podés repetirme o escribirlo?");
+                    return;
+                }
+
+                messageData.text = transcriptionText; // Treat the transcribed text as if they typed it
+            } catch (error) {
+                console.error('Audio transcription error:', error);
+                await sendMessage(messageData.from, "⚠️ Hubo un error al procesar tu audio. Por favor, escribime el mensaje.");
+                return;
+            }
+        } else if (messageData.type !== 'text') {
+            return; // Ignore other message types (video, document, etc.)
         }
 
         console.log(`\n📩 From ${messageData.from}: "${messageData.text}"`);

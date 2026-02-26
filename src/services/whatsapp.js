@@ -121,6 +121,14 @@ export function extractMessageFromWebhook(body) {
             };
         }
 
+        // Extract audio data if present
+        if (message.type === 'audio' && message.audio) {
+            result.audio = {
+                id: message.audio.id,
+                mimeType: message.audio.mime_type
+            };
+        }
+
         return result;
     } catch (error) {
         console.error('Failed to extract message:', error.message);
