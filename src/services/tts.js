@@ -28,7 +28,7 @@ export async function generateAudioFromText(text) {
                 voice: process.env.ELEVENLABS_VOICE_ID || "JBFqnCBsd6RMkjVDRZzb", // Replace with preferred voice ID
                 text: text,
                 model_id: "eleven_multilingual_v2",
-                output_format: "ogg_opus" // WhatsApp native format
+                output_format: "mp3_44100_128" // WhatsApp native format
             });
 
             const chunks = [];
@@ -49,7 +49,7 @@ export async function generateAudioFromText(text) {
             model: "tts-1",
             voice: "onyx", // Deep, clear voice suited for this context
             input: text,
-            response_format: "opus" // Native whatsapp format
+            response_format: "mp3" // WhatsApp compatible
         });
 
         const arrayBuffer = await mp3Response.arrayBuffer();

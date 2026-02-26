@@ -133,7 +133,7 @@ router.post('/', async (req, res) => {
             try {
                 // Remove some heavy emojis for TTS if needed, or just send directly
                 const audioResponseBuffer = await generateAudioFromText(response);
-                await sendAudioMessage(messageData.from, audioResponseBuffer);
+                await sendAudioMessage(messageData.from, audioResponseBuffer, 'audio/mpeg');
             } catch (ttsError) {
                 console.error('❌ Error sending audio reply:', ttsError);
             }

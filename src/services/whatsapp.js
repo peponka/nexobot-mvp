@@ -81,7 +81,8 @@ export async function sendAudioMessage(to, audioBuffer, mimeType = 'audio/ogg') 
 
         // Use global Blob for Node 18+ to attach binary data to global FormData
         const blob = new Blob([audioBuffer], { type: mimeType });
-        formData.append('file', blob, 'audio.ogg');
+        const ext = mimeType.includes('mpeg') ? 'mp3' : 'ogg';
+        formData.append('file', blob, `audio.${ext}`);
 
         const uploadRes = await fetch(`${WHATSAPP_API_URL}/${phoneNumberId}/media`, {
             method: 'POST',
