@@ -6,11 +6,17 @@
 import { Router } from 'express';
 import { processMessage } from '../services/nlp.js';
 import { handleMessage } from '../services/bot.js';
-import { sendMessage, markAsRead, extractMessageFromWebhook } from '../services/whatsapp.js';
+import { sendMessage, sendAudioMessage, markAsRead, extractMessageFromWebhook } from '../services/whatsapp.js';
 import { expectsImage } from '../services/onboarding.js';
 import { transcribeAudio } from '../services/audio.js';
+import { generateAudioFromText } from '../services/tts.js';
 
 const router = Router();
+
+// In-memory cache to prevent processing the same message twice (Meta retries)
+const processedMessages = new Set();
+// Clean up old messages every hour to prevent memory leaks
+setInterval(() => processedMessages.clear(), 60 * 60 * 1000);
 
 /**
  * GET /webhook — Verification endpoint (required by Meta)
@@ -44,6 +50,13 @@ router.post('/', async (req, res) => {
         const messageData = extractMessageFromWebhook(req.body);
 
         if (!messageData) return;
+
+        // Idempotency check: Don't process the same message twice
+        if (processedMessages.has(messageData.messageId)) {
+            console.log(`♻️ Skipping already processed message: ${messageData.messageId}`);
+            return;
+        }
+        processedMessages.add(messageData.messageId);
 
         // Handle image messages (cédula photos during onboarding)
         if (messageData.type === 'image') {
@@ -111,8 +124,20 @@ router.post('/', async (req, res) => {
             parsed
         );
 
+        // Always send text
         await sendMessage(messageData.from, response);
         console.log(`📤 Response sent to ${messageData.from}`);
+
+        // If user sent audio, let's reply with audio too!
+        if (messageData.type === 'audio') {
+            try {
+                // Remove some heavy emojis for TTS if needed, or just send directly
+                const audioResponseBuffer = await generateAudioFromText(response);
+                await sendAudioMessage(messageData.from, audioResponseBuffer);
+            } catch (ttsError) {
+                console.error('❌ Error sending audio reply:', ttsError);
+            }
+        }
 
     } catch (error) {
         console.error('❌ Webhook processing error:', error);
