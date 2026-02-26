@@ -15,7 +15,12 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
  * @returns {Promise<Buffer>} The synthesized audio buffer in OGG format.
  */
 export async function generateAudioFromText(text) {
-    console.log(`🔊 Generating audio for text: "${text.substring(0, 50)}..."`);
+    // Para que la IA lea mejor los montos en lugar de deletrear "G S punto"
+    const sanitizedText = text.replace(/Gs\.\s*([\d.,]+)(?:\s*(millones|millón|mil|k|m))?/gi, (match, numb, suffix) => {
+        return suffix ? `${numb} ${suffix} guaraníes` : `${numb} guaraníes`;
+    });
+
+    console.log(`🔊 Generating audio for text: "${sanitizedText.substring(0, 50)}..."`);
 
     if (process.env.ELEVENLABS_API_KEY) {
         console.log(`🎙️ Unlocked ElevenLabs API Key, attempting ElevenLabs TTS`);
@@ -29,7 +34,7 @@ export async function generateAudioFromText(text) {
 
             const audioStream = await elevenlabsClient.generate({
                 voice: cleanVoiceId,
-                text: text,
+                text: sanitizedText,
                 model_id: "eleven_multilingual_v2",
                 output_format: "mp3_44100_128" // WhatsApp native format
             });
@@ -61,7 +66,7 @@ export async function generateAudioFromText(text) {
         const mp3Response = await openai.audio.speech.create({
             model: "tts-1",
             voice: "onyx", // Deep, clear voice suited for this context
-            input: text,
+            input: sanitizedText,
             response_format: "mp3" // WhatsApp compatible
         });
 
