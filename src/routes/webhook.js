@@ -132,7 +132,13 @@ router.post('/', async (req, res) => {
         if (messageData.type === 'audio') {
             try {
                 // Remove some heavy emojis for TTS if needed, or just send directly
+                global.__LAST_ELEVENLABS_ERROR__ = null;
                 const audioResponseBuffer = await generateAudioFromText(response);
+
+                if (global.__LAST_ELEVENLABS_ERROR__) {
+                    await sendMessage(messageData.from, "⚠️ DATO TÉCNICO: ElevenLabs falló y por eso usé el hombre de OpenAI. El error exacto en la nube es:\n\n" + global.__LAST_ELEVENLABS_ERROR__);
+                }
+
                 await sendAudioMessage(messageData.from, audioResponseBuffer, 'audio/mpeg');
             } catch (ttsError) {
                 console.error('❌ Error sending audio reply:', ttsError);
