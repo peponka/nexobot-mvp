@@ -20,17 +20,8 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 export async function processMessage(message) {
     const startTime = Date.now();
 
-    // Step 1: Try fast regex parser
-    const fastResult = fastParser(message);
-
-    // If regex is confident enough, return immediately (0ms!)
-    if (fastResult.confidence >= 0.8) {
-        fastResult.processing_time_ms = Date.now() - startTime;
-        console.log(`⚡ NLP: "${message}" → ${fastResult.intent} (${fastResult.confidence}) [${fastResult.processing_time_ms}ms] [FAST]`);
-        return fastResult;
-    }
-
-    // Step 2: For ambiguous messages, try OpenAI
+    // Si tenemos OpenAI configurado, mandamos el 100% de los mensajes a la IA.
+    // Es infinitamente más inteligente y no confunde zanahorias con clientes.
     if (process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY !== 'sk-your-openai-key') {
         try {
             const aiResult = await openaiParser(message);
@@ -38,13 +29,14 @@ export async function processMessage(message) {
             console.log(`🧠 NLP: "${message}" → ${aiResult.intent} (${aiResult.confidence}) [${aiResult.processing_time_ms}ms] [AI]`);
             return aiResult;
         } catch (error) {
-            console.error('❌ OpenAI Error, using fast parser:', error.message);
+            console.error('❌ OpenAI Error, usando fallback (fast parser):', error.message);
         }
     }
 
-    // Step 3: Return fast result even if low confidence
+    // Si OpenAI falla o no está configurado, caemos en el parser rápido de Regex.
+    const fastResult = fastParser(message);
     fastResult.processing_time_ms = Date.now() - startTime;
-    console.log(`⚠️ NLP: "${message}" → ${fastResult.intent} (${fastResult.confidence}) [${fastResult.processing_time_ms}ms] [FALLBACK]`);
+    console.log(`⚡ NLP: "${message}" → ${fastResult.intent} (${fastResult.confidence}) [${fastResult.processing_time_ms}ms] [FAST-FALLBACK]`);
     return fastResult;
 }
 
