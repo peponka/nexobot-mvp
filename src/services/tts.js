@@ -17,15 +17,18 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 export async function generateAudioFromText(text) {
     console.log(`🔊 Generating audio for text: "${text.substring(0, 50)}..."`);
 
-    // Si tenemos clave de ElevenLabs, intentamos usar ElevenLabs
     if (process.env.ELEVENLABS_API_KEY) {
         console.log(`🎙️ Unlocked ElevenLabs API Key, attempting ElevenLabs TTS`);
         try {
+            const cleanApiKey = process.env.ELEVENLABS_API_KEY.trim();
+            const cleanVoiceId = (process.env.ELEVENLABS_VOICE_ID || "JBFqnCBsd6RMkjVDRZzb").trim();
+            console.log(`Voice ID being used: '${cleanVoiceId}'`);
+
             const { ElevenLabsClient } = await import('elevenlabs');
-            const elevenlabsClient = new ElevenLabsClient({ apiKey: process.env.ELEVENLABS_API_KEY });
+            const elevenlabsClient = new ElevenLabsClient({ apiKey: cleanApiKey });
 
             const audioStream = await elevenlabsClient.generate({
-                voice: process.env.ELEVENLABS_VOICE_ID || "JBFqnCBsd6RMkjVDRZzb", // Replace with preferred voice ID
+                voice: cleanVoiceId,
                 text: text,
                 model_id: "eleven_multilingual_v2",
                 output_format: "mp3_44100_128" // WhatsApp native format
