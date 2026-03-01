@@ -22,6 +22,7 @@
   "author": "NexoFinanzas",
   "license": "MIT",
   "dependencies": {
+    "@sentry/node": "^10.40.0",
     "@supabase/supabase-js": "^2.95.3",
     "bcrypt": "^6.0.0",
     "canvas": "^3.2.1",
