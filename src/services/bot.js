@@ -606,7 +606,7 @@ async function handleInventoryUpdate(merchant, entities, lang = 'es') {
 // =============================================
 
 function handleGetDashboard(merchant, lang = 'es') {
-    const baseUrl = 'https://nexofinanzas.com/dashboard'; // Cambiar por la url de render si se prefiere
+    const baseUrl = 'https://nexobot-mvp.onrender.com/dashboard'; // Cambiar por la url de render si se prefiere
     let response = `📊 *Tu Panel de Control (Nexo Dashboard)*\n\n`;
 
     response += `Acá podés ver todas tus ventas, deudores y métricas sin salir de WhatsApp:\n\n`;
@@ -642,7 +642,7 @@ async function handlePaymentLink(merchant, entities, rawMessage, lang = 'es') {
     response += `💰 Monto: ${amount.toLocaleString('es-PY')} ${(currency || 'PYG')}\n\n`;
 
     response += `📲 Compartí este link con tu cliente para que te pague al instante:\n`;
-    response += `🔗 https://nexofinanzas.com/pay/${merchant.id}/${amount}\n\n`;
+    response += `🔗 https://nexobot-mvp.onrender.com/pay/${merchant.id}/${amount}\n\n`;
     response += `_(La app te avisará apenas el cliente transfiera 😉)_`;
 
     return response;
