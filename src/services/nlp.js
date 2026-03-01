@@ -13,15 +13,20 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 // MAIN ENTRY POINT
 // =============================================
 
-/**
- * Process a merchant's message
- * Strategy: Regex first (instant), OpenAI fallback (1-2s)
- */
 export async function processMessage(message) {
     const startTime = Date.now();
 
-    // Si tenemos OpenAI configurado, mandamos el 100% de los mensajes a la IA.
-    // Es infinitamente más inteligente y no confunde zanahorias con clientes.
+    // 1. Evaluar comandos estelares y exactos primero con Regex para ahorrar tiempo y tokens
+    const fastResult = fastParser(message);
+    const adminIntents = ['GET_DASHBOARD', 'SET_PIN', 'FORGOT_PIN', 'HELP', 'GREETING', 'HUMAN_HANDOFF'];
+
+    if (adminIntents.includes(fastResult.intent)) {
+        fastResult.processing_time_ms = Date.now() - startTime;
+        console.log(`⚡ NLP: "${message}" → ${fastResult.intent} (${fastResult.confidence}) [${fastResult.processing_time_ms}ms] [FAST]`);
+        return fastResult;
+    }
+
+    // 2. Si no es comando exacto, mandamos a la IA (OpenAI) para interpretar el contexto financiero
     if (process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY !== 'sk-your-openai-key') {
         try {
             const aiResult = await openaiParser(message);
@@ -33,8 +38,7 @@ export async function processMessage(message) {
         }
     }
 
-    // Si OpenAI falla o no está configurado, caemos en el parser rápido de Regex.
-    const fastResult = fastParser(message);
+    // 3. Fallback a Regex si todo OpenAI falla
     fastResult.processing_time_ms = Date.now() - startTime;
     console.log(`⚡ NLP: "${message}" → ${fastResult.intent} (${fastResult.confidence}) [${fastResult.processing_time_ms}ms] [FAST-FALLBACK]`);
     return fastResult;
