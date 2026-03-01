@@ -46,26 +46,16 @@ export async function generateAudioFromText(text) {
             return Buffer.concat(chunks);
         } catch (error) {
             console.error('❌ ElevenLabs TTS Error:', error.message);
-            // Instead of just falling through, let's attach the error to a global object temporarily so the route can read it
-            global.__LAST_ELEVENLABS_ERROR__ = error.message;
-            if (error.body && error.body.getReader) {
-                // try to read string from the stream for detail
-                try {
-                    const reader = error.body.getReader();
-                    const { value } = await reader.read();
-                    global.__LAST_ELEVENLABS_ERROR__ += ' | Body: ' + new TextDecoder().decode(value);
-                } catch (ex) { }
-            }
-            // Fallthrough to OpenAI
+            // Fallthrough to OpenAI silently without sending the technical error to the user
         }
     }
 
     // Default to OpenAI TTS (we know the key exists and works)
-    console.log(`🎙️ Using OpenAI TTS`);
+    console.log(`🎙️ Using OpenAI TTS (Femenino)`);
     try {
         const mp3Response = await openai.audio.speech.create({
             model: "tts-1",
-            voice: "onyx", // Deep, clear voice suited for this context
+            voice: "nova", // nova is a female voice
             input: sanitizedText,
             response_format: "mp3" // WhatsApp compatible
         });

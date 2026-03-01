@@ -9,42 +9,47 @@
 //   - See GreenLight consultation history
 
 import { Router } from 'express';
+import jwt from 'jsonwebtoken';
 import supabase from '../config/supabase.js';
 
 const router = Router();
+const JWT_SECRET = process.env.JWT_SECRET || 'nexo-super-secret-jwt-2026';
 
 // -----------------------------------------------
-// Middleware: validate API key
+// Middleware: validate JWT session for the portal
 // -----------------------------------------------
-async function requireApiKey(req, res, next) {
-    const apiKey = req.headers['x-api-key'] || req.query.apiKey;
-    if (!apiKey) {
-        return res.status(401).json({ error: 'API key requerida' });
+async function requirePortalAuth(req, res, next) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'Token requerido o inválido' });
     }
 
-    if (!supabase) {
-        return res.status(503).json({ error: 'Base de datos no disponible' });
+    const token = authHeader.replace('Bearer ', '');
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        if (decoded.role !== 'partner') {
+            return res.status(403).json({ error: 'No autorizado' });
+        }
+
+        // Populate req.partner the same way as before for compatibility with handlers
+        req.partner = {
+            id: decoded.id,
+            api_key: decoded.apiKey,
+            name: decoded.name,
+            plan: decoded.plan
+        };
+        next();
+    } catch (err) {
+        return res.status(401).json({ error: 'Token expirado o inválido' });
     }
-
-    const { data: partner } = await supabase
-        .from('partners')
-        .select('*')
-        .eq('api_key', apiKey)
-        .eq('is_active', true)
-        .single();
-
-    if (!partner) {
-        return res.status(403).json({ error: 'API key inválida o desactivada' });
-    }
-
-    req.partner = partner;
-    next();
 }
+
+router.use(requirePortalAuth);
 
 // -----------------------------------------------
 // GET /api/portal/stats — Dashboard KPI data
 // -----------------------------------------------
-router.get('/stats', requireApiKey, async (req, res) => {
+router.get('/stats', async (req, res) => {
     try {
         const partner = req.partner;
         const now = new Date();
@@ -138,7 +143,7 @@ router.get('/stats', requireApiKey, async (req, res) => {
 // -----------------------------------------------
 // GET /api/portal/usage-daily — Daily usage chart
 // -----------------------------------------------
-router.get('/usage-daily', requireApiKey, async (req, res) => {
+router.get('/usage-daily', async (req, res) => {
     try {
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -180,7 +185,7 @@ router.get('/usage-daily', requireApiKey, async (req, res) => {
 // -----------------------------------------------
 // GET /api/portal/payment-history
 // -----------------------------------------------
-router.get('/payment-history', requireApiKey, async (req, res) => {
+router.get('/payment-history', async (req, res) => {
     try {
         const { data: payments } = await supabase
             .from('payments')

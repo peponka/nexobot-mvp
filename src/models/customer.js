@@ -129,6 +129,28 @@ export async function getById(customerId) {
     return data;
 }
 
+/**
+ * Update Customer Cedula (KYC)
+ */
+export async function updateCedula(customerId, cedula, mockRiskLevel = null) {
+    if (!supabase) {
+        return updateCedulaMemory(customerId, cedula, mockRiskLevel);
+    }
+
+    const updates = { cedula };
+    if (mockRiskLevel) {
+        updates.external_risk_level = mockRiskLevel; // 'limpio', 'alerta', 'informconf'
+    }
+
+    const { error } = await supabase
+        .from('merchant_customers')
+        .update(updates)
+        .eq('id', customerId);
+
+    if (error) console.error('DB Error updating cedula:', error);
+    return !error;
+}
+
 // =============================================
 // IN-MEMORY FALLBACK
 // =============================================
@@ -200,4 +222,14 @@ function getByIdMemory(customerId) {
     return null;
 }
 
-export default { findOrCreate, updateDebt, getDebtors, getById };
+function updateCedulaMemory(customerId, cedula, mockRiskLevel) {
+    const customer = getByIdMemory(customerId);
+    if (customer) {
+        customer.cedula = cedula;
+        if (mockRiskLevel) customer.external_risk_level = mockRiskLevel;
+        return true;
+    }
+    return false;
+}
+
+export default { findOrCreate, updateDebt, getDebtors, getById, updateCedula };

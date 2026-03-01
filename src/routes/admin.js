@@ -5,19 +5,30 @@
 // Protected by admin key auth
 
 import { Router } from 'express';
+import jwt from 'jsonwebtoken';
 import supabase from '../config/supabase.js';
 
 const router = Router();
-
-const ADMIN_KEY = process.env.ADMIN_KEY || 'nexo-admin-2026';
+const JWT_SECRET = process.env.JWT_SECRET || 'nexo-super-secret-jwt-2026';
 
 // ── AUTH MIDDLEWARE ──
 function requireAdmin(req, res, next) {
-    const key = req.headers['x-admin-key'] || req.query.adminKey;
-    if (key !== ADMIN_KEY) {
-        return res.status(401).json({ error: 'Unauthorized' });
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'Token requerido o inválido' });
     }
-    next();
+
+    const token = authHeader.replace('Bearer ', '');
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        if (decoded.role !== 'superadmin' && decoded.role !== 'admin') {
+            return res.status(403).json({ error: 'No tienes permisos suficientes' });
+        }
+        req.admin = decoded;
+        next();
+    } catch (err) {
+        return res.status(401).json({ error: 'Token expirado o inválido' });
+    }
 }
 
 router.use(requireAdmin);

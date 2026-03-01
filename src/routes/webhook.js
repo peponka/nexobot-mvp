@@ -124,20 +124,18 @@ router.post('/', async (req, res) => {
             parsed
         );
 
-        // Always send text
-        await sendMessage(messageData.from, response);
-        console.log(`📤 Response sent to ${messageData.from}`);
+        // Send text if response exists
+        if (response) {
+            await sendMessage(messageData.from, response);
+            console.log(`📤 Response sent to ${messageData.from}`);
+        } else {
+            console.log(`🤫 No response generated (Bot is paused / Human handoff)`);
+        }
 
-        // If user sent audio, let's reply with audio too!
-        if (messageData.type === 'audio') {
+        // If user sent audio & we have a response, reply with audio too!
+        if (messageData.type === 'audio' && response) {
             try {
-                // Remove some heavy emojis for TTS if needed, or just send directly
-                global.__LAST_ELEVENLABS_ERROR__ = null;
                 const audioResponseBuffer = await generateAudioFromText(response);
-
-                if (global.__LAST_ELEVENLABS_ERROR__) {
-                    await sendMessage(messageData.from, "⚠️ DATO TÉCNICO: ElevenLabs falló y por eso usé el hombre de OpenAI. El error exacto en la nube es:\n\n" + global.__LAST_ELEVENLABS_ERROR__);
-                }
 
                 await sendAudioMessage(messageData.from, audioResponseBuffer, 'audio/mpeg');
             } catch (ttsError) {

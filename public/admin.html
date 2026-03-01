@@ -547,10 +547,12 @@
     <div class="auth-overlay" id="authOverlay">
         <div class="auth-box">
             <h2>🔐 NexoBot Admin</h2>
-            <p>Ingresá la clave de administrador</p>
-            <input type="password" class="auth-input" id="adminKey" placeholder="••••••" maxlength="32">
-            <button class="auth-btn" onclick="authenticate()">Ingresar</button>
-            <p class="auth-error" id="authError">Clave incorrecta</p>
+            <p>Ingresá tus credenciales de administrador</p>
+            <input type="email" class="auth-input" id="adminEmail" placeholder="admin@nexofinanzas.com"
+                style="letter-spacing: normal;">
+            <input type="password" class="auth-input" id="adminPassword" placeholder="Contraseña">
+            <button class="auth-btn" id="btnAuth" onclick="authenticate()">Iniciar Sesión</button>
+            <p class="auth-error" id="authError">Credenciales incorrectas</p>
         </div>
     </div>
 
@@ -687,24 +689,60 @@
 
     <script>
         const API = window.location.origin;
-        const ADMIN_KEY = 'nexo-admin-2026'; // Change in production
+        let adminToken = localStorage.getItem('nexo_admin_jwt') || null;
         let activityChart, intentsChart;
 
         // ── AUTH ──
-        function authenticate() {
-            const key = document.getElementById('adminKey').value;
-            if (key === ADMIN_KEY) {
-                document.getElementById('authOverlay').classList.add('hidden');
-                document.getElementById('mainContent').classList.remove('hidden');
-                initDashboard();
-            } else {
+        async function authenticate() {
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+            const btn = document.getElementById('btnAuth');
+
+            if (!email || !password) return;
+
+            btn.textContent = 'Verificando...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`${API}/api/auth-admin/admin/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await res.json();
+
+                if (data.success && data.token) {
+                    adminToken = data.token;
+                    localStorage.setItem('nexo_admin_jwt', adminToken);
+                    document.getElementById('authOverlay').classList.add('hidden');
+                    document.getElementById('mainContent').classList.remove('hidden');
+                    initDashboard();
+                } else {
+                    document.getElementById('authError').textContent = data.error || 'Autenticación fallida';
+                    document.getElementById('authError').style.display = 'block';
+                }
+            } catch (e) {
+                document.getElementById('authError').textContent = 'Error de red';
                 document.getElementById('authError').style.display = 'block';
-                document.getElementById('adminKey').value = '';
+            } finally {
+                btn.textContent = 'Iniciar Sesión';
+                btn.disabled = false;
             }
         }
 
-        document.getElementById('adminKey').addEventListener('keydown', e => {
+        document.getElementById('adminPassword').addEventListener('keydown', e => {
             if (e.key === 'Enter') authenticate();
+        });
+
+        // Auto login if token exists
+        window.addEventListener('DOMContentLoaded', () => {
+            if (adminToken) {
+                // We should ideally verify the token, but for now we just try loading metrics
+                document.getElementById('authOverlay').classList.add('hidden');
+                document.getElementById('mainContent').classList.remove('hidden');
+                initDashboard();
+            }
         });
 
         // ── CLOCK ──
@@ -749,8 +787,9 @@
         async function loadMetrics() {
             try {
                 const res = await fetch(`${API}/api/admin/metrics`, {
-                    headers: { 'x-admin-key': ADMIN_KEY }
+                    headers: { 'Authorization': `Bearer ${adminToken}` }
                 });
+                if (res.status === 401 || res.status === 403) return logout();
                 const d = await res.json();
 
                 document.getElementById('totalMerchants').textContent = d.totalMerchants || 0;
@@ -780,8 +819,9 @@
         async function loadMerchants() {
             try {
                 const res = await fetch(`${API}/api/admin/merchants`, {
-                    headers: { 'x-admin-key': ADMIN_KEY }
+                    headers: { 'Authorization': `Bearer ${adminToken}` }
                 });
+                if (res.status === 401 || res.status === 403) return logout();
                 const merchants = await res.json();
                 const tbody = document.getElementById('merchantsBody');
 
@@ -809,8 +849,9 @@
         async function loadHealth() {
             try {
                 const res = await fetch(`${API}/api/admin/health`, {
-                    headers: { 'x-admin-key': ADMIN_KEY }
+                    headers: { 'Authorization': `Bearer ${adminToken}` }
                 });
+                if (res.status === 401 || res.status === 403) return logout();
                 const h = await res.json();
 
                 setHealth('Api', h.api);
@@ -913,8 +954,9 @@
         async function loadActivity() {
             try {
                 const res = await fetch(`${API}/api/admin/activity`, {
-                    headers: { 'x-admin-key': ADMIN_KEY }
+                    headers: { 'Authorization': `Bearer ${adminToken}` }
                 });
+                if (res.status === 401 || res.status === 403) return logout();
                 const d = await res.json();
 
                 if (d.daily && activityChart) {
@@ -950,8 +992,9 @@
         async function loadIntents() {
             try {
                 const res = await fetch(`${API}/api/admin/intents`, {
-                    headers: { 'x-admin-key': ADMIN_KEY }
+                    headers: { 'Authorization': `Bearer ${adminToken}` }
                 });
+                if (res.status === 401 || res.status === 403) return logout();
                 const d = await res.json();
 
                 if (d.intents && intentsChart) {
@@ -962,6 +1005,14 @@
             } catch (e) {
                 console.error('Intents error:', e);
             }
+        }
+
+        // ── HELPERS ──
+        function logout() {
+            localStorage.removeItem('nexo_admin_jwt');
+            adminToken = null;
+            document.getElementById('mainContent').classList.add('hidden');
+            document.getElementById('authOverlay').classList.remove('hidden');
         }
     </script>
 </body>

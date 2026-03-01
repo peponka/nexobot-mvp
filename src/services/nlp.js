@@ -76,6 +76,13 @@ function fastParser(message) {
         return result;
     }
 
+    // 0.8 DASHBOARD MAGIC LINK
+    if (/mi\s*panel|ver\s*(mi)?\s*cuenta|dashboard|mi\s*sistema|mi\s*libreta|entrar\s*(al)?\s*sistema|entrar|abrir\s*(la)?\s*app|abrir/i.test(lower)) {
+        result.intent = 'GET_DASHBOARD';
+        result.confidence = 0.95;
+        return result;
+    }
+
     // 1. GREETINGS (short messages, check first)
     if (/^(hola|buenas?|buen[oa]?s?\s*(d[ií]as?|tardes?|noches?)?|qu[eé]\s*tal|hey|hi|ola|epa|que\s*hay|alo|aló|mba[''´]?[eé]ichapa|nde\s*haku|mba[''´]?eichapa\s*nde|iporã|ipo|terere|holi|holaa*|buena|wenas|saludos|bienvenido|mba[''´]?[eé]iko|ndeko|nde\s*py[''´]a\s*guasu)/i.test(lower) && lower.length < 40) {
         result.intent = 'GREETING';
@@ -86,6 +93,13 @@ function fastParser(message) {
     // 2. HELP
     if (/^(ayuda|help|menu|menú|comandos|opciones|que\s*(podes|pod[eé]s|puedo|puedes)\s*hacer|c[oó]mo\s*(funciona|te\s*uso|uso)|instrucciones|info|que\s*sos|para\s*qu[eé]\s*serv[ií]s|que\s*haces|funciones|pytyvõ|epytyvõ\s*che|mba[''´]?[eé]pa\s*ejapo)/i.test(lower)) {
         result.intent = 'HELP';
+        result.confidence = 0.95;
+        return result;
+    }
+
+    // 2.5 HUMAN HANDOFF
+    if (/hablar\s*con\s*(un)?\s*humano|soporte|atenci[oó]n|asesor|persona\s*real|ayuda\s*humana|agente|comunicarme\s*con\s*alguien|no\s*entiendes/i.test(lower)) {
+        result.intent = 'HUMAN_HANDOFF';
         result.confidence = 0.95;
         return result;
     }
@@ -108,9 +122,23 @@ function fastParser(message) {
     }
 
     // 4. SALES QUERY (before sale registration)
-    if (/cu[áa]nto\s*vend[ií]|resumen|mis\s*ventas|ventas?\s*de\s*(hoy|esta\s*semana|este\s*mes|ayer)|total\s*de\s*ventas|cu[áa]nto\s*hice|c[oó]mo\s*(me\s*fue|estoy|voy|va|ando)|estad[ií]sticas?|reporte|balance|como\s*va\s*el\s*negocio|como\s*anda\s*el\s*negocio|mba[''´]?[eé]pa\s*avend[eé]|cuanto\s*gane|cuanto\s*gan[eé]|ganancia|utilidad|mbovy\s*avendé|mba[''´]?[eé]ichapa\s*che\s*negocio/i.test(lower)) {
+    if (/resumen\s*del\s*d[ií]a|mi\s*resumen|c[oó]mo\s*cerr[eé]|mand[aá]me\s*el\s*resumen/i.test(lower)) {
+        result.intent = 'DAILY_SUMMARY';
+        result.confidence = 0.95;
+        return result;
+    }
+
+    if (/cu[áa]nto\s*vend[ií]|mis\s*ventas|ventas?\s*de\s*(hoy|esta\s*semana|este\s*mes|ayer)|total\s*de\s*ventas|cu[áa]nto\s*hice|c[oó]mo\s*(me\s*fue|estoy|voy|va|ando)|estad[ií]sticas?|reporte|balance|como\s*va\s*el\s*negocio|como\s*anda\s*el\s*negocio|mba[''´]?[eé]pa\s*avend[eé]|cuanto\s*gane|cuanto\s*gan[eé]|ganancia|utilidad|mbovy\s*avendé|mba[''´]?[eé]ichapa\s*che\s*negocio/i.test(lower)) {
         result.intent = 'SALES_QUERY';
         result.confidence = 0.9;
+        return result;
+    }
+
+    // 4.5 PAYMENT LINK / QR
+    if (/cobrar\s*con\s*qr|gener[aá]r?\s*(un)?\s*qr|cre[aá]r?\s*(un)?\s*qr|mand[aá]le\s*(un)?\s*qr|link\s*de\s*pago|gener[aá]r?\s*link|sipap/i.test(lower)) {
+        result.intent = 'PAYMENT_LINK';
+        result.confidence = 0.9;
+        extractEntities(lower, original, result);
         return result;
     }
 
@@ -248,6 +276,25 @@ function fastParser(message) {
         result.intent = 'INVENTORY_UPDATE';
         result.confidence = 0.85;
         extractEntities(lower, original, result);
+        return result;
+    }
+
+    // 16.5 KYC - SAVE CEDULA
+    const kycMatch = lower.match(/c[eé]dula\s*de\s*(.+)\s*es\s*([\d\.]+)/i) ||
+        lower.match(/anot[aá]r?\s*c[eé]dula\s*a\s*(.+)\s*([\d\.]+)/i) ||
+        lower.match(/(.+)\s*tiene\s*c[eé]dula\s*([\d\.]+)/i) ||
+        lower.match(/documento\s*de\s*(.+)\s*es\s*([\d\.]+)/i);
+    if (kycMatch) {
+        result.intent = 'REGISTER_CEDULA';
+        result.confidence = 0.9;
+
+        // Clean up entities
+        const potentialName = kycMatch[1]
+            .replace(/^(el|la|don|doña|señor|señora)\s+/i, '')
+            .trim();
+
+        result.entities.customer_name = potentialName;
+        result.entities.cedula = kycMatch[2].replace(/[^0-9]/g, '');
         return result;
     }
 
@@ -556,6 +603,8 @@ DEBES responder SOLO con JSON válido, sin texto adicional.
 - SALE_CREDIT: Venta a crédito / fiado
 - SALE_CASH: Venta al contado
 - PAYMENT: Cobro / pago recibido
+- PAYMENT_LINK: Pedido de generación de link de pago, QR o SIPAP
+- DAILY_SUMMARY: Solicitud del resumen diario / cierre de caja
 - DEBT_QUERY: Consulta de deudas
 - SALES_QUERY: Consulta de ventas / resumen
 - INVENTORY_IN: Llegada de mercadería
@@ -565,6 +614,8 @@ DEBES responder SOLO con JSON válido, sin texto adicional.
 - UNDO: Deshacer o anular la última transacción
 - GREETING: Saludo
 - HELP: Pedido de ayuda
+- HUMAN_HANDOFF: Pedir hablar con una persona humana o soporte
+- REGISTER_CEDULA: Registrar o guardar la cédula de identidad de un cliente
 - UNKNOWN: No se entiende
 
 ## Formato de respuesta:
@@ -575,6 +626,7 @@ DEBES responder SOLO con JSON válido, sin texto adicional.
     "amount": 500000,
     "currency": "PYG",
     "customer_name": "Carlos",
+    "cedula": "4851234",
     "product": "cerveza",
     "quantity": 10,
     "unit_price": 50000
@@ -587,6 +639,8 @@ DEBES responder SOLO con JSON válido, sin texto adicional.
 - "al contado", "en efectivo", "cash", "pagó ya" → SALE_CASH
 - Si dice "vendí" sin indicar fiado/contado → SALE_CASH
 - "cobré", "me pagó", "recibí pago", "abonó", "canceló", "liquidó" → PAYMENT
+- "pasame un qr", "mandale un qr", "generar qr de 100", "link de pago" → PAYMENT_LINK
+- "resumen del día", "mi resumen", "mandame el resumen de hoy", "como cerré" → DAILY_SUMMARY
 - "cuánto me deben", "deudas", "pendiente", "morosos" → DEBT_QUERY
 - "cuánto vendí", "ventas", "resumen", "cómo me fue" → SALES_QUERY
 - "me llegó", "llegaron", "recibí mercadería", "stock" → INVENTORY_IN
@@ -594,6 +648,8 @@ DEBES responder SOLO con JSON válido, sin texto adicional.
 - "me equivoqué", "deshacer", "cancelar último" → UNDO
 - "a cuánto tengo", "precio de", "cuánto está" → INVENTORY_QUERY
 - "actualizar precio", "cambiar precio", "precio ahora es" → INVENTORY_UPDATE
+- "hablar con alguien", "soporte", "humano", "persona" → HUMAN_HANDOFF
+- "cedula de carlos es 12345", "documento de ana 999" → REGISTER_CEDULA (extraer customer_name y cedula)
 - Moneda: siempre PYG (guaraníes) salvo que diga "dólares" o "USD"
 - "500 mil" = 500000, "1 millón" = 1000000, "1 palo" = 1000000, "medio millón" = 500000
 - "500k" = 500000, "200 lucas" = 200000

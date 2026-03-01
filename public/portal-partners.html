@@ -561,355 +561,546 @@
                 text-align: center;
             }
         }
+
+        /* ── AUTH MODAL ── */
+        .auth-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .auth-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            width: 380px;
+        }
+
+        .auth-box h2 {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--accent), var(--blue));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .auth-box p {
+            color: var(--text-dim);
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+
+        .auth-input {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text);
+            font-size: 15px;
+            font-family: 'Inter', sans-serif;
+            text-align: center;
+            margin-bottom: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .auth-input:focus {
+            border-color: var(--accent);
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--accent), #8B5CF6);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 24px var(--accent-glow);
+        }
+
+        .auth-error {
+            color: var(--red);
+            font-size: 13px;
+            margin-top: 12px;
+            display: none;
+        }
+
+        .hidden {
+            display: none !important;
+        }
     </style>
 </head>
 
 <body>
 
-    <!-- HEADER -->
-    <header class="header">
-        <div class="header-left">
-            <div class="logo">Nexo<span>Bot</span></div>
-            <div class="badge">PORTAL PARTNERS</div>
+    <!-- AUTH -->
+    <div class="auth-overlay" id="authOverlay">
+        <div class="auth-box">
+            <h2>NexoBot B2B</h2>
+            <p>Portal para Partners Financieros</p>
+            <input type="email" class="auth-input" id="partnerEmail" placeholder="correo@banco.com">
+            <input type="password" class="auth-input" id="partnerPassword" placeholder="Contraseña">
+            <button class="auth-btn" id="btnAuth" onclick="authenticate()">Iniciar Sesión</button>
+            <p class="auth-error" id="authError">Credenciales incorrectas</p>
         </div>
-        <div class="header-right">
-            <div class="partner-info">
-                <div class="name" id="partnerName">Cooperativa San Cristóbal</div>
-                <div class="plan" id="partnerPlan">Plan Professional</div>
+    </div>
+
+    <!-- MAIN APP CONTENT -->
+    <div id="mainContent" class="hidden">
+        <!-- HEADER -->
+        <header class="header">
+            <div class="header-left">
+                <div class="logo">Nexo<span>Bot</span></div>
+                <div class="badge">PORTAL PARTNERS</div>
             </div>
-            <div class="avatar" id="partnerAvatar">CS</div>
-        </div>
-    </header>
-
-    <!-- CONTENT -->
-    <div class="container">
-
-        <!-- API KEY -->
-        <div class="alert">
-            <span class="alert-icon">🔑</span>
-            <div>
-                <strong>Tu API Key:</strong>
-                <div class="api-key-box" style="margin-top:8px;">
-                    <span class="key" id="apiKeyDisplay">gl-demo-key</span>
-                    <button onclick="copyApiKey()">Copiar</button>
+            <div class="header-right">
+                <div class="partner-info">
+                    <div class="name" id="partnerName">Cooperativa San Cristóbal</div>
+                    <div class="plan" id="partnerPlan">Plan Professional</div>
                 </div>
+                <!-- <button onclick="logout()" style="margin-left:8px;background:none;border:none;color:var(--text-dim);cursor:pointer;">Salir</button> -->
+                <div class="avatar" id="partnerAvatar" onclick="logout()" style="cursor:pointer;" title="Cerrar sesión">
+                    CS</div>
             </div>
-        </div>
+        </header>
 
-        <!-- KPIs -->
-        <div class="kpi-grid">
-            <div class="kpi-card">
-                <div class="kpi-label">Consultas este mes</div>
-                <div class="kpi-value" id="kpiCalls">342</div>
-                <div class="kpi-sub">de 500 incluidas en tu plan</div>
-                <div class="kpi-trend up">↑ 18% vs mes anterior</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-label">NexoScores consultados</div>
-                <div class="kpi-value" id="kpiScores">187</div>
-                <div class="kpi-sub">comerciantes evaluados</div>
-                <div class="kpi-trend up">↑ 24%</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-label">GreenLight</div>
-                <div class="kpi-value" id="kpiGreenlight">155</div>
-                <div class="kpi-sub">autorizaciones en tiempo real</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-label">Factura del mes</div>
-                <div class="kpi-value" id="kpiBilling">$0</div>
-                <div class="kpi-sub">facturación pendiente</div>
-            </div>
-        </div>
+        <!-- CONTENT -->
+        <div class="container">
 
-        <!-- TABS -->
-        <div class="tabs">
-            <div class="tab active" onclick="switchTab('uso')">📊 Uso de API</div>
-            <div class="tab" onclick="switchTab('scores')">🎯 Consultar Score</div>
-            <div class="tab" onclick="switchTab('historial')">📋 Historial</div>
-            <div class="tab" onclick="switchTab('facturacion')">💳 Facturación</div>
-            <div class="tab" onclick="switchTab('docs')">📖 Documentación</div>
-        </div>
-
-        <!-- PANEL: USO -->
-        <div class="panel active" id="panel-uso">
-            <div class="chart-grid">
-                <div class="chart-card">
-                    <div class="chart-title">Consultas por día (últimos 30 días)</div>
-                    <canvas id="chartDaily" height="200"></canvas>
-                </div>
-                <div class="chart-card">
-                    <div class="chart-title">Distribución por endpoint</div>
-                    <canvas id="chartEndpoints" height="200"></canvas>
-                </div>
-            </div>
-            <div class="chart-card">
-                <div class="chart-title">Últimas consultas</div>
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Fecha</th>
-                                <th>Endpoint</th>
-                                <th>Estado</th>
-                                <th>Tiempo</th>
-                                <th>Resultado</th>
-                            </tr>
-                        </thead>
-                        <tbody id="recentCallsTable">
-                            <tr>
-                                <td>20/02/2026 07:32</td>
-                                <td>/api/score/+5959812345</td>
-                                <td><span class="status-badge success">200</span></td>
-                                <td>45ms</td>
-                                <td>Score: 720 (Tier A)</td>
-                            </tr>
-                            <tr>
-                                <td>20/02/2026 07:28</td>
-                                <td>/api/greenlight/check</td>
-                                <td><span class="status-badge success">200</span></td>
-                                <td>62ms</td>
-                                <td>APPROVED - Gs. 5M</td>
-                            </tr>
-                            <tr>
-                                <td>20/02/2026 07:15</td>
-                                <td>/api/score/+5959887654</td>
-                                <td><span class="status-badge success">200</span></td>
-                                <td>38ms</td>
-                                <td>Score: 580 (Tier B)</td>
-                            </tr>
-                            <tr>
-                                <td>20/02/2026 06:55</td>
-                                <td>/api/greenlight/check</td>
-                                <td><span class="status-badge pending">429</span></td>
-                                <td>12ms</td>
-                                <td>Rate limit exceeded</td>
-                            </tr>
-                            <tr>
-                                <td>19/02/2026 18:42</td>
-                                <td>/api/score/+5959834567</td>
-                                <td><span class="status-badge success">200</span></td>
-                                <td>51ms</td>
-                                <td>Score: 310 (Tier D)</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- PANEL: SCORES -->
-        <div class="panel" id="panel-scores">
-            <div class="chart-card">
-                <div class="chart-title">Consultar NexoScore de un comerciante</div>
-                <p style="color:var(--text-dim);font-size:13px;margin-bottom:16px;">Ingresá el número de teléfono o
-                    cédula del comerciante para ver su score crediticio.</p>
-                <div class="search-box">
-                    <input type="text" id="scoreSearch" placeholder="Ej: +595981234567 o 4523871" />
-                    <button onclick="lookupScore()">Consultar</button>
-                </div>
-                <div class="score-result" id="scoreResult">
-                    <div class="score-display">
-                        <div class="score-circle tier-A" id="scoreCircle">
-                            <span id="scoreValue">720</span>
-                            <span class="tier-label" id="scoreTier">TIER A</span>
-                        </div>
-                        <div class="score-details">
-                            <h3 id="scoreName">María González</h3>
-                            <p id="scorePhone">+595981234567 · Almacén "La Esquina"</p>
-                            <p id="scoreSince" style="margin-top:4px;">Registrado hace 8 meses · 247 transacciones</p>
-                        </div>
-                    </div>
-                    <div class="score-bars" id="scoreBars">
-                        <div class="score-bar-item">
-                            <span class="score-bar-label">Volumen ventas</span>
-                            <div class="score-bar-track">
-                                <div class="score-bar-fill" style="width:85%;background:var(--green);"></div>
-                            </div>
-                            <span>85</span>
-                        </div>
-                        <div class="score-bar-item">
-                            <span class="score-bar-label">Frecuencia</span>
-                            <div class="score-bar-track">
-                                <div class="score-bar-fill" style="width:90%;background:var(--green);"></div>
-                            </div>
-                            <span>90</span>
-                        </div>
-                        <div class="score-bar-item">
-                            <span class="score-bar-label">Cobro eficiencia</span>
-                            <div class="score-bar-track">
-                                <div class="score-bar-fill" style="width:70%;background:var(--blue);"></div>
-                            </div>
-                            <span>70</span>
-                        </div>
-                        <div class="score-bar-item">
-                            <span class="score-bar-label">Antigüedad</span>
-                            <div class="score-bar-track">
-                                <div class="score-bar-fill" style="width:65%;background:var(--blue);"></div>
-                            </div>
-                            <span>65</span>
-                        </div>
-                        <div class="score-bar-item">
-                            <span class="score-bar-label">Riesgo cartera</span>
-                            <div class="score-bar-track">
-                                <div class="score-bar-fill" style="width:40%;background:var(--orange);"></div>
-                            </div>
-                            <span>40</span>
-                        </div>
+            <!-- API KEY -->
+            <div class="alert">
+                <span class="alert-icon">🔑</span>
+                <div>
+                    <strong>Tu API Key:</strong>
+                    <div class="api-key-box" style="margin-top:8px;">
+                        <span class="key" id="apiKeyDisplay">gl-demo-key</span>
+                        <button onclick="copyApiKey()">Copiar</button>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- PANEL: HISTORIAL -->
-        <div class="panel" id="panel-historial">
-            <div class="chart-card">
-                <div class="chart-title">Historial de consultas GreenLight</div>
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Fecha</th>
-                                <th>Comerciante</th>
-                                <th>Score</th>
-                                <th>Tier</th>
-                                <th>Riesgo</th>
-                                <th>Decisión</th>
-                            </tr>
-                        </thead>
-                        <tbody id="greenlightTable">
-                            <tr>
-                                <td>20/02 07:28</td>
-                                <td>María González</td>
-                                <td>720</td>
-                                <td><span class="status-badge success">A</span></td>
-                                <td>Muy bajo</td>
-                                <td>✅ Aprobado - Gs. 5M</td>
-                            </tr>
-                            <tr>
-                                <td>19/02 15:12</td>
-                                <td>Carlos Benítez</td>
-                                <td>580</td>
-                                <td><span class="status-badge success">B</span></td>
-                                <td>Bajo</td>
-                                <td>✅ Aprobado - Gs. 2M</td>
-                            </tr>
-                            <tr>
-                                <td>19/02 11:45</td>
-                                <td>Pedro Ramírez</td>
-                                <td>420</td>
-                                <td><span class="status-badge pending">C</span></td>
-                                <td>Medio</td>
-                                <td>⚠️ Revisión manual</td>
-                            </tr>
-                            <tr>
-                                <td>18/02 09:30</td>
-                                <td>Ana Villalba</td>
-                                <td>310</td>
-                                <td><span class="status-badge error">D</span></td>
-                                <td>Alto</td>
-                                <td>❌ Rechazado</td>
-                            </tr>
-                            <tr>
-                                <td>18/02 08:15</td>
-                                <td>José Fernández</td>
-                                <td>650</td>
-                                <td><span class="status-badge success">A</span></td>
-                                <td>Bajo</td>
-                                <td>✅ Aprobado - Gs. 3M</td>
-                            </tr>
-                        </tbody>
-                    </table>
+            <!-- KPIs -->
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-label">Consultas este mes</div>
+                    <div class="kpi-value" id="kpiCalls">342</div>
+                    <div class="kpi-sub">de 500 incluidas en tu plan</div>
+                    <div class="kpi-trend up">↑ 18% vs mes anterior</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">NexoScores consultados</div>
+                    <div class="kpi-value" id="kpiScores">187</div>
+                    <div class="kpi-sub">comerciantes evaluados</div>
+                    <div class="kpi-trend up">↑ 24%</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">GreenLight</div>
+                    <div class="kpi-value" id="kpiGreenlight">155</div>
+                    <div class="kpi-sub">autorizaciones en tiempo real</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Factura del mes</div>
+                    <div class="kpi-value" id="kpiBilling">$0</div>
+                    <div class="kpi-sub">facturación pendiente</div>
                 </div>
             </div>
-        </div>
 
-        <!-- PANEL: FACTURACION -->
-        <div class="panel" id="panel-facturacion">
-            <div class="chart-grid">
-                <div class="chart-card">
-                    <div class="chart-title">Factura actual — Febrero 2026</div>
-                    <div class="kpi-label">Total a pagar</div>
-                    <div class="invoice-total" id="invoiceTotal">$0.00</div>
-                    <div style="color:var(--text-dim);font-size:13px;margin-bottom:16px;">
-                        <span id="invoiceDetail">342 consultas · 500 incluidas · 0 facturables</span>
+            <!-- TABS -->
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('uso')">📊 Uso de API</div>
+                <div class="tab" onclick="switchTab('scores')">🎯 Consultar Score</div>
+                <div class="tab" onclick="switchTab('historial')">📋 Historial</div>
+                <div class="tab" onclick="switchTab('facturacion')">💳 Facturación</div>
+                <div class="tab" onclick="switchTab('docs')">📖 Documentación</div>
+            </div>
+
+            <!-- PANEL: USO -->
+            <div class="panel active" id="panel-uso">
+                <div class="chart-grid">
+                    <div class="chart-card">
+                        <div class="chart-title">Consultas por día (últimos 30 días)</div>
+                        <canvas id="chartDaily" height="200"></canvas>
                     </div>
-                    <button class="pay-btn" onclick="payInvoice()" id="payBtn" style="display:none;">
-                        💳 Pagar con tarjeta
-                    </button>
-                    <p style="color:var(--green);font-size:14px;font-weight:600;" id="paidMsg">
-                        ✅ Estás al día — no hay saldo pendiente
-                    </p>
+                    <div class="chart-card">
+                        <div class="chart-title">Distribución por endpoint</div>
+                        <canvas id="chartEndpoints" height="200"></canvas>
+                    </div>
                 </div>
                 <div class="chart-card">
-                    <div class="chart-title">Historial de pagos</div>
+                    <div class="chart-title">Últimas consultas</div>
                     <div class="table-wrap">
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Período</th>
-                                    <th>Consultas</th>
-                                    <th>Monto</th>
+                                    <th>Fecha</th>
+                                    <th>Endpoint</th>
                                     <th>Estado</th>
+                                    <th>Tiempo</th>
+                                    <th>Resultado</th>
                                 </tr>
                             </thead>
-                            <tbody id="paymentHistory">
+                            <tbody id="recentCallsTable">
                                 <tr>
-                                    <td>Enero 2026</td>
-                                    <td>289</td>
-                                    <td>$0.00</td>
-                                    <td><span class="status-badge success">Plan incluido</span></td>
+                                    <td>20/02/2026 07:32</td>
+                                    <td>/api/score/+5959812345</td>
+                                    <td><span class="status-badge success">200</span></td>
+                                    <td>45ms</td>
+                                    <td>Score: 720 (Tier A)</td>
                                 </tr>
                                 <tr>
-                                    <td>Diciembre 2025</td>
-                                    <td>156</td>
-                                    <td>$0.00</td>
-                                    <td><span class="status-badge success">Plan incluido</span></td>
+                                    <td>20/02/2026 07:28</td>
+                                    <td>/api/greenlight/check</td>
+                                    <td><span class="status-badge success">200</span></td>
+                                    <td>62ms</td>
+                                    <td>APPROVED - Gs. 5M</td>
+                                </tr>
+                                <tr>
+                                    <td>20/02/2026 07:15</td>
+                                    <td>/api/score/+5959887654</td>
+                                    <td><span class="status-badge success">200</span></td>
+                                    <td>38ms</td>
+                                    <td>Score: 580 (Tier B)</td>
+                                </tr>
+                                <tr>
+                                    <td>20/02/2026 06:55</td>
+                                    <td>/api/greenlight/check</td>
+                                    <td><span class="status-badge pending">429</span></td>
+                                    <td>12ms</td>
+                                    <td>Rate limit exceeded</td>
+                                </tr>
+                                <tr>
+                                    <td>19/02/2026 18:42</td>
+                                    <td>/api/score/+5959834567</td>
+                                    <td><span class="status-badge success">200</span></td>
+                                    <td>51ms</td>
+                                    <td>Score: 310 (Tier D)</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- PANEL: DOCS -->
-        <div class="panel" id="panel-docs">
-            <div class="chart-card">
-                <div class="chart-title">Integración rápida</div>
-                <p style="color:var(--text-dim);font-size:14px;line-height:1.6;margin-bottom:20px;">
-                    Integrá NexoBot en tu sistema en minutos. Usá tu API key para consultar scores y autorizaciones
-                    crediticias.
-                </p>
-
-                <h4 style="margin:16px 0 8px;">1. Consultar NexoScore</h4>
-                <div class="api-key-box" style="font-size:12px;white-space:pre;overflow-x:auto;">curl -X GET
-                    "https://nexobot-mvp-1.onrender.com/api/score/+595981234567" \
-                    -H "x-api-key: TU_API_KEY"</div>
-
-                <h4 style="margin:16px 0 8px;">2. GreenLight (autorización crediticia)</h4>
-                <div class="api-key-box" style="font-size:12px;white-space:pre;overflow-x:auto;">curl -X POST
-                    "https://nexobot-mvp-1.onrender.com/api/greenlight/check" \
-                    -H "x-api-key: TU_API_KEY" \
-                    -H "Content-Type: application/json" \
-                    -d '{"phone": "+595981234567", "amount": 5000000}'</div>
-
-                <h4 style="margin:16px 0 8px;">3. Ver tu consumo</h4>
-                <div class="api-key-box" style="font-size:12px;white-space:pre;overflow-x:auto;">curl -X GET
-                    "https://nexobot-mvp-1.onrender.com/api/billing/usage" \
-                    -H "x-api-key: TU_API_KEY"</div>
-
-                <p style="color:var(--text-dim);font-size:13px;margin-top:20px;">
-                    📖 Documentación completa: <a href="/api-docs.html"
-                        style="color:var(--accent);">nexobot-mvp-1.onrender.com/api-docs.html</a>
-                </p>
+            <!-- PANEL: SCORES -->
+            <div class="panel" id="panel-scores">
+                <div class="chart-card">
+                    <div class="chart-title">Consultar NexoScore de un comerciante</div>
+                    <p style="color:var(--text-dim);font-size:13px;margin-bottom:16px;">Ingresá el número de teléfono o
+                        cédula del comerciante para ver su score crediticio.</p>
+                    <div class="search-box">
+                        <input type="text" id="scoreSearch" placeholder="Ej: +595981234567 o 4523871" />
+                        <button onclick="lookupScore()">Consultar</button>
+                    </div>
+                    <div class="score-result" id="scoreResult">
+                        <div class="score-display">
+                            <div class="score-circle tier-A" id="scoreCircle">
+                                <span id="scoreValue">720</span>
+                                <span class="tier-label" id="scoreTier">TIER A</span>
+                            </div>
+                            <div class="score-details">
+                                <h3 id="scoreName">María González</h3>
+                                <p id="scorePhone">+595981234567 · Almacén "La Esquina"</p>
+                                <p id="scoreSince" style="margin-top:4px;">Registrado hace 8 meses · 247 transacciones
+                                </p>
+                            </div>
+                        </div>
+                        <div class="score-bars" id="scoreBars">
+                            <div class="score-bar-item">
+                                <span class="score-bar-label">Volumen ventas</span>
+                                <div class="score-bar-track">
+                                    <div class="score-bar-fill" style="width:85%;background:var(--green);"></div>
+                                </div>
+                                <span>85</span>
+                            </div>
+                            <div class="score-bar-item">
+                                <span class="score-bar-label">Frecuencia</span>
+                                <div class="score-bar-track">
+                                    <div class="score-bar-fill" style="width:90%;background:var(--green);"></div>
+                                </div>
+                                <span>90</span>
+                            </div>
+                            <div class="score-bar-item">
+                                <span class="score-bar-label">Cobro eficiencia</span>
+                                <div class="score-bar-track">
+                                    <div class="score-bar-fill" style="width:70%;background:var(--blue);"></div>
+                                </div>
+                                <span>70</span>
+                            </div>
+                            <div class="score-bar-item">
+                                <span class="score-bar-label">Antigüedad</span>
+                                <div class="score-bar-track">
+                                    <div class="score-bar-fill" style="width:65%;background:var(--blue);"></div>
+                                </div>
+                                <span>65</span>
+                            </div>
+                            <div class="score-bar-item">
+                                <span class="score-bar-label">Riesgo cartera</span>
+                                <div class="score-bar-track">
+                                    <div class="score-bar-fill" style="width:40%;background:var(--orange);"></div>
+                                </div>
+                                <span>40</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
 
-    </div>
+            <!-- PANEL: HISTORIAL -->
+            <div class="panel" id="panel-historial">
+                <div class="chart-card">
+                    <div class="chart-title">Historial de consultas GreenLight</div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Comerciante</th>
+                                    <th>Score</th>
+                                    <th>Tier</th>
+                                    <th>Riesgo</th>
+                                    <th>Decisión</th>
+                                </tr>
+                            </thead>
+                            <tbody id="greenlightTable">
+                                <tr>
+                                    <td>20/02 07:28</td>
+                                    <td>María González</td>
+                                    <td>720</td>
+                                    <td><span class="status-badge success">A</span></td>
+                                    <td>Muy bajo</td>
+                                    <td>✅ Aprobado - Gs. 5M</td>
+                                </tr>
+                                <tr>
+                                    <td>19/02 15:12</td>
+                                    <td>Carlos Benítez</td>
+                                    <td>580</td>
+                                    <td><span class="status-badge success">B</span></td>
+                                    <td>Bajo</td>
+                                    <td>✅ Aprobado - Gs. 2M</td>
+                                </tr>
+                                <tr>
+                                    <td>19/02 11:45</td>
+                                    <td>Pedro Ramírez</td>
+                                    <td>420</td>
+                                    <td><span class="status-badge pending">C</span></td>
+                                    <td>Medio</td>
+                                    <td>⚠️ Revisión manual</td>
+                                </tr>
+                                <tr>
+                                    <td>18/02 09:30</td>
+                                    <td>Ana Villalba</td>
+                                    <td>310</td>
+                                    <td><span class="status-badge error">D</span></td>
+                                    <td>Alto</td>
+                                    <td>❌ Rechazado</td>
+                                </tr>
+                                <tr>
+                                    <td>18/02 08:15</td>
+                                    <td>José Fernández</td>
+                                    <td>650</td>
+                                    <td><span class="status-badge success">A</span></td>
+                                    <td>Bajo</td>
+                                    <td>✅ Aprobado - Gs. 3M</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PANEL: FACTURACION -->
+            <div class="panel" id="panel-facturacion">
+                <div class="chart-grid">
+                    <div class="chart-card">
+                        <div class="chart-title">Factura actual — Febrero 2026</div>
+                        <div class="kpi-label">Total a pagar</div>
+                        <div class="invoice-total" id="invoiceTotal">$0.00</div>
+                        <div style="color:var(--text-dim);font-size:13px;margin-bottom:16px;">
+                            <span id="invoiceDetail">342 consultas · 500 incluidas · 0 facturables</span>
+                        </div>
+                        <button class="pay-btn" onclick="payInvoice()" id="payBtn" style="display:none;">
+                            💳 Pagar con tarjeta
+                        </button>
+                        <p style="color:var(--green);font-size:14px;font-weight:600;" id="paidMsg">
+                            ✅ Estás al día — no hay saldo pendiente
+                        </p>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-title">Historial de pagos</div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Período</th>
+                                        <th>Consultas</th>
+                                        <th>Monto</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="paymentHistory">
+                                    <tr>
+                                        <td>Enero 2026</td>
+                                        <td>289</td>
+                                        <td>$0.00</td>
+                                        <td><span class="status-badge success">Plan incluido</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Diciembre 2025</td>
+                                        <td>156</td>
+                                        <td>$0.00</td>
+                                        <td><span class="status-badge success">Plan incluido</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PANEL: DOCS -->
+            <div class="panel" id="panel-docs">
+                <div class="chart-card">
+                    <div class="chart-title">Integración rápida</div>
+                    <p style="color:var(--text-dim);font-size:14px;line-height:1.6;margin-bottom:20px;">
+                        Integrá NexoBot en tu sistema en minutos. Usá tu API key para consultar scores y autorizaciones
+                        crediticias.
+                    </p>
+
+                    <h4 style="margin:16px 0 8px;">1. Consultar NexoScore</h4>
+                    <div class="api-key-box" style="font-size:12px;white-space:pre;overflow-x:auto;">curl -X GET
+                        "https://nexobot-mvp-1.onrender.com/api/score/+595981234567" \
+                        -H "x-api-key: TU_API_KEY"</div>
+
+                    <h4 style="margin:16px 0 8px;">2. GreenLight (autorización crediticia)</h4>
+                    <div class="api-key-box" style="font-size:12px;white-space:pre;overflow-x:auto;">curl -X POST
+                        "https://nexobot-mvp-1.onrender.com/api/greenlight/check" \
+                        -H "x-api-key: TU_API_KEY" \
+                        -H "Content-Type: application/json" \
+                        -d '{"phone": "+595981234567", "amount": 5000000}'</div>
+
+                    <h4 style="margin:16px 0 8px;">3. Ver tu consumo</h4>
+                    <div class="api-key-box" style="font-size:12px;white-space:pre;overflow-x:auto;">curl -X GET
+                        "https://nexobot-mvp-1.onrender.com/api/billing/usage" \
+                        -H "x-api-key: TU_API_KEY"</div>
+
+                    <p style="color:var(--text-dim);font-size:13px;margin-top:20px;">
+                        📖 Documentación completa: <a href="/api-docs.html"
+                            style="color:var(--accent);">nexobot-mvp-1.onrender.com/api-docs.html</a>
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div> <!-- END MAIN APP CONTENT -->
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
     <script>
+        const API = window.location.origin;
+        let partnerToken = localStorage.getItem('nexo_partner_jwt') || null;
+
+        // =============================================
+        // AUTH
+        // =============================================
+        async function authenticate() {
+            const email = document.getElementById('partnerEmail').value;
+            const password = document.getElementById('partnerPassword').value;
+            const btn = document.getElementById('btnAuth');
+
+            if (!email || !password) return;
+
+            btn.textContent = 'Verificando...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`${API}/api/auth-admin/partner/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await res.json();
+
+                if (data.success && data.token) {
+                    partnerToken = data.token;
+                    localStorage.setItem('nexo_partner_jwt', partnerToken);
+                    document.getElementById('authOverlay').classList.add('hidden');
+                    document.getElementById('mainContent').classList.remove('hidden');
+                    setupPartnerProfile(data.partner);
+                    loadStats(); // Reemplazar la data demo por la real si logramos traerla
+                } else {
+                    document.getElementById('authError').textContent = data.error || 'Autenticación fallida';
+                    document.getElementById('authError').style.display = 'block';
+                }
+            } catch (e) {
+                document.getElementById('authError').textContent = 'Error de red';
+                document.getElementById('authError').style.display = 'block';
+            } finally {
+                btn.textContent = 'Iniciar Sesión';
+                btn.disabled = false;
+            }
+        }
+
+        document.getElementById('partnerPassword').addEventListener('keydown', e => {
+            if (e.key === 'Enter') authenticate();
+        });
+
+        function logout() {
+            localStorage.removeItem('nexo_partner_jwt');
+            partnerToken = null;
+            document.getElementById('mainContent').classList.add('hidden');
+            document.getElementById('authOverlay').classList.remove('hidden');
+        }
+
+        function setupPartnerProfile(partner) {
+            document.getElementById('partnerName').textContent = partner.name || 'Partner';
+            document.getElementById('partnerPlan').textContent = `Plan ${partner.plan || 'Professional'}`;
+            document.getElementById('apiKeyDisplay').textContent = partner.apiKey || '---';
+
+            if (partner.name) {
+                const initials = partner.name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
+                document.getElementById('partnerAvatar').textContent = initials;
+            }
+        }
+
+        async function loadStats() {
+            // Aquí iría el fetch real a /api/portal/stats
+            try {
+                const res = await fetch(`${API}/api/portal/stats`, {
+                    headers: { 'Authorization': `Bearer ${partnerToken}` }
+                });
+                if (res.status === 401 || res.status === 403) return logout();
+                const d = await res.json();
+
+                // Actualizar interfaz con datos reales (sólo ejemplo parcial aquí)
+                if (d.kpis) {
+                    document.getElementById('kpiCalls').textContent = d.kpis.totalCalls;
+                    document.getElementById('kpiScores').textContent = d.kpis.scoreConsults;
+                    document.getElementById('kpiGreenlight').textContent = d.kpis.greenlightConsults;
+                }
+
+                if (d.partner) setupPartnerProfile(d.partner);
+            } catch (e) {
+                console.error('Stats error:', e);
+            }
+        }
+
         // =============================================
         // TAB SWITCHING
         // =============================================
@@ -931,29 +1122,77 @@
         }
 
         // =============================================
-        // SCORE LOOKUP (demo)
+        // SCORE LOOKUP (Real API Call)
         // =============================================
-        function lookupScore() {
+        async function lookupScore() {
             const input = document.getElementById('scoreSearch').value.trim();
             if (!input) return;
 
-            // Simulated score data
-            const score = Math.floor(Math.random() * 400) + 400;
-            const tier = score >= 700 ? 'A' : score >= 550 ? 'B' : score >= 400 ? 'C' : 'D';
-            const tierClass = `tier-${tier}`;
-            const names = ['María González', 'Carlos Benítez', 'Pedro Ramírez', 'Ana Villalba', 'José Fernández'];
-            const businesses = ['Almacén "La Esquina"', 'Despensa Don Carlos', 'Ferretería El Progreso', 'Kiosco Ana', 'MiniMarket JF'];
-            const idx = Math.floor(Math.random() * names.length);
+            const apiKey = document.getElementById('apiKeyDisplay').textContent;
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = 'Buscando...';
+            btn.disabled = true;
 
-            const circle = document.getElementById('scoreCircle');
-            circle.className = `score-circle ${tierClass}`;
-            document.getElementById('scoreValue').textContent = score;
-            document.getElementById('scoreTier').textContent = `TIER ${tier}`;
-            document.getElementById('scoreName').textContent = names[idx];
-            document.getElementById('scorePhone').textContent = `${input} · ${businesses[idx]}`;
-            document.getElementById('scoreSince').textContent = `Registrado hace ${Math.floor(Math.random() * 12) + 1} meses · ${Math.floor(Math.random() * 300) + 50} transacciones`;
+            try {
+                // Hacer la llamada real al backend
+                const res = await fetch(`${API}/api/score/${encodeURIComponent(input)}`, {
+                    method: 'GET',
+                    headers: {
+                        'x-api-key': apiKey !== '---' ? apiKey : ''
+                    }
+                });
 
-            document.getElementById('scoreResult').classList.add('visible');
+                const json = await res.json();
+
+                if (!res.ok || json.error) {
+                    alert(json.error || json.message || 'Error al buscar comerciante');
+                    return;
+                }
+
+                const d = json.data;
+                const score = d.score;
+                const tier = d.tier.name;
+                const tierClass = `tier-${tier}`;
+
+                const circle = document.getElementById('scoreCircle');
+                circle.className = `score-circle ${tierClass}`;
+                document.getElementById('scoreValue').textContent = score;
+                document.getElementById('scoreTier').textContent = `TIER ${tier}`;
+
+                // Mostrar datos reales o aproximaciones si faltan
+                document.getElementById('scoreName').textContent = d.merchant_name || 'Comerciante';
+                document.getElementById('scorePhone').textContent = `Tel: ${d.phone || input}`;
+
+                const txCount = d.factors.volume_score ? Math.floor(d.factors.volume_score * 3) : 0;
+                document.getElementById('scoreSince').textContent = `Score actualizado · Basado en transacciones registradas`;
+
+                // Actualizar las barras con los factores reales
+                updateScoreBar(0, d.factors.volume_score, 'var(--green)');
+                updateScoreBar(1, d.factors.frequency_score, 'var(--green)');
+                updateScoreBar(2, d.factors.payment_efficiency, 'var(--blue)');
+                updateScoreBar(3, d.factors.time_score, 'var(--blue)');
+                updateScoreBar(4, 100 - (d.factors.risk_adjustment || 0), 'var(--orange)');
+
+                document.getElementById('scoreResult').classList.add('visible');
+            } catch (error) {
+                console.error('Error fetching score:', error);
+                alert('Hubo un error de red al consultar el NexoScore.');
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        function updateScoreBar(index, value, color) {
+            const bars = document.querySelectorAll('.score-bar-item');
+            if (bars[index]) {
+                const fill = bars[index].querySelector('.score-bar-fill');
+                const valTxt = bars[index].querySelector('span:last-child');
+                fill.style.width = `${value || 0}%`;
+                fill.style.background = color;
+                valTxt.textContent = Math.round(value || 0);
+            }
         }
 
         // =============================================
@@ -1045,6 +1284,13 @@
             document.getElementById('scoreSearch').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') lookupScore();
             });
+
+            // Auto login verification
+            if (partnerToken) {
+                document.getElementById('authOverlay').classList.add('hidden');
+                document.getElementById('mainContent').classList.remove('hidden');
+                loadStats();
+            }
         });
     </script>
 

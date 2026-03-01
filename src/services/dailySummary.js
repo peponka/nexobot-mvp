@@ -72,7 +72,7 @@ export async function processDailySummaries() {
 /**
  * Send daily summary to a single merchant
  */
-async function sendDailySummary(merchant) {
+export async function sendDailySummary(merchant) {
     // Get today's date range (Paraguay time = UTC-3)
     const now = new Date();
     const todayStart = new Date(now);

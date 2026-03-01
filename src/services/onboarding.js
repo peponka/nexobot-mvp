@@ -21,6 +21,7 @@ const onboardingState = new Map();
 
 const STEPS = {
     WELCOME: 0,
+    TERMS: 0.5,
     FULL_NAME: 1,
     CEDULA: 2,
     CEDULA_PHOTO: 2.5,  // Sub-step: processing cédula photo
@@ -94,14 +95,23 @@ export async function handleOnboarding(merchant, message, imageData = null) {
 
     switch (state.step) {
         case STEPS.WELCOME:
-            state.step = STEPS.FULL_NAME;
+            state.step = STEPS.TERMS;
             return `🦄 *¡Bienvenido a NexoFinanzas!* 🇵🇾\n\n` +
-                `Soy *NexoBot*, tu asistente que te ayuda a:\n` +
-                `✅ Registrar ventas al contado y fiado\n` +
-                `✅ Controlar quién te debe y cuánto\n` +
-                `✅ Enviar recordatorios de cobro automáticos\n` +
-                `✅ Recibir un resumen diario de tu negocio\n\n` +
-                `Vamos a crear tu cuenta en *1 minuto* (8 pasos rápidos).\n\n` +
+                `Soy *NexoBot*, tu asistente financiero por WhatsApp.\n\n` +
+                `🔒 *Privacidad y Seguridad*\n` +
+                `Para proteger tus datos (Ley N° 6534/20), necesitamos tu consentimiento para procesar tu información transaccional.\n\n` +
+                `👉 *Leé nuestras políticas acá:* https://nexobot-mvp-1.onrender.com/privacy\n\n` +
+                `Para continuar, respondé *ACEPTO* o *SI*.`;
+
+        case STEPS.TERMS:
+            if (!/acepto|sí|si|ok|dale/i.test(lower)) {
+                return `⚠️ Es necesario aceptar los términos para brindarte el servicio de NexoBot de forma segura y legal.\n\n` +
+                    `Respondé *ACEPTO* para continuar.`;
+            }
+            state.data.terms_accepted = true;
+            state.data.terms_accepted_at = new Date().toISOString();
+            state.step = STEPS.FULL_NAME;
+            return `✅ ¡Excelente! Vamos a crear tu cuenta en *1 minuto* (8 pasos rápidos).\n\n` +
                 `${progressBar(1)} Paso 1 de 8\n\n` +
                 `👤 *¿Cuál es tu nombre completo?*\n` +
                 `_(Ej: "Juan Carlos Pérez González")_\n\n` +
@@ -303,6 +313,7 @@ async function saveOnboardingData(merchantId, data) {
         monthly_volume: data.volume,
         cedula_verified: data.cedula_verified || false,
         cedula_ocr_data: data.cedula_ocr_data || null,
+        terms_accepted: data.terms_accepted || false,
         onboarded_at: new Date().toISOString()
     };
 

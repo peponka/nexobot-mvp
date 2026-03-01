@@ -10,11 +10,15 @@ import morgan from 'morgan';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+// Sentry Monitoring
+import * as Sentry from '@sentry/node';
+
 import webhookRouter from './routes/webhook.js';
 import dashboardRouter from './routes/dashboard.js';
 import scoreRouter from './routes/score.js';
 import greenlightRouter from './routes/greenlight.js';
 import authRouter from './routes/auth.js';
+import authAdminRouter from './routes/auth-admin.js';
 import { requireAuth } from './services/auth.js';
 import { startReminderCron } from './services/reminders.js';
 import { startSummaryCron } from './services/dailySummary.js';
@@ -41,6 +45,16 @@ const PORT = process.env.PORT || 3000;
 const IS_PROD = process.env.NODE_ENV === 'production';
 const VERSION = '1.0.0';
 const startedAt = new Date().toISOString();
+
+// =============================================
+// SENTRY INITIALIZATION
+// =============================================
+Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    // Tracing
+    tracesSampleRate: 1.0, //  Capture 100% of the transactions
+    environment: process.env.NODE_ENV || 'development'
+});
 
 // =============================================
 // MIDDLEWARE
@@ -87,6 +101,9 @@ app.use('/webhook', webhookRouter);
 
 // Auth API (public)
 app.use('/api/auth', authRouter);
+
+// Admin & Partner Login API
+app.use('/api/auth-admin', authAdminRouter);
 
 // B2B Leads capture
 app.post('/api/leads', async (req, res) => {
@@ -258,6 +275,9 @@ app.get('/api/simulate/:message', async (req, res) => {
 app.use((req, res) => {
     res.status(404).json({ error: 'Not found', path: req.originalUrl });
 });
+
+// Sentry Error Handler - Must be before any other error middleware!
+Sentry.setupExpressErrorHandler(app);
 
 // Global error handler
 app.use((err, req, res, next) => {

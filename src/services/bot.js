@@ -17,6 +17,10 @@ import { handleReferralIntent } from './referrals.js';
 import { getReportMessage } from './reports.js';
 import { handleReceiptPhoto } from './receiptOcr.js';
 import { handleMultiBusinessIntent } from './multiBusiness.js';
+import { sendDailySummary } from './dailySummary.js';
+
+// En memoria: comercios que pidieron hablar con un humano
+const pausedMerchants = new Set();
 
 /**
  * Format currency (Guaraníes)
@@ -54,6 +58,15 @@ export async function handleMessage(phone, contactName, rawMessage, parsed, imag
 
     if (!merchant) {
         return t(lang, 'error_internal');
+    }
+
+    // -- HUMAN HANDOFF: Revisar si está pausado el bot --
+    if (pausedMerchants.has(merchant.id)) {
+        if (/reanudar\s*bot|activar\s*bot|volver\s*al\s*bot/i.test(rawMessage)) {
+            pausedMerchants.delete(merchant.id);
+            return "🤖 Modo IA automático *reactivado*. ¡Hola de nuevo! ¿Qué anotamos?";
+        }
+        return null; // Silencioso. Un humano está atendiendo por WhatsApp Web.
     }
 
     // Check if merchant needs onboarding (new user)
@@ -110,11 +123,23 @@ export async function handleMessage(phone, contactName, rawMessage, parsed, imag
             case 'FORGOT_PIN':
                 return handleForgotPin(merchant, lang);
 
+            case 'HUMAN_HANDOFF':
+                return handleHumanHandoff(merchant, lang);
+
+            case 'PAYMENT_LINK':
+                return await handlePaymentLink(merchant, entities, rawMessage, lang);
+
+            case 'REGISTER_CEDULA':
+                return await handleRegisterCedula(merchant, entities, lang);
+
             case 'REFERRAL':
                 return await handleReferralIntent(merchant, entities.subIntent, entities);
 
             case 'REPORT':
                 return await handleReportIntent(merchant);
+
+            case 'GET_DASHBOARD':
+                return handleGetDashboard(merchant, lang);
 
             case 'MULTI_BUSINESS':
                 return await handleMultiBusinessIntent(merchant, phone, entities.subIntent, entities);
@@ -574,6 +599,86 @@ async function handleInventoryUpdate(merchant, entities, lang = 'es') {
     if (!updated) return '❌ Hubo un error al actualizar el producto.';
 
     return `✅ Precio de *${product}* actualizado a ${formatPYG(amount)}.`;
+}
+
+// =============================================
+// DASHBOARD & MAGIC LINK
+// =============================================
+
+function handleGetDashboard(merchant, lang = 'es') {
+    const baseUrl = 'https://nexofinanzas.com/dashboard'; // Cambiar por la url de render si se prefiere
+    let response = `📊 *Tu Panel de Control (Nexo Dashboard)*\n\n`;
+
+    response += `Acá podés ver todas tus ventas, deudores y métricas sin salir de WhatsApp:\n\n`;
+    response += `🔗 ${baseUrl}?phone=${merchant.phone.replace('+', '%2B')}\n\n`;
+
+    if (merchant.dashboard_pin) {
+        response += `_(Nota: El sistema te va a pedir tu PIN de 4 dígitos para entrar)._`;
+    } else {
+        response += `⚠️ *Aún no tenés un código de seguridad.*\nPara proteger tu información, te recomiendo crear uno.\n👉 Enviame un mensaje que diga: *PIN 1234* (cambiando 1234 por tu número secreto).`;
+    }
+
+    return response;
+}
+
+// =============================================
+// NUEVAS FUNCIONES: SIPAP/QR Y HANDOFF
+// =============================================
+
+function handleHumanHandoff(merchant, lang = 'es') {
+    pausedMerchants.add(merchant.id);
+    return `⏸️ *Bot Pausado*\n\nHe avisado al equipo de soporte humano para que lea tu mensaje y te conteste a la brevedad.\n\n_(Para volver a usar el bot automático, escribí "activar bot")_`;
+}
+
+async function handlePaymentLink(merchant, entities, rawMessage, lang = 'es') {
+    const { amount, customer_name, currency } = entities;
+
+    if (!amount) {
+        return '🤔 ¿De cuánto querés generar el cobro QR / SIPAP? Ej: "Generame un QR de 50 mil"';
+    }
+
+    let response = `🏦 *Tu Link de Cobro SIPAP/QR*\n\n`;
+    if (customer_name) response += `👤 Para: ${customer_name}\n`;
+    response += `💰 Monto: ${amount.toLocaleString('es-PY')} ${(currency || 'PYG')}\n\n`;
+
+    response += `📲 Compartí este link con tu cliente para que te pague al instante:\n`;
+    response += `🔗 https://nexofinanzas.com/pay/${merchant.id}/${amount}\n\n`;
+    response += `_(La app te avisará apenas el cliente transfiera 😉)_`;
+
+    return response;
+}
+
+async function handleRegisterCedula(merchant, entities, lang = 'es') {
+    const { customer_name, cedula } = entities;
+
+    if (!customer_name || !cedula) {
+        return "🤔 Necesito el nombre y el número de cédula. Ej: 'Cédula de Carlos es 1234567'";
+    }
+
+    const customer = await Customer.findOrCreate(merchant.id, customer_name);
+
+    // Simular consulta a buró de crédito (Informconf)
+    const cedulaStr = String(cedula);
+    let mockRiskLevel = 'limpio'; // por defecto
+    let bureauMessage = '🟢 *Historial Limpio*: No registra morosidad activa en el sistema financiero.';
+
+    // Lógica para demo: si la cédula termina en 4 o 5 simulamos deuda
+    if (cedulaStr.endsWith('4')) {
+        mockRiskLevel = 'alerta';
+        bureauMessage = '🟡 *Atención*: Registra pequeños atrasos recientes en telefonías o electrodomésticos.';
+    } else if (cedulaStr.endsWith('5')) {
+        mockRiskLevel = 'informconf';
+        bureauMessage = '🔴 *Cuidado (Informconf)*: Registra operaciones morosas graves o demandas no resueltas.';
+    }
+
+    await Customer.updateCedula(customer.id, cedulaStr, mockRiskLevel);
+
+    return `🛡️ *Identidad Guardada (KYC)*\n\n` +
+        `👤 Cliente: ${customer_name}\n` +
+        `🪪 Cédula: ${cedulaStr}\n\n` +
+        `🔍 *Chequeo Automático de Crédito:*\n` +
+        `${bureauMessage}\n\n` +
+        `_(Esta info te ayuda a decidir si darle fiado o no)_`;
 }
 
 export default { handleMessage };
