@@ -77,7 +77,7 @@ function fastParser(message) {
     }
 
     // 0.8 DASHBOARD MAGIC LINK
-    if (/mi\s*panel|ver\s*(mi)?\s*cuenta|dashboard|mi\s*sistema|mi\s*libreta|entrar\s*(al)?\s*sistema|entrar|abrir\s*(la)?\s*app|abrir/i.test(lower)) {
+    if (/(mi|el)\s*panel|ver\s*(mi|el)?\s*cuenta|dashboard|mi\s*sistema|mi\s*libreta|entrar\s*(al)?\s*sistema|entrar|abrir\s*(la)?\s*app|abrir/i.test(lower)) {
         result.intent = 'GET_DASHBOARD';
         result.confidence = 0.95;
         return result;
