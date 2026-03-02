@@ -51,12 +51,31 @@ router.post('/', async (req, res) => {
 
         if (!messageData) return;
 
-        // Idempotency check: Don't process the same message twice
+        // Idempotency check: Don't process the same message twice (Meta retries)
         if (processedMessages.has(messageData.messageId)) {
-            console.log(`♻️ Skipping already processed message: ${messageData.messageId}`);
+            console.log(`♻️ Skipping already processed message ID: ${messageData.messageId}`);
             return;
         }
+
+        // 🛡️ ANTI-BOUNCE FILTER 🛡️
+        // Meta sometimes sends 2 webhooks with DIFFERENT message IDs if the user
+        // accidentally double-taps "Send" or if their WhatsApp Web connection lags.
+        // We create a composite key: "phone_number + first 20 chars of text"
+        const textKey = messageData.text ? `${messageData.from}_${messageData.text.substring(0, 20)}` : null;
+
+        if (textKey && processedMessages.has(textKey)) {
+            console.log(`♻️ Skipping duplicate text message from same user (Anti-Bounce): ${textKey}`);
+            return;
+        }
+
+        // Mark as processed
         processedMessages.add(messageData.messageId);
+
+        if (textKey) {
+            processedMessages.add(textKey);
+            // Remove the text deduplicator after 10 seconds (allows them to intentionally repeat later)
+            setTimeout(() => processedMessages.delete(textKey), 10000);
+        }
 
         // Handle image messages (cédula photos during onboarding)
         if (messageData.type === 'image') {
