@@ -57,11 +57,11 @@ router.post('/', async (req, res) => {
             return;
         }
 
-        // 🛡️ ANTI-BOUNCE FILTER 🛡️
+        // 🛡️ ENHANCED ANTI-BOUNCE FILTER 🛡️
         // Meta sometimes sends 2 webhooks with DIFFERENT message IDs if the user
         // accidentally double-taps "Send" or if their WhatsApp Web connection lags.
-        // We create a composite key: "phone_number + first 20 chars of text"
-        const textKey = messageData.text ? `${messageData.from}_${messageData.text.substring(0, 20)}` : null;
+        // We create a composite key: "phone_number + exact_text"
+        const textKey = messageData.text ? `${messageData.from}_${messageData.text.trim()}` : null;
 
         if (textKey && processedMessages.has(textKey)) {
             console.log(`♻️ Skipping duplicate text message from same user (Anti-Bounce): ${textKey}`);
@@ -73,8 +73,8 @@ router.post('/', async (req, res) => {
 
         if (textKey) {
             processedMessages.add(textKey);
-            // Remove the text deduplicator after 10 seconds (allows them to intentionally repeat later)
-            setTimeout(() => processedMessages.delete(textKey), 10000);
+            // Remove the text deduplicator after 20 seconds (allows them to intentionally repeat much later)
+            setTimeout(() => processedMessages.delete(textKey), 20000);
         }
 
         // Handle image messages (cédula photos during onboarding)
