@@ -265,7 +265,7 @@ export async function lookupScore(identifier) {
         const { data } = await supabase
             .from('merchants')
             .select('id, phone, name, business_name, nexo_score, cedula, city, business_type, created_at')
-            .eq('phone', clean.startsWith('+') ? clean : \`+\${clean}\`)
+            .eq('phone', clean.startsWith('+') ? clean : `+${clean}`)
             .single();
         merchant = data;
     }
