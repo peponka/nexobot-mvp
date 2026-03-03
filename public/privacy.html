@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Política de Privacidad — NexoFinanzas</title>
+    <meta name="description"
+        content="Política de privacidad de NexoFinanzas. Cómo recopilamos, usamos y protegemos tus datos.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: #0a0f1c;
+            color: #e0e7ef;
+            line-height: 1.7;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0d1b3e 0%, #1a2a5e 100%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 20px 0;
+        }
+
+        .header-inner {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #3b82f6;
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: #10b981;
+        }
+
+        .back-link {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: #3b82f6;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #0d1b3e 0%, #162447 100%);
+            padding: 60px 24px 40px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #f1f5f9;
+            margin-bottom: 12px;
+        }
+
+        .hero .subtitle {
+            color: #94a3b8;
+            font-size: 1rem;
+        }
+
+        .hero .update-date {
+            display: inline-block;
+            margin-top: 16px;
+            padding: 6px 16px;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 20px;
+            color: #60a5fa;
+            font-size: 0.85rem;
+        }
+
+        .content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 24px 80px;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 32px;
+            margin-bottom: 24px;
+            transition: border-color 0.3s;
+        }
+
+        .section:hover {
+            border-color: rgba(59, 130, 246, 0.2);
+        }
+
+        .section-number {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            line-height: 32px;
+            text-align: center;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 16px;
+        }
+
+        h2 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #f1f5f9;
+            margin-bottom: 16px;
+        }
+
+        p {
+            color: #cbd5e1;
+            margin-bottom: 12px;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 12px 0;
+        }
+
+        ul li {
+            padding: 8px 0 8px 28px;
+            position: relative;
+            color: #cbd5e1;
+        }
+
+        ul li::before {
+            content: '•';
+            position: absolute;
+            left: 8px;
+            color: #3b82f6;
+            font-weight: bold;
+        }
+
+        .highlight-box {
+            background: rgba(16, 185, 129, 0.08);
+            border-left: 3px solid #10b981;
+            padding: 16px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 16px 0;
+        }
+
+        .highlight-box p {
+            color: #a7f3d0;
+            margin: 0;
+        }
+
+        .warning-box {
+            background: rgba(245, 158, 11, 0.08);
+            border-left: 3px solid #f59e0b;
+            padding: 16px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 16px 0;
+        }
+
+        .warning-box p {
+            color: #fde68a;
+            margin: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+        }
+
+        th,
+        td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        th {
+            color: #94a3b8;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            color: #cbd5e1;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 40px 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            color: #64748b;
+            font-size: 0.85rem;
+        }
+
+        .footer a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+
+        @media (max-width: 640px) {
+            .hero h1 {
+                font-size: 1.5rem;
+            }
+
+            .section {
+                padding: 24px 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="header-inner">
+            <a href="/" class="logo">Nexo<span>Finanzas</span></a>
+            <a href="/" class="back-link">← Volver al inicio</a>
+        </div>
+    </div>
+
+    <div class="hero">
+        <h1>🔒 Política de Privacidad</h1>
+        <p class="subtitle">Tu privacidad es nuestra prioridad. Aquí explicamos cómo manejamos tus datos.</p>
+        <span class="update-date">📅 Última actualización: Marzo 2026</span>
+    </div>
+
+    <div class="content">
+
+        <div class="section">
+            <span class="section-number">1</span>
+            <h2>Introducción</h2>
+            <p>NexoFinanzas (operado por <strong>Nexobot SA</strong>, con domicilio en Asunción, Paraguay) proporciona
+                un asistente de gestión financiera a través de WhatsApp para comerciantes y pequeños negocios. Esta
+                Política de Privacidad describe cómo recopilamos, usamos, almacenamos y protegemos la información
+                personal que recibimos de nuestros usuarios.</p>
+            <p>Al utilizar NexoBot a través de WhatsApp, aceptás los términos de esta política.</p>
+        </div>
+
+        <div class="section">
+            <span class="section-number">2</span>
+            <h2>Datos que Recopilamos</h2>
+            <p>Recopilamos solo los datos necesarios para brindarte el servicio:</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tipo de dato</th>
+                        <th>Propósito</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Número de teléfono</td>
+                        <td>Identificar tu cuenta y comunicarnos contigo</td>
+                    </tr>
+                    <tr>
+                        <td>Nombre del contacto</td>
+                        <td>Personalizar la experiencia del bot</td>
+                    </tr>
+                    <tr>
+                        <td>Mensajes enviados al bot</td>
+                        <td>Procesar ventas, cobros, deudas e inventario</td>
+                    </tr>
+                    <tr>
+                        <td>Datos transaccionales</td>
+                        <td>Registrar operaciones financieras (montos, clientes, productos)</td>
+                    </tr>
+                    <tr>
+                        <td>Audios de voz</td>
+                        <td>Transcribir instrucciones para el bot (no se almacenan)</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="highlight-box">
+                <p><strong>✅ No recopilamos:</strong> ubicación GPS, contactos del teléfono, fotos personales, historial
+                    de navegación ni datos de otras aplicaciones.</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <span class="section-number">3</span>
+            <h2>Cómo Usamos tus Datos</h2>
+            <p>Utilizamos los datos recopilados exclusivamente para:</p>
+            <ul>
+                <li>Registrar ventas al contado y fiadas</li>
+                <li>Gestionar cobros y saldos pendientes</li>
+                <li>Generar resúmenes diarios y semanales</li>
+                <li>Administrar tu inventario</li>
+                <li>Enviarte recordatorios de cobro (si lo activás)</li>
+                <li>Generar reportes en PDF y Excel</li>
+                <li>Mejorar el servicio y la experiencia de usuario</li>
+            </ul>
+            <div class="warning-box">
+                <p><strong>⚠️ Nunca vendemos, alquilamos ni compartimos tus datos con terceros para fines publicitarios
+                        o de marketing.</strong></p>
+            </div>
+        </div>
+
+        <div class="section">
+            <span class="section-number">4</span>
+            <h2>Almacenamiento y Seguridad</h2>
+            <p>Tus datos se almacenan de forma segura en servidores de <strong>Supabase</strong> (ubicados en Estados
+                Unidos), protegidos con:</p>
+            <ul>
+                <li>Encriptación en tránsito (TLS/HTTPS)</li>
+                <li>Encriptación en reposo (AES-256)</li>
+                <li>Acceso restringido con autenticación multifactor</li>
+                <li>Copias de seguridad automáticas diarias</li>
+                <li>Monitoreo de seguridad 24/7</li>
+            </ul>
+            <p>Solo el personal autorizado de Nexobot SA tiene acceso a los datos, y únicamente para propósitos de
+                soporte técnico y mantenimiento del servicio.</p>
+        </div>
+
+        <div class="section">
+            <span class="section-number">5</span>
+            <h2>Compartición de Datos con Terceros</h2>
+            <p>Compartimos datos limitados únicamente con los siguientes proveedores de servicio, necesarios para el
+                funcionamiento del bot:</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Proveedor</th>
+                        <th>Uso</th>
+                        <th>Datos compartidos</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Meta (WhatsApp)</td>
+                        <td>Canal de comunicación</td>
+                        <td>Mensajes de texto</td>
+                    </tr>
+                    <tr>
+                        <td>Supabase</td>
+                        <td>Base de datos</td>
+                        <td>Datos transaccionales encriptados</td>
+                    </tr>
+                    <tr>
+                        <td>OpenAI</td>
+                        <td>Procesamiento de lenguaje natural</td>
+                        <td>Texto del mensaje (sin datos personales)</td>
+                    </tr>
+                    <tr>
+                        <td>ElevenLabs</td>
+                        <td>Respuestas de audio</td>
+                        <td>Texto de respuesta (sin datos personales)</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>Todos estos proveedores cumplen con estándares de seguridad y privacidad internacionales.</p>
+        </div>
+
+        <div class="section">
+            <span class="section-number">6</span>
+            <h2>Tus Derechos</h2>
+            <p>Tenés los siguientes derechos sobre tus datos personales:</p>
+            <ul>
+                <li><strong>Acceso:</strong> Podés solicitar una copia de todos tus datos almacenados</li>
+                <li><strong>Rectificación:</strong> Podés corregir datos incorrectos en cualquier momento</li>
+                <li><strong>Eliminación:</strong> Podés solicitar que eliminemos todos tus datos enviando "borrar mis
+                    datos" al bot</li>
+                <li><strong>Portabilidad:</strong> Podés exportar tus datos en formato PDF o Excel</li>
+                <li><strong>Objeción:</strong> Podés oponerte al procesamiento de tus datos en cualquier momento</li>
+            </ul>
+            <p>Para ejercer cualquiera de estos derechos, enviá un mensaje al bot de WhatsApp o contactanos por email.
+            </p>
+        </div>
+
+        <div class="section">
+            <span class="section-number">7</span>
+            <h2>Retención de Datos</h2>
+            <p>Conservamos tus datos mientras tu cuenta esté activa. Si dejás de usar el servicio:</p>
+            <ul>
+                <li>Tus datos permanecen disponibles por <strong>12 meses</strong> de inactividad</li>
+                <li>Después de 12 meses, los datos se archivan de forma segura</li>
+                <li>Podés solicitar la eliminación inmediata en cualquier momento</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <span class="section-number">8</span>
+            <h2>Menores de Edad</h2>
+            <p>NexoBot está diseñado para uso comercial y profesional. No recopilamos intencionalmente información de
+                menores de 18 años. Si descubrimos que hemos recopilado datos de un menor, los eliminaremos de
+                inmediato.</p>
+        </div>
+
+        <div class="section">
+            <span class="section-number">9</span>
+            <h2>Cambios a esta Política</h2>
+            <p>Podemos actualizar esta Política de Privacidad ocasionalmente. Te notificaremos de cambios significativos
+                a través del bot de WhatsApp. El uso continuado del servicio después de dichos cambios constituye tu
+                aceptación de la política actualizada.</p>
+        </div>
+
+        <div class="section">
+            <span class="section-number">10</span>
+            <h2>Contacto</h2>
+            <p>Si tenés preguntas sobre esta Política de Privacidad, podés contactarnos:</p>
+            <ul>
+                <li><strong>WhatsApp:</strong> Enviá "ayuda" al bot NexoBot</li>
+                <li><strong>Email:</strong> privacidad@nexofinanzas.com</li>
+                <li><strong>Dirección:</strong> Nexobot SA, Zurbaran 1127, Asunción, Paraguay</li>
+            </ul>
+        </div>
+
+    </div>
+
+    <div class="footer">
+        <p>© 2026 Nexobot SA. Todos los derechos reservados.</p>
+        <p style="margin-top: 8px;">
+            <a href="/">Inicio</a> ·
+            <a href="/terminos.html">Términos de Servicio</a> ·
+            <a href="/contacto.html">Contacto</a>
+        </p>
+    </div>
+</body>
+
+</html>

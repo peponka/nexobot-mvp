@@ -9,21 +9,57 @@ node_modules/
 # Logs
 *.log
 debug-*
-server-log.txt
-server-err.txt
-ngrok-output.txt
 
-# Test artifacts
+# Test artifacts & scripts
 test-*.mjs
 test-*.txt
-check.*
+test-*.js
+test_*.js
+check*.js
+check*.mjs
 
 # Seed scripts (dev only)
-seed-demo.mjs
-seed-result.txt
+seed-*.mjs
+seed-*.txt
 
 # Git helper files
 git-*.txt
+
+# Temporary patch/debug scripts
+patch_*.js
+create_locks.js
+modify.js
+run_manual_api.js
+fix-*.mjs
+reset-*.mjs
+setup-*.mjs
+
+# Output/temp files
+*.txt.bak
+out.txt
+out.log
+out2.txt
+out2.log
+err2.txt
+output.txt
+reset.txt
+user-info.txt
+health.txt
+procs.txt
+node_procs.txt
+push-result.txt
+server-*.txt
+startup-*.txt
+ngrok-output.txt
+render-env-vars*
+
+# Temp directories
+temp/
+
+# Media (don't commit large files)
+*.mp4
+*.avi
+*.mov
 
 # OS files
 .DS_Store
@@ -38,6 +74,8 @@ boot-test.log
 boot-check.mjs
 
 # Secrets / temp keys (NEVER commit)
-render-env-vars*
 *-secrets*
 *-keys*
+
+# Gemini agent files
+.gemini/

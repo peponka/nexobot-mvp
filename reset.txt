@@ -1,3 +1,0 @@
-Setting up user with phone: +595981234567
-Result: { success: true }
-Ready! User: +595981234567 | PIN: 1234
